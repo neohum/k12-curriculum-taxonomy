@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>과학 빛의 반사와 굴절 레이 실험실</title>
+  <style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", "Noto Sans KR", sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    line-height: 1.5;
+    padding: 16px;
+    word-break: keep-all;
+    overflow-x: hidden;
+  }
+  .sim-container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+  }
+  header.sim-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 16px;
+  }
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 9999px;
+    line-height: 1;
+  }
+  .badge-primary { background: #e0e7ff; color: #3730a3; }
+  .badge-stage { background: #dcfce7; color: #166534; }
+  .badge-subject { background: #fef3c7; color: #92400e; }
+  h1.sim-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+    text-wrap: balance;
+  }
+  p.sim-subtitle {
+    font-size: 15px;
+    color: #64748b;
+  }
+  .pedagogy-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #14532d;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pedagogy-box .pedagogy-title {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Tactile touch targets (min 44px) */
+  button, .touch-btn, select, input[type="range"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+    font-family: inherit;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+  }
+  button:active, .touch-btn:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+  }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 0 14px;
+  }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-accent {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+  }
+  .btn-accent:hover { background: #059669; }
+  .btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    padding: 0 12px;
+  }
+  .btn-danger:hover { background: #fecaca; }
+  .control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .lab-canvas-box {
+    width: 100%;
+    height: 440px;
+    background: #0f172a;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+  .data-readout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .data-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .data-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+  .data-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .data-value.active-glow {
+    color: #ef4444;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  }
+  .slider-control-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    height: 8px;
+    accent-color: #ef4444;
+  }
+  .mode-tab-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .mode-btn {
+    padding: 0 16px;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-weight: 700;
+    border-radius: 10px;
+  }
+  .mode-btn.active {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+  .tir-banner {
+    background: #fef2f2;
+    border: 2px solid #f87171;
+    color: #991b1b;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 16px;
+    display: none;
+  }
+  </style>
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-row">
+        <span class="badge badge-primary">교구 시뮬레이션</span>
+        <span class="badge badge-stage">초등 5~6학년 (구체적 ➔ 형식적 조작기)</span>
+        <span class="badge badge-subject">과학 (빛과 렌즈)</span>
+      </div>
+      <h1 class="sim-title">과학 빛의 반사와 굴절 레이 실험실</h1>
+      <p class="sim-subtitle">각도 슬라이더를 조절하거나 캔버스를 드래그하여 빛의 반사 및 굴절 경로를 탐구하세요.</p>
+    </header>
+
+    <div class="pedagogy-box">
+      <div class="pedagogy-title">💡 수업 탐구 안내 (비계 설정)</div>
+      <div>빛이 거울에 닿아 반사될 때의 법칙(입사각 = 반사각)과 공기에서 물이나 유리로 들어갈 때 꺾이는 굴절 현상, 그리고 빛이 완전히 꺾이지 않고 반사되는 전반사를 실험해 봅니다.</div>
+    </div>
+
+    <!-- Mode Select Tabs -->
+    <div style="margin-bottom: 16px;">
+      <div class="mode-tab-group">
+        <button class="mode-btn touch-btn active" id="btnMirror" onclick="setMode('mirror')">🪞 평면 거울 (반사의 법칙)</button>
+        <button class="mode-btn touch-btn" id="btnAirWater" onclick="setMode('air_to_water')">💧 공기 ➔ 물 (굴절)</button>
+        <button class="mode-btn touch-btn" id="btnWaterAir" onclick="setMode('water_to_air')">⚡ 물 ➔ 공기 (전반사 탐구)</button>
+      </div>
+    </div>
+
+    <!-- Total Reflection Alert Banner -->
+    <div class="tir-banner" id="tirBanner">
+      ⚡ <strong>전반사(Total Internal Reflection) 발생!</strong> 임계각(약 48.8°)을 넘어 빛이 굴절하지 않고 100% 반사됩니다!
+    </div>
+
+    <!-- Canvas Lab -->
+    <div class="lab-canvas-box">
+      <canvas id="rayCanvas" width="900" height="440"></canvas>
+    </div>
+
+    <!-- Live Data Readout -->
+    <div class="data-readout-grid">
+      <div class="data-card">
+        <div class="data-label">입사각 (Incident Angle)</div>
+        <div class="data-value active-glow" id="valIncident">45.0°</div>
+      </div>
+      <div class="data-card">
+        <div class="data-label">반사각 (Reflection Angle)</div>
+        <div class="data-value" id="valReflect">45.0°</div>
+      </div>
+      <div class="data-card">
+        <div class="data-label">굴절각 (Refraction Angle)</div>
+        <div class="data-value" id="valRefract">32.1°</div>
+      </div>
+    </div>
+
+    <!-- Slider & Fine tune -->
+    <div class="slider-control-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:700; font-size:14px; color:#334155;">입사각 조절 (0° ~ 85°):</span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-secondary touch-btn" style="min-height:36px; padding:0 10px;" onclick="adjustAngle(-1)">-1°</button>
+          <button class="btn-secondary touch-btn" style="min-height:36px; padding:0 10px;" onclick="adjustAngle(1)">+1°</button>
+        </div>
+      </div>
+      <div class="slider-row">
+        <span>0°</span>
+        <input type="range" id="angleRange" min="0" max="85" value="45" step="0.5" oninput="onSlider(this.value)">
+        <span>85°</span>
+      </div>
+    </div>
+
+    <!-- Options & Controls -->
+    <div class="control-bar">
+      <button class="btn-secondary touch-btn" onclick="toggleNormal()" id="normalBtn">📐 법선(기준선) 켜기</button>
+      <button class="btn-secondary touch-btn" onclick="toggleProtractor()" id="protractorBtn">🧭 각도기 켜기</button>
+      <button class="btn-secondary touch-btn" onclick="resetDefaults()">🔄 초기화</button>
+      <div style="margin-left: auto;">
+        <button class="btn-secondary touch-btn" id="muteBtn" onclick="toggleMute()">🔊 소리 켜짐</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+  }
+  _init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+  toggleMute() {
+    this.muted = !this.muted;
+    return this.muted;
+  }
+  playTone(freq, type = "sine", duration = 0.12, vol = 0.15) {
+    if (this.muted) return;
+    try {
+      this._init();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration);
+    } catch (e) {}
+  }
+  playPop() {
+    this.playTone(460, "sine", 0.08, 0.22);
+  }
+  playThud() {
+    this.playTone(140, "triangle", 0.14, 0.25);
+  }
+  playClick() {
+    this.playTone(850, "sine", 0.04, 0.08);
+  }
+  playChime() {
+    if (this.muted) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((f, i) => {
+      setTimeout(() => this.playTone(f, "triangle", 0.25, 0.18), i * 85);
+    });
+  }
+  playFanfare() {
+    if (this.muted) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    notes.forEach((f, i) => {
+      setTimeout(() => this.playTone(f, "sine", 0.35, 0.2), i * 90);
+    });
+  }
+  playLaserBeep() {
+    this.playTone(720, "sawtooth", 0.08, 0.08);
+    setTimeout(() => this.playTone(1100, "sine", 0.12, 0.12), 60);
+  }
+}
+const sound = new SoundEngine();
+
+    const canvas = document.getElementById("rayCanvas");
+    const ctx = canvas.getContext("2d");
+    const valIncident = document.getElementById("valIncident");
+    const valReflect = document.getElementById("valReflect");
+    const valRefract = document.getElementById("valRefract");
+    const angleRange = document.getElementById("angleRange");
+    const tirBanner = document.getElementById("tirBanner");
+    const muteBtn = document.getElementById("muteBtn");
+
+    let mode = 'mirror';
+    let incidentAngleDeg = 45;
+    let showNormal = true;
+    let showProtractor = true;
+    let isDragging = false;
+
+    function toggleMute() {
+      const isMuted = sound.toggleMute();
+      muteBtn.textContent = isMuted ? "🔇 소리 꺼짐" : "🔊 소리 켜짐";
+    }
+
+    function setMode(m) {
+      mode = m;
+      sound.playClick();
+      document.getElementById("btnMirror").classList.toggle("active", m === 'mirror');
+      document.getElementById("btnAirWater").classList.toggle("active", m === 'air_to_water');
+      document.getElementById("btnWaterAir").classList.toggle("active", m === 'water_to_air');
+      draw();
+    }
+
+    function adjustAngle(delta) {
+      incidentAngleDeg = Math.max(0, Math.min(85, incidentAngleDeg + delta));
+      angleRange.value = incidentAngleDeg;
+      sound.playLaserBeep();
+      draw();
+    }
+
+    function onSlider(val) {
+      incidentAngleDeg = parseFloat(val);
+      draw();
+    }
+
+    function toggleNormal() {
+      showNormal = !showNormal;
+      document.getElementById("normalBtn").textContent = showNormal ? "📐 법선 끄기" : "📐 법선 켜기";
+      sound.playClick();
+      draw();
+    }
+
+    function toggleProtractor() {
+      showProtractor = !showProtractor;
+      document.getElementById("protractorBtn").textContent = showProtractor ? "🧭 각도기 끄기" : "🧭 각도기 켜기";
+      sound.playClick();
+      draw();
+    }
+
+    function resetDefaults() {
+      incidentAngleDeg = 45;
+      angleRange.value = 45;
+      setMode('mirror');
+      draw();
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      handlePointer(e);
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (isDragging) handlePointer(e);
+    });
+    window.addEventListener("pointerup", () => {
+      isDragging = false;
+    });
+
+    function handlePointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      const dx = cx - mx;
+      const dy = cy - my;
+      let rad = Math.atan2(dx, dy);
+      let deg = rad * (180 / Math.PI);
+      if (mode === 'water_to_air') {
+        rad = Math.atan2(dx, -dy);
+        deg = rad * (180 / Math.PI);
+      }
+      if (deg >= 0 && deg <= 85) {
+        incidentAngleDeg = Math.round(deg * 10) / 10;
+        angleRange.value = incidentAngleDeg;
+        draw();
+      }
+    }
+
+    function draw() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const rayLen = 320;
+
+      ctx.clearRect(0, 0, w, h);
+
+      if (mode === 'mirror') {
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(0, 0, w, cy);
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(0, cy, w, cy);
+
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(w, cy);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        for (let x = 10; x < w; x += 20) {
+          ctx.beginPath();
+          ctx.moveTo(x, cy);
+          ctx.lineTo(x - 10, cy + 12);
+          ctx.stroke();
+        }
+      } else if (mode === 'air_to_water') {
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(0, 0, w, cy);
+        ctx.fillStyle = "#0369a1";
+        ctx.fillRect(0, cy, w, cy);
+
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(w, cy);
+        ctx.stroke();
+      } else if (mode === 'water_to_air') {
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(0, 0, w, cy);
+        ctx.fillStyle = "#0369a1";
+        ctx.fillRect(0, cy, w, cy);
+
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(w, cy);
+        ctx.stroke();
+      }
+
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillStyle = "#94a3b8";
+      ctx.textAlign = "left";
+      ctx.fillText(mode === 'water_to_air' ? "공기 (n₁ = 1.00)" : (mode === 'mirror' ? "공기 매질" : "공기 (n₁ = 1.00)"), 20, 30);
+      ctx.fillText(mode === 'mirror' ? "평면 거울" : (mode === 'air_to_water' ? "물 (n₂ = 1.33)" : "물 (n₁ = 1.33)"), 20, cy + 30);
+
+      if (showProtractor) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 180, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        for (let a = 0; a <= 90; a += 15) {
+          const rad = (a * Math.PI) / 180;
+          const lx = cx - Math.sin(rad) * 195;
+          const ly = cy - Math.cos(rad) * 195;
+          ctx.fillText(a + "°", lx, ly);
+
+          const rx = cx + Math.sin(rad) * 195;
+          const ry = cy - Math.cos(rad) * 195;
+          ctx.fillText(a + "°", rx, ry);
+        }
+      }
+
+      if (showNormal) {
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(cx, 20);
+        ctx.lineTo(cx, h - 20);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("법선(Normal)", cx, 15);
+      }
+
+      const radIncident = (incidentAngleDeg * Math.PI) / 180;
+      valIncident.textContent = incidentAngleDeg.toFixed(1) + "°";
+      valReflect.textContent = incidentAngleDeg.toFixed(1) + "°";
+
+      let hasTotalReflection = false;
+      let radRefracted = null;
+
+      if (mode === 'air_to_water') {
+        const n1 = 1.0, n2 = 1.33;
+        const sinR = (n1 / n2) * Math.sin(radIncident);
+        radRefracted = Math.asin(sinR);
+        valRefract.textContent = (radRefracted * 180 / Math.PI).toFixed(1) + "°";
+        tirBanner.style.display = "none";
+      } else if (mode === 'water_to_air') {
+        const n1 = 1.33, n2 = 1.0;
+        const sinR = (n1 / n2) * Math.sin(radIncident);
+        if (sinR > 1.0) {
+          hasTotalReflection = true;
+          valRefract.textContent = "전반사 발생!";
+          tirBanner.style.display = "block";
+        } else {
+          radRefracted = Math.asin(sinR);
+          valRefract.textContent = (radRefracted * 180 / Math.PI).toFixed(1) + "°";
+          tirBanner.style.display = "none";
+        }
+      } else {
+        valRefract.textContent = "- (반사 모드)";
+        tirBanner.style.display = "none";
+      }
+
+      ctx.save();
+      ctx.shadowColor = "#ef4444";
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = "#ef4444";
+      ctx.lineWidth = 4;
+
+      let srcX, srcY;
+      if (mode === 'water_to_air') {
+        srcX = cx - Math.sin(radIncident) * rayLen;
+        srcY = cy + Math.cos(radIncident) * rayLen;
+      } else {
+        srcX = cx - Math.sin(radIncident) * rayLen;
+        srcY = cy - Math.cos(radIncident) * rayLen;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(srcX, srcY);
+      ctx.lineTo(cx, cy);
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(srcX, srcY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.shadowColor = hasTotalReflection ? "#fbbf24" : "#f87171";
+      ctx.strokeStyle = hasTotalReflection ? "#fbbf24" : "rgba(239, 68, 68, 0.75)";
+      ctx.lineWidth = hasTotalReflection ? 5 : 3;
+
+      let refX, refY;
+      if (mode === 'water_to_air') {
+        refX = cx + Math.sin(radIncident) * rayLen;
+        refY = cy + Math.cos(radIncident) * rayLen;
+      } else {
+        refX = cx + Math.sin(radIncident) * rayLen;
+        refY = cy - Math.cos(radIncident) * rayLen;
+      }
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(refX, refY);
+      ctx.stroke();
+
+      if (radRefracted !== null && !hasTotalReflection) {
+        ctx.shadowColor = "#38bdf8";
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 4;
+
+        let refrX, refrY;
+        if (mode === 'air_to_water') {
+          refrX = cx + Math.sin(radRefracted) * rayLen;
+          refrY = cy + Math.cos(radRefracted) * rayLen;
+        } else {
+          refrX = cx + Math.sin(radRefracted) * rayLen;
+          refrY = cy - Math.cos(radRefracted) * rayLen;
+        }
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(refrX, refrY);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      drawAngleArc(cx, cy, incidentAngleDeg, mode === 'water_to_air' ? 1 : -1, "#ef4444", "i = " + incidentAngleDeg.toFixed(0) + "°");
+    }
+
+    function drawAngleArc(cx, cy, deg, ySign, color, label) {
+      if (deg < 3) return;
+      const radius = 55;
+      const rad = (deg * Math.PI) / 180;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (ySign < 0) {
+        ctx.arc(cx, cy, radius, -Math.PI / 2 - rad, -Math.PI / 2);
+      } else {
+        ctx.arc(cx, cy, radius, Math.PI / 2, Math.PI / 2 + rad);
+      }
+      ctx.stroke();
+    }
+
+    draw();
+  </script>
+</body>
+</html>
