@@ -1,0 +1,3830 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>초등 교육과정 인지 위계 온톨로지 & 수업 설계 대시보드</title>
+  
+  <!-- Pretendard Modern Korean Typography -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  
+  <!-- Flaticon UIcons Standard -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+
+  <style>
+    /* =========================================================================
+       DESIGN SYSTEM TOKENS (Refero / Stripe Slate Canvas & Notion Warm Surface)
+       ========================================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-surface-subtle: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-subtle: #edf2f7;
+      --border-focus: #4f46e5;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-light: #eef2ff;
+      --accent-border: #c7d2fe;
+      
+      --success: #059669;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      
+      --danger: #e11d48;
+      --danger-light: #fff1f2;
+      --danger-border: #fecdd3;
+      
+      --info: #0284c7;
+      --info-light: #f0f9ff;
+      --info-border: #bae6fd;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+      
+      --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+      --touch-min: 44px;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #090a0f;
+      --bg-surface: #11131a;
+      --bg-surface-elevated: #1a1d27;
+      --bg-surface-subtle: #222634;
+      --border-color: #242938;
+      --border-subtle: #1e2230;
+      --border-focus: #6366f1;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-light: rgba(99, 102, 241, 0.15);
+      --accent-border: rgba(99, 102, 241, 0.3);
+      
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.15);
+      --success-border: rgba(16, 185, 129, 0.3);
+      
+      --warning: #f59e0b;
+      --warning-light: rgba(245, 158, 11, 0.15);
+      --warning-border: rgba(245, 158, 11, 0.3);
+      
+      --danger: #f43f5e;
+      --danger-light: rgba(244, 63, 94, 0.15);
+      --danger-border: rgba(244, 63, 94, 0.3);
+      
+      --info: #38bdf8;
+      --info-light: rgba(56, 189, 248, 0.15);
+      --info-border: rgba(56, 189, 248, 0.3);
+      
+      --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      word-break: keep-all;
+      overflow-x: hidden;
+      line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    header.dashboard-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+    }
+
+    .brand-title h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      text-wrap: balance;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Tab Mode Switcher (Segmented Control) */
+    .mode-nav {
+      display: flex;
+      background: var(--bg-surface-elevated);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      gap: 3px;
+    }
+
+    .mode-btn {
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-primary);
+      background: rgba(0, 0, 0, 0.03);
+    }
+    [data-theme="dark"] .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700;
+    }
+
+    /* Theme Toggle & Action Buttons */
+    .btn-icon-subtle {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-icon-subtle:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border-color: var(--border-focus);
+    }
+
+    /* Badges */
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .badge-mastered { background: var(--success-light); color: var(--success); border-color: var(--success-border); }
+    .badge-learning { background: var(--info-light); color: var(--info); border-color: var(--info-border); }
+    .badge-deficit { background: var(--danger-light); color: var(--danger); border-color: var(--danger-border); }
+    .badge-ready { background: var(--warning-light); color: var(--warning); border-color: var(--warning-border); }
+
+    /* 4단계 파이프라인 상단 네비게이터 */
+    .pipeline-nav {
+      background: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border-color);
+      padding: 6px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      z-index: 101;
+    }
+    .pipeline-brand {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pipeline-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .pipeline-step-link {
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+    }
+    .pipeline-step-link:hover {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    .pipeline-step-link.active {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: var(--shadow-xs);
+    }
+    .pipeline-step-num {
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 0, 0, 0.1);
+      font-size: 10px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .pipeline-step-link.active .pipeline-step-num {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    /* Main Container Layout */
+    .app-main {
+      flex: 1;
+      display: flex;
+      height: calc(100vh - 105px);
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: Topic Selector & Search */
+    aside.sidebar {
+      width: 350px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 38px;
+      padding: 0 12px 0 34px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-surface);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+
+    .subject-filters {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .filter-chip {
+      min-height: 30px;
+      padding: 0 11px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .filter-chip:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+    }
+
+    .filter-chip.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .sidebar-topic-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .topic-list-item {
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .topic-list-item:hover {
+      background: var(--bg-surface-elevated);
+    }
+
+    .topic-list-item.selected {
+      background: var(--accent-light);
+      border-color: var(--accent-border);
+    }
+
+    .item-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .item-code {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: ui-monospace, monospace;
+    }
+
+    .item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .item-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Content Workspaces: FIXED to prevent overlapping */
+    .content-area {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-page);
+    }
+
+    .workspace-pane {
+      display: none !important;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .workspace-pane.active {
+      display: flex !important;
+    }
+
+    /* Mode 1: Knowledge Graph Workspace */
+    .graph-view-container {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-page);
+    }
+
+    #knowledgeCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #knowledgeCanvas:active {
+      cursor: grabbing;
+    }
+
+    .graph-controls-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      gap: 8px;
+      background: var(--bg-surface);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      z-index: 10;
+    }
+
+    .graph-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+    }
+    .graph-btn:hover {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-focus);
+    }
+
+    .graph-legend-overlay {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      background: var(--bg-surface);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      z-index: 10;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: var(--radius-full);
+    }
+
+    /* Right Inspector Drawer */
+    aside.inspector-drawer {
+      width: 380px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+      padding: 20px;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .drawer-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .drawer-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .node-status-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-status-toggle {
+      min-height: 38px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-status-toggle:hover {
+      border-color: var(--border-focus);
+      color: var(--text-primary);
+    }
+    .btn-status-toggle.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .prereq-badge {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .prereq-badge:hover {
+      border-color: var(--border-focus);
+      background: var(--accent-light);
+    }
+
+    /* Mode 2: Diagnostic Assessment Simulator */
+    .diagnostic-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .diag-left-col {
+      flex: 1.1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .diag-right-col {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .diag-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .diag-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .question-prompt-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .scenario-btn {
+      min-height: 48px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--border-focus);
+      background: var(--accent-light);
+    }
+
+    .scenario-btn.selected-error {
+      border-color: var(--danger);
+      background: var(--danger-light);
+      box-shadow: 0 0 0 2px var(--danger-border);
+    }
+
+    /* Backtracking Visual Stepper */
+    .backtrack-stepper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-elevated);
+      border: 1.5px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-item.active-trace .step-num {
+      background: var(--danger);
+      color: #ffffff;
+      border-color: var(--danger);
+      box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+    }
+
+    .step-body {
+      flex: 1;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Mode 3: 3-9-3 Lesson Planner RAG */
+    .lesson-rag-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .lesson-section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .lesson-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .lesson-section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-bubble-dialogue {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .avatar-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .avatar-teacher {
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+    }
+    .avatar-student {
+      background: var(--warning-light);
+      color: var(--warning);
+      border: 1px solid var(--warning-border);
+    }
+
+    .bubble-card {
+      flex: 1;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    /* Rubric Table */
+    .rubric-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .rubric-table th, .rubric-table td {
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    .rubric-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    /* Mode 4: Manipulative Simulations */
+    .manipulative-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tool-selector-bar {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-surface);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .tool-tab-btn {
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .tool-tab-btn:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+    }
+
+    .tool-tab-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .simulation-viewport-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 520px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Action Buttons */
+    .btn-primary {
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-xs);
+      transition: all 0.15s;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-focus);
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text-primary);
+      color: var(--bg-surface);
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 4단계 파이프라인 상단 네비게이터 -->
+  <nav class="pipeline-nav" aria-label="수업자료 파이프라인 빠른 이동">
+    <div class="pipeline-brand">
+      <i class="fi fi-rr-apps" style="color:var(--accent);"></i>
+      <span>수업자료 4단계 파이프라인</span>
+    </div>
+    <div class="pipeline-links">
+      <a href="taxonomy-dashboard.html" class="pipeline-step-link active" title="1단계: 런처테스트 (현재)">
+        <span class="pipeline-step-num">1</span>
+        <i class="fi fi-rr-rocket-lunch"></i>
+        <span>런처테스트</span>
+      </a>
+      <a href="../widgets/k12-remediation-widget.html" class="pipeline-step-link" title="2단계: 결손진단 위젯">
+        <span class="pipeline-step-num">2</span>
+        <i class="fi fi-rr-puzzle-piece"></i>
+        <span>진단위젯</span>
+      </a>
+      <a href="../common-tools/index.html" class="pipeline-step-link" title="3단계: 공용수업도구">
+        <span class="pipeline-step-num">3</span>
+        <i class="fi fi-rr-wrench"></i>
+        <span>공용수업도구</span>
+      </a>
+      <a href="../modular-studio/index.html" class="pipeline-step-link" title="4단계: 모듈러 에디터">
+        <span class="pipeline-step-num">4</span>
+        <i class="fi fi-rr-edit"></i>
+        <span>모듈러에디터</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Top Navigation Header -->
+  <header class="dashboard-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <i class="fi fi-rr-apps"></i>
+      </div>
+      <div class="brand-title">
+        <h1>K-12 교육과정 인지 위계 온톨로지</h1>
+        <p>초·중·고 12개년 나선형 교육과정 인지 위계 & 성취기준 연동 콘솔</p>
+      </div>
+    </div>
+
+    <!-- Mode Selector Tabs (Segmented Control) -->
+    <nav class="mode-nav" aria-label="메인 대시보드 뷰">
+      <button class="mode-btn active" data-tab="tab-graph" onclick="switchMainTab('tab-graph')">
+        <i class="fi fi-rr-vector-alt"></i>
+        <span>인지 위계 그래프</span>
+      </button>
+      <button class="mode-btn" data-tab="tab-diagnostic" onclick="switchMainTab('tab-diagnostic')">
+        <i class="fi fi-rr-stethoscope"></i>
+        <span>AI 진단 & 결손 역추적</span>
+      </button>
+      <button class="mode-btn" data-tab="tab-planner" onclick="switchMainTab('tab-planner')">
+        <i class="fi fi-rr-document"></i>
+        <span>3-9-3 수업설계 RAG</span>
+      </button>
+      <button class="mode-btn" data-tab="tab-manipulative" onclick="switchMainTab('tab-manipulative')">
+        <i class="fi fi-rr-cube"></i>
+        <span>가상 조작 교구 실습</span>
+      </button>
+      <button class="mode-btn" data-tab="tab-standards" onclick="switchMainTab('tab-standards')">
+        <i class="fi fi-rr-diploma"></i>
+        <span>2022 개정 연동</span>
+      </button>
+    </nav>
+
+    <!-- Header Actions (Theme Toggle & Export) -->
+    <div class="header-actions">
+      <button class="btn-icon-subtle" id="themeToggleBtn" onclick="toggleTheme()" title="라이트/다크 테마 전환">
+        <i class="fi fi-rr-moon"></i>
+        <span>다크 모드</span>
+      </button>
+      <button class="btn-icon-subtle" onclick="exportTaxonomySummary()" title="전체 요약 내보내기">
+        <i class="fi fi-rr-download"></i>
+        <span>내보내기</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="search-box">
+          <i class="fi fi-rr-search"></i>
+          <input type="text" class="search-input" id="taxonomySearchInput" placeholder="성취코드([12미적], [9수], [4수]) 또는 개념 검색..." oninput="handleSearchInput(this.value)">
+        </div>
+        <!-- School Level Filter Pills -->
+        <div class="school-level-filters" style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px;">
+          <button class="filter-chip active" data-school="all" onclick="filterBySchoolLevel('all')">전체 K-12</button>
+          <button class="filter-chip" data-school="ES" onclick="filterBySchoolLevel('ES')">초등 (ES)</button>
+          <button class="filter-chip" data-school="MS" onclick="filterBySchoolLevel('MS')">중등 (MS)</button>
+          <button class="filter-chip" data-school="HS" onclick="filterBySchoolLevel('HS')">고등 (HS)</button>
+        </div>
+        <!-- Subject Filter Pills -->
+        <div class="subject-filters" style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; flex-wrap: wrap;">
+          <button class="filter-chip active" data-subject="all" onclick="filterBySubject('all')">전체 교과</button>
+          <button class="filter-chip" data-subject="Korean" onclick="filterBySubject('Korean')">국어</button>
+          <button class="filter-chip" data-subject="Mathematics" onclick="filterBySubject('Mathematics')">수학</button>
+          <button class="filter-chip" data-subject="English" onclick="filterBySubject('English')">영어</button>
+          <button class="filter-chip" data-subject="Social" onclick="filterBySubject('Social')">사회/역사</button>
+          <button class="filter-chip" data-subject="Ethics" onclick="filterBySubject('Ethics')">도덕/윤리</button>
+          <button class="filter-chip" data-subject="Science" onclick="filterBySubject('Science')">과학</button>
+          <button class="filter-chip" data-subject="Computing" onclick="filterBySubject('Computing')">정보/AI</button>
+          <button class="filter-chip" data-subject="Arts" onclick="filterBySubject('Arts')">예체능/기술</button>
+        </div>
+      </div>
+      <div class="sidebar-topic-list" id="sidebarTopicList">
+        <!-- Topic Items Injected via JS -->
+      </div>
+    </aside>
+
+    <!-- Content Workspace -->
+    <section class="content-area">
+
+      <!-- =========================================================================
+           TAB 1: KNOWLEDGE GRAPH PANE
+           ========================================================================= -->
+      <div class="workspace-pane active" id="tab-graph">
+        <div class="graph-view-container" id="canvasWrapper">
+          
+          <div class="graph-legend-overlay">
+            <span class="legend-item"><span class="legend-dot" style="background: var(--success);"></span>마스터 (Mastered)</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--info);"></span>학습 중 (Learning)</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--danger);"></span>결손 노드 (Deficit)</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--warning);"></span>다음 학습 적기 (Ready to Learn)</span>
+          </div>
+
+          <canvas id="knowledgeCanvas"></canvas>
+
+          <div class="graph-controls-overlay">
+            <button class="graph-btn" onclick="zoomGraph(1.2)" title="확대"><i class="fi fi-rr-zoom-in"></i></button>
+            <button class="graph-btn" onclick="zoomGraph(0.8)" title="축소"><i class="fi fi-rr-zoom-out"></i></button>
+            <button class="graph-btn" onclick="resetGraphView()" title="원점 복귀"><i class="fi fi-rr-expand"></i></button>
+            <button class="graph-btn" onclick="toggleDeficitFocus()" title="결손 개념 하이라이트"><i class="fi fi-rr-exclamation"></i></button>
+            <button class="graph-btn" onclick="toggleReadyToLearnFilter()" title="Ready to Learn 토픽 보기"><i class="fi fi-rr-bulb"></i></button>
+          </div>
+        </div>
+
+        <!-- Node Inspector Drawer -->
+        <aside class="inspector-drawer" id="nodeInspector">
+          <div class="drawer-card">
+            <div class="drawer-title">
+              <span id="inspectorCurriculumCode" class="item-code">[4수01-10]</span>
+              <span id="inspectorSubjectBadge" class="badge-status badge-deficit">수학 · 분수</span>
+            </div>
+            <h2 id="inspectorNodeTitle" style="font-size: 16px; font-weight: 800; color: var(--text-primary); line-height: 1.35;">동분모 분수의 덧셈 원리</h2>
+            <p id="inspectorDescription" style="font-size: 12px; color: var(--text-secondary); line-height: 1.55;">
+              분모가 같은 두 분수를 더할 때, 단위분수의 개수를 더하는 것임을 이해하고 합을 계산합니다.
+            </p>
+            <div style="font-size: 11px; color: var(--text-muted); display: flex; gap: 8px;">
+              <span>발달: <strong id="inspectorPiagetStage" style="color:var(--text-secondary);">구체적 조작기</strong></span>
+              <span>교구: <strong id="inspectorManipulative" style="color:var(--accent);">fraction-bars</strong></span>
+            </div>
+          </div>
+
+          <div class="drawer-card">
+            <div class="drawer-title" style="font-size: 13px;">
+              <span><i class="fi fi-rr-settings-sliders" style="margin-right: 6px; color: var(--accent);"></i>학습 상태 변경</span>
+            </div>
+            <div class="node-status-actions">
+              <button class="btn-status-toggle status-opt-btn" data-status="mastered" onclick="updateCurrentNodeStatus('mastered')">
+                <i class="fi fi-rr-check"></i> 마스터
+              </button>
+              <button class="btn-status-toggle status-opt-btn" data-status="learning" onclick="updateCurrentNodeStatus('learning')">
+                <i class="fi fi-rr-play"></i> 학습 중
+              </button>
+              <button class="btn-status-toggle status-opt-btn" data-status="deficit" onclick="updateCurrentNodeStatus('deficit')">
+                <i class="fi fi-rr-cross"></i> 결손 발생
+              </button>
+              <button class="btn-status-toggle status-opt-btn" data-status="unexplored" onclick="updateCurrentNodeStatus('unexplored')">
+                <i class="fi fi-rr-rotate-right"></i> 초기화
+              </button>
+            </div>
+          </div>
+
+          <div class="drawer-card">
+            <div class="drawer-title" style="font-size: 13px;">
+              <span><i class="fi fi-rr-sitemap" style="margin-right: 6px; color: var(--info);"></i>선수학습 위계 (Prerequisites)</span>
+            </div>
+            <div id="inspectorPrereqList" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+              <!-- Prerequisite links -->
+            </div>
+          </div>
+
+          <div class="drawer-card">
+            <div class="drawer-title" style="font-size: 13px;">
+              <span><i class="fi fi-rr-share" style="margin-right: 6px; color: var(--success);"></i>후속 발전 토픽 (Successors)</span>
+            </div>
+            <div id="inspectorSuccessorList" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+              <!-- Successor links -->
+            </div>
+          </div>
+
+          <div class="drawer-card">
+            <div class="drawer-title" style="font-size: 13px;">
+              <span><i class="fi fi-rr-magic-wand" style="margin-right: 6px; color: var(--warning);"></i>추천 교육학 솔루션</span>
+            </div>
+            <p id="inspSolutionText" style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+              분수 막대(Fraction Bars) 구체 조작기를 통해 전체와 부분의 양감을 물리적으로 먼저 체험시킵니다.
+            </p>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button class="btn-primary" style="flex: 1; font-size: 12px;" onclick="launchLessonPlannerForCurrent()">
+                <i class="fi fi-rr-document"></i> 3-9-3 수업설계
+              </button>
+              <button class="btn-secondary" style="flex: 1; font-size: 12px;" onclick="launchManipulativeForCurrent()">
+                <i class="fi fi-rr-cube"></i> 가상 교구 열기
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- =========================================================================
+           TAB 2: AI DIAGNOSTIC & REMEDIATION PANE
+           ========================================================================= -->
+      <div class="workspace-pane" id="tab-diagnostic">
+        <div class="diagnostic-container" style="flex-direction: column;">
+          
+          <!-- Preset Selector Bar -->
+          <div class="diag-preset-bar" style="width: 100%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: var(--bg-surface); padding: 12px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-xs);">
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                <i class="fi fi-rr-route" style="color: var(--accent);"></i> 진단 시나리오 프리셋:
+              </span>
+              <button class="filter-chip active" id="diagPresetK12Btn" onclick="switchDiagnosticPreset('k12_calculus')">
+                [수학 고2] 미분 순간변화율 ➔ 초등 7개년 역추적
+              </button>
+              <button class="filter-chip" id="diagPresetElemBtn" onclick="switchDiagnosticPreset('elem_fraction')">
+                [수학 초4] 동분모 분수 덧셈 단위 결손
+              </button>
+              <button class="filter-chip" id="diagPresetReadingBtn" onclick="switchDiagnosticPreset('k12_reading')">
+                [국어 고3] 학술 비문학 독해 ➔ 초1 한글 음운 12개년 역추적
+              </button>
+              <button class="filter-chip" id="diagPresetEconomyBtn" onclick="switchDiagnosticPreset('k12_economy')">
+                [사회 고2] 환율·이자율 거시경제 ➔ 초5 비와 비율 6개년 역추적
+              </button>
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+              <span class="badge-status badge-deficit" id="diagPresetBadge">K-12 나선형 7개년 역추적</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 24px; width: 100%;">
+            <div class="diag-left-col">
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <i class="fi fi-rr-interrogation" style="color: var(--accent);"></i>
+                  <span id="diagQuestionTitle">실시간 진단평가 문항</span>
+                </div>
+                <div class="question-prompt-box" id="diagQuestionPrompt">
+                  <!-- Populated by switchDiagnosticPreset -->
+                </div>
+                <div class="options-grid" id="diagOptionsGrid">
+                  <!-- Populated by switchDiagnosticPreset -->
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+                  <button class="btn-primary" onclick="triggerRunDiagnosis()">
+                    <i class="fi fi-rr-refresh"></i> 결손 원인 인과 역추적 실행
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bayesian Diagnosis Engine Output -->
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <i class="fi fi-rr-brain" style="color: var(--info);"></i>
+                  <span>베이지안 인지 버그 확률 (Bayesian Cognitive Debugger)</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px;">
+                      <span id="labelBug1">BUG_PROPORTION_GAP (초등 비와 비율 및 변화량 결손)</span>
+                      <span style="color: var(--danger);" id="probBug1">91.4%</span>
+                    </div>
+                    <div style="height: 6px; background: var(--bg-surface-elevated); border-radius: 9999px; overflow: hidden;">
+                      <div id="barBug1" style="width: 91.4%; height: 100%; background: var(--danger); border-radius: 9999px;"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px;">
+                      <span id="labelBug2">BUG_OPERATOR_SLIP (형식적 미분 공식 암기 고착)</span>
+                      <span style="color: var(--text-muted);" id="probBug2">8.4%</span>
+                    </div>
+                    <div style="height: 6px; background: var(--bg-surface-elevated); border-radius: 9999px; overflow: hidden;">
+                      <div id="barBug2" style="width: 8.4%; height: 100%; background: var(--text-muted); border-radius: 9999px;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagnostic Right Column: Backtracking Stepper & Prescription -->
+            <div class="diag-right-col">
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <i class="fi fi-rr-diagram-project" style="color: var(--danger);"></i>
+                  <span id="diagStepperTitle">선수학습 위계 역추적 경로 (DAG Backtracking Stepper)</span>
+                </div>
+
+                <div class="backtrack-stepper" id="diagStepperContainer">
+                  <!-- Populated by switchDiagnosticPreset -->
+                </div>
+              </div>
+
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <i class="fi fi-rr-diploma" style="color: var(--success);"></i>
+                  <span>피아제·비고츠키 기반 인지 발달 처방서</span>
+                </div>
+                <div id="diagPrescriptionContent" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Populated by switchDiagnosticPreset -->
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 6px;">
+                  <button class="btn-primary" onclick="applyRemediationToGraph()">
+                    <i class="fi fi-rr-check"></i> 그래프에 결손 노드 반영
+                  </button>
+                  <button class="btn-secondary" onclick="openRemediationManipulative()">
+                    <i class="fi fi-rr-play"></i> 처방 교구(분수 막대) 즉시 열기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           TAB 3: 3-9-3 LESSON PLANNER RAG PANE
+           ========================================================================= -->
+      <div class="workspace-pane" id="tab-planner">
+        <div class="lesson-rag-container">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2 id="plannerLessonTitle" style="font-size: 18px; font-weight: 800; color: var(--text-primary);">[3-9-3 완성형 수업설계] 동분모 분수의 덧셈 원리</h2>
+              <p id="plannerSubjectBadge" style="font-size: 12px; color: var(--text-secondary);">수학 · 초3~4</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-secondary" onclick="copyLessonScriptToClipboard()">
+                <i class="fi fi-rr-copy"></i> 대본 복사
+              </button>
+              <button class="btn-primary" onclick="exportLessonScriptMarkdown()">
+                <i class="fi fi-rr-download"></i> 마크다운 저장
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 1: Intro 3 (도입 3단계) -->
+          <div class="lesson-section-card" style="border: 1px solid var(--border-color);">
+            <div class="lesson-section-header">
+              <span class="lesson-section-title">
+                <span class="badge-status badge-ready">1단계: 도입 (Intro · 10분)</span>
+                <span>실생활 인지 갈등 및 배움 문제 정립</span>
+              </span>
+            </div>
+            
+            <div class="chat-bubble-dialogue">
+              <div class="chat-row">
+                <div class="avatar-icon avatar-teacher"><i class="fi fi-rr-user"></i></div>
+                <div class="bubble-card">
+                  <strong style="color: var(--accent); display: block; margin-bottom: 2px;">교사 1단계 발문 (동기 유발):</strong>
+                  "여러분, 피자 1판을 똑같이 4조각으로 나눈 피자가 있어요. 지우가 1조각을 먹고, 민우가 2조각을 먹었을 때 두 사람이 먹은 피자는 전체의 몇 판일까요?"
+                </div>
+              </div>
+
+              <div class="chat-row">
+                <div class="avatar-icon avatar-student"><i class="fi fi-rr-smile"></i></div>
+                <div class="bubble-card">
+                  <strong style="color: var(--warning); display: block; margin-bottom: 2px;">학생 응답 A (오개념 반응):</strong>
+                  "1조각은 1/4이고, 2조각은 2/4니까... 분모랑 분자를 다 더해서 3/8판입니다!"
+                </div>
+              </div>
+
+              <div class="chat-row">
+                <div class="avatar-icon avatar-teacher"><i class="fi fi-rr-user"></i></div>
+                <div class="bubble-card">
+                  <strong style="color: var(--accent); display: block; margin-bottom: 2px;">교사 2단계 발문 (인지 갈등 유발):</strong>
+                  "어라? 3/8판이면 4조각 중 3조각보다 피자의 양이 더 적어지네요! 피자를 더 먹었는데 왜 양이 줄어들었을까요? 오늘 이 비밀을 함께 풀어봅시다."
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Main 9 (전개 9단계 - Bruner 3-Tier EIS) -->
+          <div class="lesson-section-card" style="border: 1px solid var(--border-color);">
+            <div class="lesson-section-header">
+              <span class="lesson-section-title">
+                <span class="badge-status badge-learning">2단계: 전개 (Main · 25분)</span>
+                <span>Bruner 3단계(EIS) 구체 조작 ➔ 영상 표상 ➔ 기호 추상화</span>
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+              <div style="background: var(--bg-surface-elevated); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <strong style="font-size: 13px; color: var(--accent); display: block; margin-bottom: 6px;">[1~3단계] 동작적 조작 (Enactive)</strong>
+                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+                  1) 1/4 분수 막대 1개와 2개를 나란히 잇기<br>
+                  2) 전체 1 막대 아래에서 포개어 길이 비교<br>
+                  3) 1/4이 3개 모여 길이가 3/4이 됨을 손으로 감지
+                </p>
+              </div>
+
+              <div style="background: var(--bg-surface-elevated); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <strong style="font-size: 13px; color: var(--info); display: block; margin-bottom: 6px;">[4~6단계] 영상적 표상 (Iconic)</strong>
+                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+                  4) 4등분된 수직선 위에서 0부터 1칸 점프 ➔ 2칸 점프<br>
+                  5) 분모 4는 '조각의 크기(단위)'이므로 변하지 않음을 시각 확인<br>
+                  6) 피자 면적 모델 색칠 대조
+                </p>
+              </div>
+
+              <div style="background: var(--bg-surface-elevated); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <strong style="font-size: 13px; color: var(--success); display: block; margin-bottom: 6px;">[7~9단계] 기호적 추상화 (Symbolic)</strong>
+                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+                  7) 짝 하브루타: "왜 분모는 안 더하는지" 친구에게 설명<br>
+                  8) 1/4 + 2/4 = (1+2)/4 = 3/4 계산 알고리즘 형식화<br>
+                  9) 실생활 들이(L) 문제 적용
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Wrap-up 3 (정리 3단계 & 루브릭) -->
+          <div class="lesson-section-card" style="border: 1px solid var(--border-color);">
+            <div class="lesson-section-header">
+              <span class="lesson-section-title">
+                <span class="badge-status badge-mastered">3단계: 정리 (Wrap-up · 5분)</span>
+                <span>1:1 형성평가 루브릭 및 출구 퀴즈</span>
+              </span>
+            </div>
+
+            <table class="rubric-table">
+              <thead>
+                <tr>
+                  <th style="width: 15%;">평가 수준</th>
+                  <th style="width: 45%;">관찰 행동 기준 (Observable Criteria)</th>
+                  <th style="width: 40%;">교사의 맞춤 피드백 안내</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-status badge-mastered">상 (Mastery)</span></td>
+                  <td>동분모 분수의 합을 계산하고, 분모가 그대로 유지되는 이유를 단위분수의 개수로 명확히 구술할 수 있다.</td>
+                  <td>"훌륭합니다! 합이 1을 초과하는 가분수 덧셈으로 도전해 보세요."</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-status badge-learning">중 (Proficient)</span></td>
+                  <td>계산 결과는 바르게 구하나, 분모가 왜 더해지지 않는지 이유 설명 시 수직선이나 조작물의 도움이 필요하다.</td>
+                  <td>"분모 4는 무엇을 뜻할까요? 피자 조각의 크기라는 점을 다시 떠올려보세요."</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-status badge-deficit">하 (Developing)</span></td>
+                  <td>분모와 분자를 기계적으로 모두 더하여 3/8과 같은 오개념을 표출한다.</td>
+                  <td>"분수 막대 교구를 열어서 1/4 조각 3개를 실제로 붙여보며 길이를 확인해 봅시다."</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           TAB 4: MANIPULATIVE LAB PANE
+           ========================================================================= -->
+      <div class="workspace-pane" id="tab-manipulative">
+        <div class="manipulative-container">
+          
+          <div class="tool-selector-bar">
+            <button class="tool-tab-btn active" data-tool="fraction-bars" onclick="switchManipulativeTool('fraction-bars')">
+              <i class="fi fi-rr-ruler-combined"></i>
+              <span>분수 막대 분할기</span>
+            </button>
+            <button class="tool-tab-btn" data-tool="ten-frame" onclick="switchManipulativeTool('ten-frame')">
+              <i class="fi fi-rr-grid"></i>
+              <span>10칸 수셈판 (10-Frame)</span>
+            </button>
+            <button class="tool-tab-btn" data-tool="balance-scale" onclick="switchManipulativeTool('balance-scale')">
+              <i class="fi fi-rr-scale"></i>
+              <span>수학 양팔 저울</span>
+            </button>
+            <button class="tool-tab-btn" data-tool="light-reflection" onclick="switchManipulativeTool('light-reflection')">
+              <i class="fi fi-rr-sun"></i>
+              <span>빛의 반사·굴절 광학실험실</span>
+            </button>
+          </div>
+
+          <div class="simulation-viewport-card" id="manipulativeStage">
+            <!-- Injected by renderManipulativeTool() -->
+          </div>
+
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           TAB 5: KOREA 2022 STANDARDS BRIDGE PANE
+           ========================================================================= -->
+      <div class="workspace-pane" id="tab-standards">
+        <div class="lesson-rag-container">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">2022 개정 K-12 초·중·고 교육과정 성취기준 매핑 브라우저</h2>
+              <p style="font-size: 12px; color: var(--text-secondary);">국가교육과정정보센터(NCIC) 성취기준 코드([12미적], [10공수], [9수], [4수], [3과], [6실]) 및 마이크로 토픽 1:1 연동 색인</p>
+            </div>
+            <!-- School level grouping & search bar -->
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div class="school-level-filters" style="display: flex; gap: 4px;">
+                <button class="filter-chip active" data-tab5-school="all" onclick="filterStandardsBySchool('all')">전체 K-12</button>
+                <button class="filter-chip" data-tab5-school="ES" onclick="filterStandardsBySchool('ES')">초등학교 (ES)</button>
+                <button class="filter-chip" data-tab5-school="MS" onclick="filterStandardsBySchool('MS')">중학교 (MS)</button>
+                <button class="filter-chip" data-tab5-school="HS" onclick="filterStandardsBySchool('HS')">고등학교 (HS)</button>
+              </div>
+              <div class="search-box" style="width: 240px;">
+                <i class="fi fi-rr-search"></i>
+                <input type="text" class="search-input" id="standardsSearchInput" placeholder="코드/개념 검색..." oninput="handleStandardsSearch(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <div class="lesson-section-card" style="border: 1px solid var(--border-color);">
+            <div id="curriculumCodeChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;"></div>
+            <table class="rubric-table">
+              <thead>
+                <tr>
+                  <th style="width: 14%;">성취기준 코드</th>
+                  <th style="width: 12%;">학교급 / 학년</th>
+                  <th style="width: 12%;">교과 / 영역</th>
+                  <th style="width: 44%;">공식 성취기준 진술문 및 개념</th>
+                  <th style="width: 10%;">매핑 토픽</th>
+                  <th style="width: 8%;">바로가기</th>
+                </tr>
+              </thead>
+              <tbody id="curriculumTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <div class="toast-msg" id="toast">클립보드에 복사되었습니다.</div>
+
+  <script>
+    // =========================================================================
+    // 1. EMBEDDED HIGH-QUALITY CORE TAXONOMY DATASET (K-12 SPIRAL PROGRESSION)
+    // =========================================================================
+    const TAXONOMY_DATA = {
+      nodes: [
+        // --- 12-YEAR K-12 SPIRAL PROGRESSION: FROM EQUAL PARTITION TO CALCULUS ---
+        {
+          id: "mt_equal_part",
+          subject: "Mathematics",
+          domain: "Fractions & Proportions",
+          name: "똑같이 나누기 (등분할과 분수)",
+          curriculumCode: "[3수01-07]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "deficit",
+          centrality: 0.95,
+          x: 60, y: 350,
+          description: "전체 1을 똑같이 d개로 나눈 것 중의 n개를 나타내는 분수의 등분할 및 단위분수 기초 개념을 색종이와 피자 모형으로 조작합니다.",
+          prerequisites: [],
+          manipulative: "fraction-bars",
+          misconception: "똑같이 나누지 않은 도형의 단순 조각 수만 세어 1/3이라고 판정하는 등분할 양감 결손"
+        },
+        {
+          id: "mt_frac_add_like",
+          subject: "Mathematics",
+          domain: "Fractions & Proportions",
+          name: "분수의 덧셈과 비와 비율",
+          curriculumCode: "[4수01-10]",
+          grade: "초3~4",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "deficit",
+          centrality: 0.94,
+          x: 220, y: 350,
+          description: "분모가 같은 두 분수의 덧셈에서 단위분수의 개수를 누적하고, 기준량에 대한 비교하는 양의 비율 기초를 형성합니다.",
+          prerequisites: ["mt_equal_part"],
+          manipulative: "fraction-bars",
+          misconception: "1/4 + 2/4 = 3/8 처럼 분모와 분자를 둘 다 더하는 단위 보존 오개념"
+        },
+        {
+          id: "mt_ms_algebra_var",
+          subject: "Mathematics",
+          domain: "Algebra & Functions",
+          name: "문자와 식, 일차방정식",
+          curriculumCode: "[9수02-02]",
+          grade: "중1",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "learning",
+          centrality: 0.91,
+          x: 380, y: 350,
+          description: "구체적 수량 대신 문자(x)를 사용하여 수량 관계를 일반화하고, 등식의 성질을 적용하여 미지수를 해결합니다.",
+          prerequisites: ["mt_frac_add_like"],
+          manipulative: "balance-scale",
+          misconception: "등호를 연산의 단순 계산 결과로만 파악하여 양변의 동등성(동치) 보존 원리를 놓치는 오류"
+        },
+        {
+          id: "mt_ms_linear_func",
+          subject: "Mathematics",
+          domain: "Algebra & Functions",
+          name: "일차함수와 기울기 (Δy/Δx)",
+          curriculumCode: "[9수03-03]",
+          grade: "중2",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "deficit",
+          centrality: 0.93,
+          x: 540, y: 350,
+          description: "x의 증가량에 대한 y의 증가량의 일정한 비율(기울기)을 이해하고 일차함수의 그래프를 좌표평면에 모델링합니다.",
+          prerequisites: ["mt_ms_algebra_var"],
+          manipulative: "balance-scale",
+          misconception: "기울기를 공식으로만 기계 암기하여 두 변량 사이의 일정한 비와 비율(변화율)이라는 양적 실체를 결여하는 현상"
+        },
+        {
+          id: "mt_hs_poly_limits",
+          subject: "Mathematics",
+          domain: "Limits & Calculus",
+          name: "다항함수의 극한과 연속",
+          curriculumCode: "[10공수1-04]",
+          grade: "고1",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "learning",
+          centrality: 0.94,
+          x: 700, y: 350,
+          description: "변수가 일정 값에 한없이 가까워질 때 함수의 변화를 극한(lim) 기호로 엄밀화하고 연속성의 조건을 도출합니다.",
+          prerequisites: ["mt_ms_linear_func"],
+          manipulative: "balance-scale",
+          misconception: "함숫값과 극한값을 분별하지 못하거나 0/0 부정형에서 인수분해 약분의 비례적 당위성을 납득하지 못하는 오류"
+        },
+        {
+          id: "mt_hs_calculus_deriv",
+          subject: "Mathematics",
+          domain: "Limits & Calculus",
+          name: "순간변화율과 미분계수",
+          curriculumCode: "[12미적1-02-01]",
+          grade: "고2",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "deficit",
+          centrality: 0.98,
+          x: 860, y: 350,
+          description: "평균변화율의 극한값으로서 순간변화율과 접선의 기울기 개념을 정립하고 미분계수의 기하학적·물리적 의미를 해석합니다.",
+          prerequisites: ["mt_hs_poly_limits"],
+          manipulative: "fraction-bars",
+          misconception: "미분 계산 공식만 기계적으로 적용하여 평균변화율(초등 비와 비율)의 극한이라는 인과적 연계를 설명하지 못하는 형식주의 결손"
+        },
+
+        // --- ELEMENTARY MATHEMATICS: NUMBER & OPERATIONS ---
+        {
+          id: "mt_ten_comp",
+          subject: "Mathematics",
+          domain: "Number & Operations",
+          name: "10의 보수와 가르기/모으기",
+          curriculumCode: "[1수01-04]",
+          grade: "초1~2",
+          schoolLevel: "ES",
+          piagetStage: "전조작기 ➔ 구체적 조작기",
+          status: "mastered",
+          centrality: 0.88,
+          x: 120, y: 150,
+          description: "10을 두 수로 가르고 모으는 10의 보수 관계를 10프레임 구체물로 조작하고 덧셈 기초를 형성합니다.",
+          prerequisites: [],
+          manipulative: "ten-frame",
+          misconception: "수가 커져도 10 묶음 단위로 올림하지 않고 개별 낱개로만 세려는 오류"
+        },
+        {
+          id: "mt_place_val_10",
+          subject: "Mathematics",
+          domain: "Number & Operations",
+          name: "10진법 체계와 자릿값",
+          curriculumCode: "[2수01-02]",
+          grade: "초2",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.92,
+          x: 280, y: 150,
+          description: "일, 십, 백, 천의 위치적 기수법을 이해하고 10개 묶음이 다음 자리의 1이 되는 자릿값 원리를 수모형으로 탐구합니다.",
+          prerequisites: ["mt_ten_comp"],
+          manipulative: "ten-frame",
+          misconception: "24에서 '2'를 20이 아닌 단순한 2로 인지하는 자릿값 누락 오류"
+        },
+        {
+          id: "mt_mult_table",
+          subject: "Mathematics",
+          domain: "Number & Operations",
+          name: "곱셈구구와 동수누가",
+          curriculumCode: "[2수01-06]",
+          grade: "초2",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.90,
+          x: 200, y: 240,
+          description: "동수누가(같은 수 여러 번 더하기)와 배열 모델(Array)을 통해 곱셈의 기초 개념을 체득하고 곱셈구구를 암기합니다.",
+          prerequisites: ["mt_ten_comp"],
+          manipulative: "ten-frame",
+          misconception: "곱셈의 교환법칙(3x4 = 4x3)을 직관적으로 이해하지 못하고 개별 식을 별개로 외우는 현상"
+        },
+        {
+          id: "mt_mult_tens",
+          subject: "Mathematics",
+          domain: "Number & Operations",
+          name: "(몇십) × (몇) 곱셈",
+          curriculumCode: "[3수01-04]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.85,
+          x: 420, y: 200,
+          description: "자릿값 원리를 바탕으로 20x3 = (2x3)의 10배인 60이 됨을 자릿값 모형으로 시각화합니다.",
+          prerequisites: ["mt_place_val_10", "mt_mult_table"],
+          manipulative: "balance-scale",
+          misconception: "20x3을 23으로 덧셈과 연산자를 혼동하거나 0의 개수를 무작정 붙이는 암기식 오류"
+        },
+        {
+          id: "mt_mult_2digit",
+          subject: "Mathematics",
+          domain: "Number & Operations",
+          name: "두 자리 수 곱셈 (올림 포함)",
+          curriculumCode: "[3수01-05]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "learning",
+          centrality: 0.89,
+          x: 580, y: 200,
+          description: "일의 자리 곱셈에서 발생한 올림수를 십의 자리 곱에 합산하는 분배법칙 기초를 형성합니다.",
+          prerequisites: ["mt_mult_tens"],
+          manipulative: "balance-scale",
+          misconception: "24x3 계산 시 올림수 1을 잊고 2x3=6, 4x3=12를 이어붙여 612로 작성하는 오류"
+        },
+        {
+          id: "mt_frac_intro",
+          subject: "Mathematics",
+          domain: "Fractions",
+          name: "전체와 부분으로서의 분수",
+          curriculumCode: "[3수01-07B]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.90,
+          x: 220, y: 470,
+          description: "이산량과 연속량의 등분할을 통해 단위분수의 집합적 의미를 체화합니다.",
+          prerequisites: ["mt_equal_part"],
+          manipulative: "fraction-bars",
+          misconception: "부분의 크기가 다름에도 단순 개수만 세어 분수로 나타내는 오류"
+        },
+        {
+          id: "mt_frac_types",
+          subject: "Mathematics",
+          domain: "Fractions",
+          name: "진분수, 가분수, 대분수",
+          curriculumCode: "[3수01-08]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.87,
+          x: 380, y: 470,
+          description: "단위분수(1/d)의 개수를 기준으로 분자가 분모보다 작은 진분수와 같거나 큰 가분수를 분류하고 대분수로 상호 변환합니다.",
+          prerequisites: ["mt_frac_intro"],
+          manipulative: "fraction-bars",
+          misconception: "가분수는 1보다 클 수 없다는 고정관념 또는 단위분수의 묶음 세기 미흡"
+        },
+        {
+          id: "mt_frac_add_unlike",
+          subject: "Mathematics",
+          domain: "Fractions",
+          name: "이분모 분수의 통분과 덧셈",
+          curriculumCode: "[5수01-05]",
+          grade: "초5",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기 ➔ 형식적 조작기",
+          status: "learning",
+          centrality: 0.91,
+          x: 540, y: 470,
+          description: "분모가 다른 분수는 단위의 크기가 다르므로 공통분모로 통분(동치분수)한 후 덧셈을 수행합니다.",
+          prerequisites: ["mt_frac_types"],
+          manipulative: "fraction-bars",
+          misconception: "통분하지 않고 바로 분자 분모를 크로스 합산하거나 약분 과정에서 공약수를 누락하는 오류"
+        },
+
+        // --- SCIENCE: LIGHT & CIRCUITS ---
+        {
+          id: "mt_light_straight",
+          subject: "Science",
+          domain: "Energy & Waves",
+          name: "빛의 직진과 그림자",
+          curriculumCode: "[3과02-01]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.82,
+          x: 200, y: 590,
+          description: "빛이 공기 중에서 곧게 나아가는 직진 현상과 물체에 빛이 가려져 그림자가 생기는 원리를 손전등으로 탐구합니다.",
+          prerequisites: [],
+          manipulative: "light-reflection",
+          misconception: "그림자가 물체 자체에서 흘러나오는 어둠의 형태라고 생각하는 원시적 직관"
+        },
+        {
+          id: "mt_light_reflect",
+          subject: "Science",
+          domain: "Energy & Waves",
+          name: "빛의 반사와 평면거울",
+          curriculumCode: "[3과02-02]",
+          grade: "초3",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "learning",
+          centrality: 0.88,
+          x: 380, y: 590,
+          description: "빛이 거울 면에 닿아 꺾여 튕겨 나오는 반사 법칙(입사각 = 반사각)과 거울 속 상의 좌우 바뀜을 탐구합니다.",
+          prerequisites: ["mt_light_straight"],
+          manipulative: "light-reflection",
+          misconception: "빛이 거울 표면을 뚫고 들어가 거울 뒤 실제 공간에 물체가 존재한다고 착각하는 오류"
+        },
+        {
+          id: "mt_light_refract",
+          subject: "Science",
+          domain: "Energy & Waves",
+          name: "빛의 굴절과 볼록렌즈",
+          curriculumCode: "[6과01-01]",
+          grade: "초6",
+          schoolLevel: "ES",
+          piagetStage: "형식적 조작기",
+          status: "learning",
+          centrality: 0.84,
+          x: 560, y: 590,
+          description: "빛이 다른 물질(공기➔물/유리)로 들어갈 때 진행 방향이 꺾이는 굴절 현상과 볼록렌즈의 상을 관찰합니다.",
+          prerequisites: ["mt_light_reflect"],
+          manipulative: "light-reflection",
+          misconception: "빛의 굴절을 반사와 구별하지 못하고 물질 표면에서만 일어난다고 여기는 오류"
+        },
+        {
+          id: "mt_circ_basic",
+          subject: "Science",
+          domain: "Electricity & Magnetism",
+          name: "전기회로와 전류의 흐름",
+          curriculumCode: "[5과04-01]",
+          grade: "초5",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.86,
+          x: 380, y: 710,
+          description: "전지, 전구, 스위치를 도선으로 연결하여 닫힌 회로(Closed circuit)가 형성될 때 전류가 흐름을 실험합니다.",
+          prerequisites: [],
+          manipulative: "balance-scale",
+          misconception: "전류가 전구에서 모두 소모되어 반대편 도선으로는 돌아오지 않는다는 일방향 소모 모델 오류"
+        },
+        {
+          id: "mt_circ_series_par",
+          subject: "Science",
+          domain: "Electricity & Magnetism",
+          name: "전구의 직렬 연결과 병렬 연결",
+          curriculumCode: "[6과03-02]",
+          grade: "초6",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기 ➔ 형식적 조작기",
+          status: "learning",
+          centrality: 0.89,
+          x: 560, y: 710,
+          description: "직렬 회로에서 전구 개수가 늘어나면 어두워지고, 병렬 회로에서는 독립된 경로로 밝기가 유지되는 물리 법칙을 증명합니다.",
+          prerequisites: ["mt_circ_basic"],
+          manipulative: "balance-scale",
+          misconception: "직렬과 병렬의 구분 없이 전구가 2개면 무조건 1개일 때보다 2배 밝아질 것이라는 오개념"
+        },
+
+        // --- COMPUTING: ALGORITHMS ---
+        {
+          id: "mt_comp_seq",
+          subject: "Computing",
+          domain: "Algorithms & Programming",
+          name: "순차적 명령어와 일상 알고리즘",
+          curriculumCode: "[6실04-01]",
+          grade: "초5~6",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.80,
+          x: 200, y: 830,
+          description: "컴퓨터는 명령어를 순서대로 정확하게 실행함을 이해하고 일상 생활의 과업을 순차적 단계로 분해합니다.",
+          prerequisites: [],
+          manipulative: "ten-frame",
+          misconception: "컴퓨터가 사람처럼 상황을 유추하여 빠진 단계를 알아서 채워줄 것이라는 기대 오류"
+        },
+        {
+          id: "mt_comp_branch_loop",
+          subject: "Computing",
+          domain: "Algorithms & Programming",
+          name: "조건문과 반복문 구조화",
+          curriculumCode: "[6실04-02]",
+          grade: "초6",
+          schoolLevel: "ES",
+          piagetStage: "형식적 조작기",
+          status: "learning",
+          centrality: 0.87,
+          x: 420, y: 830,
+          description: "선택 구조(만약 ~라면)와 반복 구조(몇 회 반복)를 활용하여 문제를 효율적으로 해결하는 블록 코딩 프로그램을 설계합니다.",
+          prerequisites: ["mt_comp_seq"],
+          manipulative: "ten-frame",
+          misconception: "조건의 참/거짓 판단 시점과 반복문의 종료 조건을 잘못 설정하여 무한 루프에 빠지는 오류"
+        },
+        {
+          id: "mt_comp_debug",
+          subject: "Computing",
+          domain: "Algorithms & Programming",
+          name: "프로그램 오류 디버깅",
+          curriculumCode: "[6실04-03]",
+          grade: "초6",
+          schoolLevel: "ES",
+          piagetStage: "형식적 조작기",
+          status: "learning",
+          centrality: 0.85,
+          x: 640, y: 830,
+          description: "프로그램의 의도치 않은 동작(버그)을 단계별로 추적하고 논리적 오류를 스스로 수정하는 디버깅 역량을 기릅니다.",
+          prerequisites: ["mt_comp_branch_loop"],
+          manipulative: "ten-frame",
+          misconception: "오류 발생 시 전체 코드를 다 지우고 처음부터 다시 작성하려는 비효율적 태도"
+        },
+        // --- 국어과 (Korean) ---
+        {
+          id: "mt_kor_phonics",
+          subject: "국어",
+          domain: "문해력 및 음운",
+          name: "한글 자모와 낱말 소리",
+          curriculumCode: "[2국01-01]",
+          grade: "초1~2",
+          schoolLevel: "ES",
+          piagetStage: "전조작기 ➔ 구체적 조작기",
+          status: "mastered",
+          centrality: 0.95,
+          x: 100, y: 920,
+          description: "자음과 모음의 결합 원리를 체득하고 소리와 문자의 일대일 대응을 통해 기초 낱말을 정확히 식별합니다.",
+          prerequisites: [],
+          manipulative: "ten-frame",
+          misconception: "음절 단위 발음과 낱자 음소의 음가 분리 인식 결손"
+        },
+        {
+          id: "mt_kor_sentence",
+          subject: "국어",
+          domain: "문법 및 문장",
+          name: "문장 성분과 호응",
+          curriculumCode: "[4국02-01]",
+          grade: "초3~4",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.88,
+          x: 280, y: 920,
+          description: "주어-서술어의 기본 호응 관계를 이해하고 문장 부호와 띄어쓰기 규범을 바르게 구사합니다.",
+          prerequisites: ["mt_kor_phonics"],
+          manipulative: "fraction-bars",
+          misconception: "주어와 서술어의 수/높임 호응 불일치 및 조사 생략에 따른 의미 왜곡"
+        },
+        {
+          id: "mt_kor_paragraph",
+          subject: "국어",
+          domain: "독해와 작문",
+          name: "문단 구조와 사실적/추론적 독해",
+          curriculumCode: "[6국03-02]",
+          grade: "초5~6",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.92,
+          x: 480, y: 920,
+          description: "중심 문장과 뒷받침 문장의 연결 관계를 파악하고 글에 드러나지 않은 필자의 의도를 논리적으로 추론합니다.",
+          prerequisites: ["mt_kor_sentence"],
+          manipulative: "fraction-bars",
+          misconception: "지엽적 세부 사실과 전체 문단의 핵심 요지를 구별하지 못함"
+        },
+        {
+          id: "mt_kor_ms_critique",
+          subject: "국어",
+          domain: "비판적 문해력",
+          name: "비판적 독해와 타당성 평가",
+          curriculumCode: "[9국03-01]",
+          grade: "중1~3",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "learning",
+          centrality: 0.90,
+          x: 680, y: 920,
+          description: "설명문과 논설문의 논리적 일관성과 근거의 신뢰성을 비판적으로 검토합니다.",
+          prerequisites: ["mt_kor_paragraph"],
+          manipulative: "balance-scale",
+          misconception: "필자의 주관적 편향을 객관적 사실로 무비판적으로 수용"
+        },
+        {
+          id: "mt_kor_hs_academic",
+          subject: "국어",
+          domain: "학술 문해력",
+          name: "학술 텍스트 분석 및 비판적 작문",
+          curriculumCode: "[12독작02-01]",
+          grade: "고2~3",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "deficit",
+          centrality: 0.94,
+          x: 880, y: 920,
+          description: "인문·사회·과학 융합 학술 텍스트의 심층 논증 구조를 분석하고 논리적 보고서를 저술합니다.",
+          prerequisites: ["mt_kor_ms_critique"],
+          manipulative: "balance-scale",
+          misconception: "복합 접속어와 담화 표지의 논리적 계층 관계 파악 실패"
+        },
+
+        // --- 영어과 (English) ---
+        {
+          id: "mt_eng_phonics",
+          subject: "영어",
+          domain: "Phonics & Vocabulary",
+          name: "알파벳 음가와 파닉스",
+          curriculumCode: "[4영01-01]",
+          grade: "초3~4",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.86,
+          x: 100, y: 1020,
+          description: "철자와 소리의 기본 대응 규칙을 익혀 짧고 간단한 단어를 정확히 발음하고 읽습니다.",
+          prerequisites: [],
+          manipulative: "ten-frame",
+          misconception: "철자 이름과 실제 음소 소리를 혼동"
+        },
+        {
+          id: "mt_eng_ms_syntax",
+          subject: "영어",
+          domain: "Grammar & Syntax",
+          name: "기본 5형식 문형과 시제",
+          curriculumCode: "[9영01-03]",
+          grade: "중1~3",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "learning",
+          centrality: 0.88,
+          x: 480, y: 1020,
+          description: "문장의 주요 구성 성분과 기본 시제, 수동태를 활용하여 명확한 의미 단위를 구성합니다.",
+          prerequisites: ["mt_eng_phonics"],
+          manipulative: "balance-scale",
+          misconception: "주어와 동사의 수 일치 및 과거분사와 과거형 혼동"
+        },
+        {
+          id: "mt_eng_hs_academic",
+          subject: "영어",
+          domain: "Academic Reading",
+          name: "수능/학술 지문 구문 독해 및 추론",
+          curriculumCode: "[12영1-02-01]",
+          grade: "고2~3",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "deficit",
+          centrality: 0.91,
+          x: 880, y: 1020,
+          description: "복합 관계사절과 도치 구문이 포함된 학술적 원문 텍스트의 요지를 추론합니다.",
+          prerequisites: ["mt_eng_ms_syntax"],
+          manipulative: "balance-scale",
+          misconception: "문장 구조 분석 없이 단어 나열식 번역으로 문맥 오독"
+        },
+
+        // --- 사회·역사과 (Social Studies / Economics) ---
+        {
+          id: "mt_soc_market_basic",
+          subject: "사회",
+          domain: "경제와 시장",
+          name: "시장 경제와 화폐 교환",
+          curriculumCode: "[6사02-01]",
+          grade: "초5~6",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.89,
+          x: 280, y: 1120,
+          description: "생산자와 소비자의 상호 작용과 화폐를 통한 재화·서비스 교환의 원리를 이해합니다.",
+          prerequisites: ["mt_equal_part"],
+          manipulative: "balance-scale",
+          misconception: "가격이 고정된 값이라는 오인"
+        },
+        {
+          id: "mt_soc_ms_supply_demand",
+          subject: "사회",
+          domain: "시장 가격의 결정",
+          name: "수요·공급 곡선과 균형 가격",
+          curriculumCode: "[9사05-02]",
+          grade: "중1~3",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "learning",
+          centrality: 0.93,
+          x: 580, y: 1120,
+          description: "수요 곡선과 공급 곡선이 만나는 지점에서 시장 균형 가격이 형성되는 원리를 수학적 그래프로 분석합니다.",
+          prerequisites: ["mt_soc_market_basic", "mt_ms_linear_func"],
+          manipulative: "balance-scale",
+          misconception: "수요량의 변화(곡선 상의 이동)와 수요의 변화(곡선 자체의 이동) 혼동"
+        },
+        {
+          id: "mt_soc_hs_macro_econ",
+          subject: "사회",
+          domain: "거시경제와 금융",
+          name: "환율·이자율과 거시경제 변동",
+          curriculumCode: "[12경제01-02]",
+          grade: "고2~3",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "deficit",
+          centrality: 0.95,
+          x: 880, y: 1120,
+          description: "기준금리와 환율 변동이 수출입 및 국가 거시경제에 미치는 파급 효과를 비례적 모델로 분석합니다.",
+          prerequisites: ["mt_soc_ms_supply_demand"],
+          manipulative: "balance-scale",
+          misconception: "환율 상승(원화 가치 하락) 시 수출과 물가에 미치는 역방향 파급 경로 혼동"
+        },
+
+        // --- 도덕·윤리과 (Ethics) ---
+        {
+          id: "mt_mor_care_rules",
+          subject: "도덕",
+          domain: "관계와 배려",
+          name: "도덕적 배려와 공정한 규칙 준수",
+          curriculumCode: "[4도01-01]",
+          grade: "초3~4",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.85,
+          x: 280, y: 1220,
+          description: "타인의 처지에 공감하고 학급 및 사회 규칙을 자발적으로 준수하는 도덕적 태도를 기릅니다.",
+          prerequisites: [],
+          manipulative: "balance-scale",
+          misconception: "도덕 규칙을 처벌을 피하기 위한 외적 강제로만 인식"
+        },
+        {
+          id: "mt_mor_hs_ethics",
+          subject: "도덕",
+          domain: "규범 윤리학",
+          name: "롤스의 정의론과 칸트 의무론",
+          curriculumCode: "[12윤사02-01]",
+          grade: "고2~3",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "learning",
+          centrality: 0.92,
+          x: 780, y: 1220,
+          description: "무지의 베일, 차등의 원칙, 정언명령 등 현대 윤리 및 사회정의 이론의 철학적 전제를 비교 분석합니다.",
+          prerequisites: ["mt_mor_care_rules"],
+          manipulative: "balance-scale",
+          misconception: "차등의 원칙을 단순한 결과적 평등 분배로 오인"
+        },
+
+        // --- 정보·AI과 (Informatics & AI) ---
+        {
+          id: "mt_info_ms_python",
+          subject: "정보",
+          domain: "텍스트 프로그래밍",
+          name: "텍스트 코딩 제어구조와 함수",
+          curriculumCode: "[9정03-03]",
+          grade: "중1~3",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "mastered",
+          centrality: 0.91,
+          x: 580, y: 1320,
+          description: "파이썬 문법을 기반으로 조건문, 반복문, 함수 매개변수를 활용한 모듈러 프로그램을 개발합니다.",
+          prerequisites: ["mt_comp_branch_loop"],
+          manipulative: "ten-frame",
+          misconception: "함수 반환값(return)과 콘솔 출력(print)의 차이 미인식"
+        },
+        {
+          id: "mt_info_hs_machine_learning",
+          subject: "정보",
+          domain: "인공지능과 머신러닝",
+          name: "머신러닝 패러다임과 지도학습 모델",
+          curriculumCode: "[12인기02-01]",
+          grade: "고2~3",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "learning",
+          centrality: 0.96,
+          x: 880, y: 1320,
+          description: "데이터 기반 최적화 손실함수 최소화 원리를 이해하고 회귀 및 분류 모델의 성능을 평가합니다.",
+          prerequisites: ["mt_info_ms_python", "mt_hs_poly_limits"],
+          manipulative: "light-reflection",
+          misconception: "머신러닝을 규칙 기반 조건문(if-else)의 복잡한 결합으로 오인"
+        },
+
+        // --- 예체능·기술 (Arts & PE) ---
+        {
+          id: "mt_art_elements",
+          subject: "미술",
+          domain: "조형 요소와 원리",
+          name: "조형 요소 점·선·면·색",
+          curriculumCode: "[6미01-01]",
+          grade: "초5~6",
+          schoolLevel: "ES",
+          piagetStage: "구체적 조작기",
+          status: "mastered",
+          centrality: 0.84,
+          x: 280, y: 1420,
+          description: "기본 조형 요소를 탐색하고 다양한 재료와 매체를 활용하여 입체 및 평면 표현을 구성합니다.",
+          prerequisites: [],
+          manipulative: "light-reflection",
+          misconception: "원색 혼합 시 명도/채도 변화 규칙 미체득"
+        },
+        {
+          id: "mt_art_perspective",
+          subject: "미술",
+          domain: "공간 조형과 원근법",
+          name: "투시원근법과 비례",
+          curriculumCode: "[9미02-01]",
+          grade: "중1~3",
+          schoolLevel: "MS",
+          piagetStage: "초기 형식적 조작기",
+          status: "learning",
+          centrality: 0.89,
+          x: 580, y: 1420,
+          description: "소실점과 눈높이에 따른 1점/2점 투시원근법의 기하학적 원리를 화면 공간에 구현합니다.",
+          prerequisites: ["mt_art_elements"],
+          manipulative: "light-reflection",
+          misconception: "수평선(눈높이)과 소실점의 정합성 불일치로 공간 왜곡 발생"
+        },
+        {
+          id: "mt_art_visual_culture",
+          subject: "미술",
+          domain: "미술 비평과 시각문화",
+          name: "현대 시각문화 비평과 담론",
+          curriculumCode: "[12미02-01]",
+          grade: "고2~3",
+          schoolLevel: "HS",
+          piagetStage: "형식적 조작기",
+          status: "mastered",
+          centrality: 0.90,
+          x: 880, y: 1420,
+          description: "현대 미술 작품과 미디어 시각문화에 내재된 사회문화적 맥락을 비평적으로 분석합니다.",
+          prerequisites: ["mt_art_perspective"],
+          manipulative: "light-reflection",
+          misconception: "작품 비평을 단순한 개인적 호불호 감상으로 축소"
+        }
+      ]
+    };
+
+    const nodeMap = new Map();
+    TAXONOMY_DATA.nodes.forEach(n => nodeMap.set(n.id, n));
+
+    // Global State
+    const state = {
+      selectedNodeId: "mt_hs_calculus_deriv",
+      currentSubjectFilter: "all",
+      currentSchoolFilter: "all",
+      searchQuery: "",
+      onlyDeficit: false,
+      onlyReadyToLearn: false,
+      currentManipulative: "fraction-bars",
+      zoom: 1.0,
+      pan: { x: 80, y: 40 },
+      isDragging: false,
+      dragStart: { x: 0, y: 0 },
+      currentDiagPreset: "k12_calculus",
+      standardsSchoolFilter: "all",
+      standardsSearchQuery: ""
+    };
+
+    // Ready to Learn Calculation
+    function computeReadyToLearn() {
+      TAXONOMY_DATA.nodes.forEach(node => {
+        if (node.status === "mastered") {
+          node.isReadyToLearn = false;
+          return;
+        }
+        if (node.prerequisites.length === 0) {
+          node.isReadyToLearn = true;
+          return;
+        }
+        const allPrereqsMastered = node.prerequisites.every(pid => {
+          const p = nodeMap.get(pid);
+          return p && p.status === "mastered";
+        });
+        node.isReadyToLearn = allPrereqsMastered;
+      });
+    }
+
+    // Tab Switching: Clean & Verified
+    function switchMainTab(tabId) {
+      // 1. Hide all workspace panes
+      document.querySelectorAll(".workspace-pane").forEach(el => {
+        el.classList.remove("active");
+      });
+
+      // 2. Deactivate all tab buttons
+      document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      // 3. Show target pane
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add("active");
+      }
+
+      // 4. Activate target tab button
+      const activeBtn = document.querySelector(`.mode-btn[data-tab="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add("active");
+      }
+
+      // 5. Trigger resize and render if graph or manipulative
+      if (tabId === "tab-graph") {
+        setTimeout(() => {
+          resizeCanvas();
+        }, 30);
+      } else if (tabId === "tab-manipulative") {
+        renderManipulativeTool(state.currentManipulative);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.style.display = "inline-flex";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 2500);
+    }
+
+    function filterBySchoolLevel(school) {
+      state.currentSchoolFilter = school;
+      document.querySelectorAll(".school-level-filters [data-school]").forEach(c => c.classList.remove("active"));
+      const chip = document.querySelector(`.school-level-filters [data-school="${school}"]`);
+      if (chip) chip.classList.add("active");
+      renderSidebarTopicList();
+      renderKnowledgeGraph();
+    }
+
+    function renderSidebarTopicList() {
+      const container = document.getElementById("sidebarTopicList");
+      if (!container) return;
+      container.innerHTML = "";
+
+      const filtered = TAXONOMY_DATA.nodes.filter(node => {
+        if (state.currentSchoolFilter !== "all" && node.schoolLevel !== state.currentSchoolFilter) {
+          return false;
+        }
+        if (state.currentSubjectFilter !== "all") {
+          const f = state.currentSubjectFilter.toLowerCase();
+          const s = (node.subject || "").toLowerCase();
+          let match = s === f || s.includes(f);
+          if (f === "korean" && (s.includes("국어") || s.includes("korean"))) match = true;
+          if (f === "mathematics" && (s.includes("수학") || s.includes("대수") || s.includes("미적분") || s.includes("기하") || s.includes("math"))) match = true;
+          if (f === "english" && (s.includes("영어") || s.includes("english"))) match = true;
+          if (f === "social" && (s.includes("사회") || s.includes("역사") || s.includes("지리") || s.includes("경제") || s.includes("social") || s.includes("history"))) match = true;
+          if (f === "ethics" && (s.includes("도덕") || s.includes("윤리") || s.includes("ethics") || s.includes("moral"))) match = true;
+          if (f === "science" && (s.includes("과학") || s.includes("물리") || s.includes("화학") || s.includes("생명") || s.includes("지구") || s.includes("science") || s.includes("physics"))) match = true;
+          if (f === "computing" && (s.includes("정보") || s.includes("실과") || s.includes("인공지능") || s.includes("computing") || s.includes("ai"))) match = true;
+          if (f === "arts" && (s.includes("체육") || s.includes("음악") || s.includes("미술") || s.includes("기술") || s.includes("art") || s.includes("pe") || s.includes("music"))) match = true;
+          if (!match) return false;
+        }
+        if (state.searchQuery) {
+          const q = state.searchQuery.toLowerCase();
+          const matchName = node.name.toLowerCase().includes(q);
+          const matchCode = node.curriculumCode.toLowerCase().includes(q);
+          const matchDesc = node.description.toLowerCase().includes(q);
+          if (!matchName && !matchCode && !matchDesc) return false;
+        }
+        if (state.onlyDeficit && node.status !== "deficit") return false;
+        if (state.onlyReadyToLearn && !node.isReadyToLearn) return false;
+        return true;
+      });
+
+      filtered.forEach(node => {
+        const isSelected = node.id === state.selectedNodeId;
+        const item = document.createElement("div");
+        item.className = "topic-list-item" + (isSelected ? " selected" : "");
+        item.onclick = () => selectTopicNode(node.id, true);
+
+        let badgeClass = "badge-mastered";
+        let statusText = "마스터";
+        if (node.status === "learning") { badgeClass = "badge-learning"; statusText = "학습 중"; }
+        if (node.status === "deficit") { badgeClass = "badge-deficit"; statusText = "결손"; }
+        if (node.isReadyToLearn && node.status !== "mastered") { badgeClass = "badge-ready"; statusText = "다음 학습 적기"; }
+
+        let schoolTag = "초등";
+        if (node.schoolLevel === "MS") schoolTag = "중등";
+        if (node.schoolLevel === "HS") schoolTag = "고등";
+
+        item.innerHTML = `
+          <div class="item-header-row">
+            <span class="item-code">${node.curriculumCode} <small style="color:var(--text-muted); font-size:10px;">[${schoolTag}]</small></span>
+            <span class="badge-status ${badgeClass}">${statusText}</span>
+          </div>
+          <div class="item-title">${node.name}</div>
+          <div class="item-meta-row">
+            <span><i class="fi fi-rr-book"></i> ${node.subject}</span> · 
+            <span><i class="fi fi-rr-graduation-cap"></i> ${node.grade}</span>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function handleSearchInput(val) {
+      state.searchQuery = val;
+      renderSidebarTopicList();
+      renderKnowledgeGraph();
+    }
+
+    function filterBySubject(sub) {
+      state.currentSubjectFilter = sub;
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      const chip = document.querySelector(`.filter-chip[data-subject="${sub}"]`);
+      if (chip) chip.classList.add("active");
+      renderSidebarTopicList();
+      renderKnowledgeGraph();
+    }
+
+    function resetAllFilters() {
+      state.currentSubjectFilter = "all";
+      state.currentSchoolFilter = "all";
+      state.searchQuery = "";
+      state.onlyDeficit = false;
+      state.onlyReadyToLearn = false;
+      const input = document.getElementById("taxonomySearchInput");
+      if (input) input.value = "";
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      const allSubChip = document.querySelector('.subject-filters .filter-chip[data-subject="all"]');
+      if (allSubChip) allSubChip.classList.add("active");
+      const allSchoolChip = document.querySelector('.school-level-filters .filter-chip[data-school="all"]');
+      if (allSchoolChip) allSchoolChip.classList.add("active");
+      renderSidebarTopicList();
+      renderKnowledgeGraph();
+      showToast("모든 검색 및 필터가 초기화되었습니다.");
+    }
+
+    // =========================================================================
+    // GRAPH CANVAS ENGINE
+    // =========================================================================
+    let canvas = null;
+    let ctx = null;
+
+    function initCanvas() {
+      canvas = document.getElementById("knowledgeCanvas");
+      if (!canvas) return;
+      ctx = canvas.getContext("2d");
+      resizeCanvas();
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      const wrapper = document.getElementById("canvasWrapper");
+      if (!wrapper) return;
+      const w = wrapper.clientWidth || 800;
+      const h = wrapper.clientHeight || 600;
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      renderKnowledgeGraph();
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    function selectTopicNode(id, centerInView = false) {
+      state.selectedNodeId = id;
+      const node = nodeMap.get(id);
+      if (!node) return;
+
+      renderSidebarTopicList();
+      updateInspectorPanel(node);
+
+      if (centerInView && canvas) {
+        state.pan.x = (canvas.width / (2 * window.devicePixelRatio)) - (node.x * state.zoom);
+        state.pan.y = (canvas.height / (2 * window.devicePixelRatio)) - (node.y * state.zoom);
+      }
+      renderKnowledgeGraph();
+    }
+
+    function updateInspectorPanel(node) {
+      const codeEl = document.getElementById("inspectorCurriculumCode");
+      if (codeEl) codeEl.innerText = `${node.curriculumCode} · ${node.grade}`;
+
+      const badgeEl = document.getElementById("inspectorSubjectBadge");
+      if (badgeEl) badgeEl.innerText = `${node.subject} · ${node.domain}`;
+
+      const titleEl = document.getElementById("inspectorNodeTitle");
+      if (titleEl) titleEl.innerText = node.name;
+
+      const descEl = document.getElementById("inspectorDescription");
+      if (descEl) descEl.innerText = node.description;
+
+      const piagetEl = document.getElementById("inspectorPiagetStage");
+      if (piagetEl) piagetEl.innerText = node.piagetStage;
+
+      const manipEl = document.getElementById("inspectorManipulative");
+      if (manipEl) manipEl.innerText = node.manipulative;
+
+      // Status buttons
+      document.querySelectorAll(".status-opt-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.status === node.status);
+      });
+
+      // Prerequisites
+      const prereqList = document.getElementById("inspectorPrereqList");
+      if (prereqList) {
+        prereqList.innerHTML = "";
+        if (node.prerequisites.length === 0) {
+          prereqList.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">기초 진입 토픽 (선수 필요 없음)</span>`;
+        } else {
+          node.prerequisites.forEach(pid => {
+            const p = nodeMap.get(pid);
+            if (!p) return;
+            const div = document.createElement("div");
+            div.className = "prereq-badge";
+            div.onclick = () => selectTopicNode(p.id, true);
+            div.innerHTML = `
+              <span>${p.name} <small style="color:var(--text-muted);">(${p.curriculumCode})</small></span>
+              <span class="badge-status badge-${p.status}">${p.status === 'mastered' ? '마스터' : (p.status === 'deficit' ? '결손' : '학습중')}</span>
+            `;
+            prereqList.appendChild(div);
+          });
+        }
+      }
+
+      // Successors
+      const succList = document.getElementById("inspectorSuccessorList");
+      if (succList) {
+        succList.innerHTML = "";
+        const successors = TAXONOMY_DATA.nodes.filter(n => n.prerequisites.includes(node.id));
+        if (successors.length === 0) {
+          succList.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">최상위 응용 토픽 (후속 개방 대기)</span>`;
+        } else {
+          successors.forEach(s => {
+            const div = document.createElement("div");
+            div.className = "prereq-badge";
+            div.onclick = () => selectTopicNode(s.id, true);
+            div.innerHTML = `
+              <span>${s.name} <small style="color:var(--text-muted);">(${s.curriculumCode})</small></span>
+              <span class="badge-status badge-${s.status}">${s.status === 'mastered' ? '마스터' : (s.status === 'deficit' ? '결손' : '학습중')}</span>
+            `;
+            succList.appendChild(div);
+          });
+        }
+      }
+    }
+
+    function updateCurrentNodeStatus(newStatus) {
+      const node = nodeMap.get(state.selectedNodeId);
+      if (!node) return;
+      node.status = newStatus;
+      computeReadyToLearn();
+      renderSidebarTopicList();
+      updateInspectorPanel(node);
+      renderKnowledgeGraph();
+      showToast(`'${node.name}' 상태가 '${newStatus}'(으)로 갱신되었습니다.`);
+    }
+
+    function checkSubjectMatch(subject, filter) {
+      if (!filter || filter === "all") return true;
+      const f = filter.toLowerCase();
+      const s = (subject || "").toLowerCase();
+      if (s === f || s.includes(f)) return true;
+      if (f === "korean" && (s.includes("국어") || s.includes("korean"))) return true;
+      if (f === "mathematics" && (s.includes("수학") || s.includes("대수") || s.includes("미적분") || s.includes("기하") || s.includes("math"))) return true;
+      if (f === "english" && (s.includes("영어") || s.includes("english"))) return true;
+      if (f === "social" && (s.includes("사회") || s.includes("역사") || s.includes("지리") || s.includes("경제") || s.includes("social") || s.includes("history"))) return true;
+      if (f === "ethics" && (s.includes("도덕") || s.includes("윤리") || s.includes("ethics") || s.includes("moral"))) return true;
+      if (f === "science" && (s.includes("과학") || s.includes("물리") || s.includes("화학") || s.includes("생명") || s.includes("지구") || s.includes("science") || s.includes("physics"))) return true;
+      if (f === "computing" && (s.includes("정보") || s.includes("실과") || s.includes("인공지능") || s.includes("computing") || s.includes("ai"))) return true;
+      if (f === "arts" && (s.includes("체육") || s.includes("음악") || s.includes("미술") || s.includes("기술") || s.includes("art") || s.includes("pe") || s.includes("music"))) return true;
+      return false;
+    }
+
+    function renderKnowledgeGraph() {
+      if (!canvas || !ctx) return;
+      const dpr = window.devicePixelRatio || 1;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.translate(state.pan.x, state.pan.y);
+      ctx.scale(state.zoom, state.zoom);
+
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+
+      // Draw Grid dots
+      ctx.fillStyle = isDark ? "#1e2436" : "#cbd5e1";
+      const gridSize = 40;
+      for (let x = -400; x < 1800; x += gridSize) {
+        for (let y = -400; y < 1400; y += gridSize) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Draw Prerequisite Directed Edges
+      TAXONOMY_DATA.nodes.forEach(node => {
+        node.prerequisites.forEach(pid => {
+          const p = nodeMap.get(pid);
+          if (!p) return;
+
+          const isEdgeActive = node.id === state.selectedNodeId || p.id === state.selectedNodeId;
+          const isDeficit = node.status === "deficit" && p.status === "deficit";
+          const isSchoolMatch = state.currentSchoolFilter === "all" ||
+            (node.schoolLevel === state.currentSchoolFilter && p.schoolLevel === state.currentSchoolFilter);
+          const isSubjectMatch = checkSubjectMatch(node.subject, state.currentSubjectFilter) &&
+            checkSubjectMatch(p.subject, state.currentSubjectFilter);
+
+          ctx.save();
+          if ((!isSchoolMatch && state.currentSchoolFilter !== "all") || (!isSubjectMatch && state.currentSubjectFilter !== "all")) {
+            ctx.globalAlpha = 0.18;
+          }
+
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          
+          // Smooth Bezier Curve
+          const midX = (p.x + node.x) / 2;
+          ctx.bezierCurveTo(midX, p.y, midX, node.y, node.x, node.y);
+
+          if (isDeficit) {
+            ctx.strokeStyle = "#e11d48";
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([6, 4]);
+          } else if (isEdgeActive) {
+            ctx.strokeStyle = isDark ? "#818cf8" : "#4f46e5";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([]);
+          } else {
+            ctx.strokeStyle = isDark ? "#334155" : "#cbd5e1";
+            ctx.lineWidth = 1.6;
+            ctx.setLineDash([]);
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Arrow Head
+          const arrowLen = 10;
+          ctx.beginPath();
+          ctx.moveTo(node.x - 24, node.y);
+          ctx.lineTo(node.x - 32, node.y - 5);
+          ctx.lineTo(node.x - 32, node.y + 5);
+          ctx.fillStyle = isEdgeActive ? (isDark ? "#818cf8" : "#4f46e5") : (isDeficit ? "#e11d48" : (isDark ? "#475569" : "#94a3b8"));
+          ctx.fill();
+
+          ctx.restore();
+        });
+      });
+
+      // Draw Nodes
+      TAXONOMY_DATA.nodes.forEach(node => {
+        const isSelected = node.id === state.selectedNodeId;
+        const radius = isSelected ? 26 : 22;
+        const isSchoolMatch = state.currentSchoolFilter === "all" || node.schoolLevel === state.currentSchoolFilter;
+        const isSubjectMatch = checkSubjectMatch(node.subject, state.currentSubjectFilter);
+
+        ctx.save();
+        if ((!isSchoolMatch && state.currentSchoolFilter !== "all") || (!isSubjectMatch && state.currentSubjectFilter !== "all")) {
+          ctx.globalAlpha = 0.22;
+        }
+
+        // Ready to learn halo
+        if (node.isReadyToLearn && node.status !== "mastered") {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius + 9, 0, Math.PI * 2);
+          ctx.fillStyle = isDark ? "rgba(245, 158, 11, 0.25)" : "rgba(217, 119, 6, 0.18)";
+          ctx.fill();
+          ctx.strokeStyle = "#d97706";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Deficit pulsing halo
+        if (node.status === "deficit") {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius + 7, 0, Math.PI * 2);
+          ctx.fillStyle = isDark ? "rgba(239, 68, 68, 0.25)" : "rgba(225, 29, 72, 0.16)";
+          ctx.fill();
+          ctx.strokeStyle = "#e11d48";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        // Selection ring
+        if (isSelected) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius + 4, 0, Math.PI * 2);
+          ctx.strokeStyle = isDark ? "#a5b4fc" : "#4f46e5";
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        }
+
+        // Node Circle Body
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        
+        let fillColor = isDark ? "#1e293b" : "#ffffff";
+        let strokeColor = isDark ? "#334155" : "#e2e8f0";
+
+        if (node.status === "mastered") {
+          fillColor = isDark ? "#064e3b" : "#ecfdf5";
+          strokeColor = "#059669";
+        } else if (node.status === "learning") {
+          fillColor = isDark ? "#0c4a6e" : "#f0f9ff";
+          strokeColor = "#0284c7";
+        } else if (node.status === "deficit") {
+          fillColor = isDark ? "#881337" : "#fff1f2";
+          strokeColor = "#e11d48";
+        }
+
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Glyph: show school level or subject
+        let iconSymbol = "초";
+        if (node.schoolLevel === "MS") iconSymbol = "중";
+        if (node.schoolLevel === "HS") iconSymbol = "고";
+        if (node.subject === "Science") iconSymbol = "과";
+        if (node.subject === "Computing") iconSymbol = "정";
+
+        ctx.fillStyle = strokeColor;
+        ctx.font = "800 13px Pretendard, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(iconSymbol, node.x, node.y - 1);
+
+        // Name underneath
+        ctx.fillStyle = isDark ? "#f1f5f9" : "#1e293b";
+        ctx.font = isSelected ? "bold 12px Pretendard, sans-serif" : "600 11px Pretendard, sans-serif";
+        ctx.fillText(node.name, node.x, node.y + radius + 15);
+
+        // Code chip underneath name
+        ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
+        ctx.font = "500 10px Pretendard, monospace";
+        ctx.fillText(`${node.curriculumCode} (${node.grade})`, node.x, node.y + radius + 28);
+
+        ctx.restore();
+      });
+
+      ctx.restore();
+    }
+
+    // Canvas Pan & Click Handling
+    function setupCanvasInteractions() {
+      if (!canvas) return;
+
+      canvas.addEventListener("mousedown", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX - rect.left;
+        const clientY = e.clientY - rect.top;
+
+        // Check if node clicked
+        const dpr = window.devicePixelRatio || 1;
+        const graphX = (clientX - state.pan.x) / state.zoom;
+        const graphY = (clientY - state.pan.y) / state.zoom;
+
+        const hitNode = TAXONOMY_DATA.nodes.find(n => {
+          const dx = n.x - graphX;
+          const dy = n.y - graphY;
+          return Math.sqrt(dx * dx + dy * dy) <= 26;
+        });
+
+        if (hitNode) {
+          selectTopicNode(hitNode.id);
+        } else {
+          state.isDragging = true;
+          state.dragStart = { x: e.clientX - state.pan.x, y: e.clientY - state.pan.y };
+        }
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!state.isDragging) return;
+        state.pan.x = e.clientX - state.dragStart.x;
+        state.pan.y = e.clientY - state.dragStart.y;
+        renderKnowledgeGraph();
+      });
+
+      window.addEventListener("mouseup", () => {
+        state.isDragging = false;
+      });
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.08 : 0.92;
+        zoomGraph(factor);
+      }, { passive: false });
+    }
+
+    function zoomGraph(factor) {
+      state.zoom = Math.max(0.4, Math.min(2.5, state.zoom * factor));
+      renderKnowledgeGraph();
+    }
+
+    function resetGraphView() {
+      state.zoom = 1.0;
+      state.pan = { x: 80, y: 40 };
+      renderKnowledgeGraph();
+    }
+
+    function toggleDeficitFocus() {
+      state.onlyDeficit = !state.onlyDeficit;
+      renderSidebarTopicList();
+      renderKnowledgeGraph();
+      showToast(state.onlyDeficit ? "결손 발생 노드만 필터링합니다." : "전체 노드를 표시합니다.");
+    }
+
+    function toggleReadyToLearnFilter() {
+      state.onlyReadyToLearn = !state.onlyReadyToLearn;
+      renderSidebarTopicList();
+      renderKnowledgeGraph();
+      showToast(state.onlyReadyToLearn ? "다음 학습 적기(Ready to Learn) 노드만 필터링합니다." : "전체 노드를 표시합니다.");
+    }
+
+    // =========================================================================
+    // 2. DIAGNOSTIC PRESET DATA & ENGINE
+    // =========================================================================
+    const DIAGNOSTIC_PRESETS = {
+      k12_calculus: {
+        id: "k12_calculus",
+        badge: "K-12 나선형 7개년 역추적",
+        title: "[12미적1-02-01] 미적분 순간변화율과 미분계수 실전 진단 (고2)",
+        questionPrompt: `<strong>[12미적1-02-01] 고2 미적분 평가 문항</strong><br><br>
+함수 $f(x) = x^2$에서 $x=1$에서의 순간변화율(미분계수 $f'(1)$)의 정의와 기하학적 의미로 가장 올바른 것은?`,
+        options: [
+          {
+            label: "① f'(1) = lim_{Δx→0} [f(1+Δx)-f(1)]/Δx = 2 (정답: 평균변화율의 극한 및 접선의 기울기)",
+            type: "correct",
+            isError: false
+          },
+          {
+            label: "② f'(1) = (1)² = 1 (오답: 미분을 단순 함숫값 대입으로 오인)",
+            type: "error_func_val",
+            isError: true
+          },
+          {
+            label: "③ f'(1) = 2x (오답: 도함수 공식 2x만 기계 암기하고 x=1에서의 증분비 극한 실체 결손)",
+            type: "error_formula_only",
+            isError: true,
+            isDefaultSelected: true
+          }
+        ],
+        bayesian: {
+          bug1Name: "BUG_PROPORTION_GAP (초등 비와 비율 및 변화량 결손)",
+          bug1Prob: "92.4%",
+          bug1Width: "92.4%",
+          bug2Name: "BUG_FORMULA_SLIP (형식적 미분 공식 암기 고착)",
+          bug2Prob: "7.1%",
+          bug2Width: "7.1%"
+        },
+        stepperTitle: "선수학습 위계 역추적 경로 (DAG 7개년 Backtracking Stepper)",
+        steps: [
+          {
+            num: "1",
+            title: "고2 [12미적1-02-01] 미분계수 오답 (평가 문항)",
+            desc: "도함수 공식 2x만 기억하고 순간변화율의 정의(접선의 기울기) 및 극한 비례 관계 설명 불가",
+            isRoot: false
+          },
+          {
+            num: "2",
+            title: "고1 [10공수1-04] 직선의 기울기와 평균변화율 점검",
+            desc: "두 점 (1, 1), (1+Δx, (1+Δx)²) 사이의 직선 기울기(평균변화율) 식 작성 및 부정형 약분 불완전",
+            isRoot: false
+          },
+          {
+            num: "3",
+            title: "중2 [9수03-03] 일차함수 기울기(Δy/Δx) 불완전 확인",
+            desc: "x의 증가량에 대한 y의 증가량 비율이 일정하다는 일차함수 기울기 개념의 양감 결손 관찰",
+            isRoot: false
+          },
+          {
+            num: "🔥",
+            title: "초5 [6수01-06 / 3수01-07] 비와 비율 및 등분할 — Root Cause Gap",
+            desc: "기준량(Δx)에 대한 비교하는 양(Δy)의 비례적 양감 미형성 도출! 7개년 인과 연쇄의 근본 원인 특정.",
+            isRoot: true
+          }
+        ],
+        prescription: `
+          <p>• <strong>피아제 인지 발달 분석:</strong> 형식적 조작기(고2) 학생이 미적분 기호($dy/dx, \\lim$)를 다루고 있으나, 구체적 조작기(초등 3~5학년) 단계에서 정립되어야 할 '기준량에 대한 비교하는 양'의 비례적 보존 개념이 결손된 채 형식적 수식만 기계 암기해 온 7개년 누적 인과 결손 상태입니다.</p>
+          <p>• <strong>비고츠키 3단계 비계 처방(ZPD):</strong>
+            <br><strong>1단계 (긴급 처방):</strong> "미적분 공식 암기 즉시 중단 ➔ 초등 비와 비율 분수 막대 구체 조작기 15분 복습 처방"
+            <br><strong>2단계 (영상 표상):</strong> 두 점을 잇는 할선이 접선으로 수렴하는 시각적 도식 확인
+            <br><strong>3단계 (기호 추상화):</strong> $\\Delta x \\to 0$ 극한에서 비의 수렴값으로서의 도함수 정의식 재정립
+          </p>
+        `,
+        chainNodeIds: ["mt_hs_calculus_deriv", "mt_hs_poly_limits", "mt_ms_linear_func", "mt_ms_algebra_var", "mt_frac_add_like", "mt_equal_part"],
+        focusNodeId: "mt_equal_part"
+      },
+      elem_fraction: {
+        id: "elem_fraction",
+        badge: "초등 3~4학년 위계 역추적",
+        title: "[4수01-10] 분수의 덧셈 실전 진단 (초4)",
+        questionPrompt: `<strong>[4수01-10] 초4 분수의 덧셈 평가 문항</strong><br><br>
+민수는 사과 1/4개와 2/4개를 먹었습니다. 민수가 먹은 사과는 전체의 얼마입니까?`,
+        options: [
+          {
+            label: "① 3/4 개 (정답: 단위분수 3개)",
+            type: "correct",
+            isError: false
+          },
+          {
+            label: "② 3/8 개 (오답: 분모와 분자를 둘 다 더함)",
+            type: "error_add_denoms",
+            isError: true,
+            isDefaultSelected: true
+          },
+          {
+            label: "③ 3개 (오답: 단위분수 1/4을 낱개 1로 오인)",
+            type: "error_count_units",
+            isError: true
+          }
+        ],
+        bayesian: {
+          bug1Name: "BUG_PART_WHOLE (전체-부분 분수 개념 결손)",
+          bug1Prob: "88.6%",
+          bug1Width: "88.6%",
+          bug2Name: "BUG_OPERATOR_SLIP (단순 연산 기호 혼동)",
+          bug2Prob: "8.4%",
+          bug2Width: "8.4%"
+        },
+        stepperTitle: "선수학습 위계 역추적 경로 (DAG Backtracking Stepper)",
+        steps: [
+          {
+            num: "1",
+            title: "[4수01-10] 동분모 분수의 덧셈 (평가 문항)",
+            desc: "학생 오답 발생: 분모를 합산하여 3/8로 오인",
+            isRoot: false
+          },
+          {
+            num: "2",
+            title: "[3수01-08] 진분수, 가분수, 대분수 (직전 선수학습)",
+            desc: "단위분수의 누적 개념 점검 ➔ 부분 이해 확인",
+            isRoot: false
+          },
+          {
+            num: "🔥",
+            title: "[3수01-07] 똑같이 나누기 (등분할과 분수) — 근본 결손 원인 (Root Cause Gap)",
+            desc: "전체를 4로 나눈 것 중의 1개라는 '양의 보존 개념' 미형성 확인",
+            isRoot: true
+          }
+        ],
+        prescription: `
+          <p>• <strong>피아제 인지 발달 분석:</strong> 구체적 조작기(초3~4) 아동은 기호($1/4$)만으로 연산할 때 분모와 분자를 독립된 자연수로 취급합니다. 즉, 전체 기준량이 변하지 않는다는 '보존 개념(Conservation)'이 조작물 없이 직관적으로 와닿지 않는 상태입니다.</p>
+          <p>• <strong>비고츠키 3단계 비계 처방(ZPD):</strong>
+            <br>1단계 (Enactive): 분수 막대 띠를 잘라 붙이는 신체적 조작
+            <br>2단계 (Iconic): 4등분된 피자 수직선 도식화
+            <br>3단계 (Symbolic): $1/4 + 2/4 = (1+2)/4 = 3/4$ 기호 정립
+          </p>
+        `,
+        chainNodeIds: ["mt_frac_add_like", "mt_equal_part"],
+        focusNodeId: "mt_equal_part"
+      },
+      k12_reading: {
+        id: "k12_reading",
+        badge: "K-12 국어 문해력 12개년 역추적",
+        title: "[12독작02-01] 학술 논증 텍스트 분석 및 비판적 독해 실전 진단 (고3)",
+        questionPrompt: `<strong>[12독작02-01] 고3 독서와 작문 수능/학술 지문 평가 문항</strong><br><br>
+다음 복합 지문에서 '정보 기술의 발달과 사회적 감시 체계'에 관한 필자의 핵심 논증 구조로 가장 타당한 것은?`,
+        options: [
+          {
+            label: "① 필자는 기술 발달이 편의성을 제공하지만 담화 표지 '그러나' 이후 감시 자본주의의 위험성을 비판적 전제로 제시하고 있다. (정답)",
+            type: "correct",
+            isError: false
+          },
+          {
+            label: "② 지문의 전반부 사실적 서술만 읽고 '정보 기술은 현대 사회를 풍요롭게만 한다'고 결론지음. (오답: 사실과 필자 관점 혼동)",
+            type: "error_surface_reading",
+            isError: true,
+            isDefaultSelected: true
+          },
+          {
+            label: "③ 개별 단어의 사전적 정의만 암기하여 문맥 속 은유적 논거를 완전히 오독함. (오답: 어휘 표층 집착)",
+            type: "error_vocab_only",
+            isError: true
+          }
+        ],
+        bayesian: {
+          bug1Name: "BUG_DISCOURSE_COHESION (담화 표지 및 문단 논리 계층 결손)",
+          bug1Prob: "94.1%",
+          bug1Width: "94.1%",
+          bug2Name: "BUG_LITERAL_FIXATION (표층 자모/어휘 집착 오류)",
+          bug2Prob: "5.3%",
+          bug2Width: "5.3%"
+        },
+        stepperTitle: "국어과 12개년 문해력 위계 역추적 경로 (DAG Backtracking Stepper)",
+        steps: [
+          {
+            num: "1",
+            title: "고3 [12독작02-01] 학술 복합 논증 지문 오독 (평가 문항)",
+            desc: "문단 간 논리적 연계 및 역접 담화 표지의 기능 인지 결손으로 전체 주제를 반대로 결론",
+            isRoot: false
+          },
+          {
+            num: "2",
+            title: "고1 [10공국01-02] 담화 표지와 텍스트 응집성 점검",
+            desc: "문장 간 접속 관계 및 결속 구조 파악 불완전 확인",
+            isRoot: false
+          },
+          {
+            num: "3",
+            title: "중3 [9국03-01] 비판적 독해와 타당성 평가 결손",
+            desc: "사실적 정보와 필자의 가치 주장을 구별하는 비판적 분석력 미형성",
+            isRoot: false
+          },
+          {
+            num: "4",
+            title: "초6 [6국03-02] 중심 문장과 뒷받침 문단의 추론 결손",
+            desc: "문단 단위 핵심 요지와 세부 수식어 분리 실패 확인",
+            isRoot: false
+          },
+          {
+            num: "5",
+            title: "초4 [4국02-01] 주어-서술어 문장 성분 호응 점검",
+            desc: "복문에서 안긴문장의 주어와 서술어 관계 추적 지연",
+            isRoot: false
+          },
+          {
+            num: "🔥",
+            title: "초1~2 [2국01-01] 한글 자모와 낱말 소리 일대일 대응 — Root Cause Gap",
+            desc: "기초 음운 인식 및 어절 단위 자동화(Fluency) 결손이 12개년에 걸쳐 독해 인지 부하를 누적시킴!",
+            isRoot: true
+          }
+        ],
+        prescription: `
+          <p>• <strong>피아제 인지 발달 분석:</strong> 형식적 조작기(고3) 학생이 고난도 비문학 지문을 읽고 있으나, 초기 구체적 조작기(초등 저학년)의 어절 단위 음운 분절 및 자동화가 불완전하여 작업기억(Working Memory) 용량이 고갈된 상태입니다.</p>
+          <p>• <strong>비고츠키 3단계 문해력 비계 처방(ZPD):</strong>
+            <br><strong>1단계 (문단 구조화):</strong> 문단별 중심 문장과 접속사 색채 펜 하이라이팅(Visual Scaffolding)
+            <br><strong>2단계 (도식화):</strong> 주장-근거-반론 마인드맵 도식 작성
+            <br><strong>3단계 (메타인지):</strong> 필자의 숨은 전제를 찾아내는 3단계 상호 발문 훈련
+          </p>
+        `,
+        chainNodeIds: ["mt_kor_hs_academic", "mt_kor_ms_critique", "mt_kor_paragraph", "mt_kor_sentence", "mt_kor_phonics"],
+        focusNodeId: "mt_kor_phonics"
+      },
+      k12_economy: {
+        id: "k12_economy",
+        badge: "K-12 사회·수학 융합 6개년 역추적",
+        title: "[12경제01-02] 환율·이자율과 거시경제 변동 실전 진단 (고2)",
+        questionPrompt: `<strong>[12경제01-02] 고2 경제 거시경제 평가 문항</strong><br><br>
+미국 연준의 기준금리 인상으로 원/달러 환율이 상승(1,200원 ➔ 1,400원)할 때, 국내 수출 기업의 가격 경쟁력과 수입 원자재 물가에 미치는 영향으로 가장 올바른 것은?`,
+        options: [
+          {
+            label: "① 수출품의 외화 표시 가격이 하락하여 가격 경쟁력이 개선되고, 수입 원자재 원화 가격은 상승하여 국내 물가 상승 압력이 발생한다. (정답)",
+            type: "correct",
+            isError: false
+          },
+          {
+            label: "② 환율 수치(1400)가 커졌으므로 원화 가치가 상승했다고 착각하여 수입 물가가 하락한다고 오인함. (오답: 환율과 화폐가치의 반비례 역관계 결손)",
+            type: "error_inverse_ratio",
+            isError: true,
+            isDefaultSelected: true
+          },
+          {
+            label: "③ 금리와 환율은 독립 변수이므로 아무런 거시경제 영향이 없다고 판단함. (오답: 다변수 상관관계 무시)",
+            type: "error_no_relation",
+            isError: true
+          }
+        ],
+        bayesian: {
+          bug1Name: "BUG_INVERSE_RATIO (반비례 및 교환비율 양감 결손)",
+          bug1Prob: "91.8%",
+          bug1Width: "91.8%",
+          bug2Name: "BUG_GRAPH_CONFUSION (수요·공급 곡선 축 전도)",
+          bug2Prob: "7.4%",
+          bug2Width: "7.4%"
+        },
+        stepperTitle: "사회·수학 융합 6개년 인과 역추적 경로 (DAG Backtracking Stepper)",
+        steps: [
+          {
+            num: "1",
+            title: "고2 [12경제01-02] 환율 변동과 거시경제 파급 오답 (평가 문항)",
+            desc: "환율 수치 상승을 화폐 가치 상승으로 오인하는 비례-반비례 직관 전도 발생",
+            isRoot: false
+          },
+          {
+            num: "2",
+            title: "중3 [9사05-02] 외환 시장 수요·공급 곡선과 균형 가격 점검",
+            desc: "외환 수요 증가 시 외환의 가격(환율) 상승 메커니즘 그래프 해석 미흡",
+            isRoot: false
+          },
+          {
+            num: "3",
+            title: "중2 [9수03-03] 일차함수 기울기와 반비례 관계 ($y = a/x$)",
+            desc: "한 변수가 증가할 때 다른 변수가 감소하는 역관계의 수치적 직관 불완전",
+            isRoot: false
+          },
+          {
+            num: "🔥",
+            title: "초5~6 [6수01-06 / 6사02-01] 비와 비율 및 시장 교환 — Root Cause Gap",
+            desc: "'1달러를 얻기 위해 지불해야 하는 원화의 비율'이라는 기준량:비교량 양감 미형성이 6개년 경제 오답의 근본 원인!",
+            isRoot: true
+          }
+        ],
+        prescription: `
+          <p>• <strong>피아제 인지 발달 분석:</strong> 고2 경제 과목의 환율은 고도의 형식적 조작기 다변수 함수 관계이지만, 초등 5학년 구체적 조작기의 '비와 비율(기준량 대 비교량)' 직관이 결여되면 단순 암기로 전락하여 역관계를 항상 혼동하게 됩니다.</p>
+          <p>• <strong>비고츠키 3단계 융합 비계 처방(ZPD):</strong>
+            <br><strong>1단계 (구체 조작물):</strong> 양팔저울(balance-scale) 시뮬레이션으로 '1달러 = 1,400원 바둑알' 무게 균형 시각화
+            <br><strong>2단계 (도식화):</strong> 외환 시장 수요공급 곡선 인터랙티브 슬라이더 조작
+            <br><strong>3단계 (기호 추상화):</strong> 수출입 가격 탄력성 공식 연계
+          </p>
+        `,
+        chainNodeIds: ["mt_soc_hs_macro_econ", "mt_soc_ms_supply_demand", "mt_soc_market_basic", "mt_ms_linear_func", "mt_equal_part"],
+        focusNodeId: "mt_equal_part"
+      }
+    };
+
+    function switchDiagnosticPreset(presetKey) {
+      state.currentDiagPreset = presetKey;
+      const preset = DIAGNOSTIC_PRESETS[presetKey] || DIAGNOSTIC_PRESETS.k12_calculus;
+
+      const k12Btn = document.getElementById("diagPresetK12Btn");
+      const elemBtn = document.getElementById("diagPresetElemBtn");
+      const readingBtn = document.getElementById("diagPresetReadingBtn");
+      const economyBtn = document.getElementById("diagPresetEconomyBtn");
+      if (k12Btn) k12Btn.classList.toggle("active", presetKey === "k12_calculus");
+      if (elemBtn) elemBtn.classList.toggle("active", presetKey === "elem_fraction");
+      if (readingBtn) readingBtn.classList.toggle("active", presetKey === "k12_reading");
+      if (economyBtn) economyBtn.classList.toggle("active", presetKey === "k12_economy");
+
+      const badge = document.getElementById("diagPresetBadge");
+      if (badge) badge.innerText = preset.badge;
+
+      const qTitle = document.getElementById("diagQuestionTitle");
+      if (qTitle) qTitle.innerText = preset.title;
+
+      const qPrompt = document.getElementById("diagQuestionPrompt");
+      if (qPrompt) qPrompt.innerHTML = preset.questionPrompt;
+
+      const optGrid = document.getElementById("diagOptionsGrid");
+      if (optGrid) {
+        optGrid.innerHTML = "";
+        preset.options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.className = "scenario-btn" + (opt.isDefaultSelected ? " selected-error" : "");
+          btn.onclick = () => selectDiagnosticOption(btn, opt.type);
+          btn.innerHTML = `
+            <span>${opt.label}</span>
+            <i class="fi fi-rr-${opt.isError ? 'cross' : 'check'}" style="color: var(--${opt.isError ? 'danger' : 'success'}); ${opt.isDefaultSelected ? '' : 'opacity: 0;'}"></i>
+          `;
+          optGrid.appendChild(btn);
+        });
+      }
+
+      const label1 = document.getElementById("labelBug1");
+      const prob1 = document.getElementById("probBug1");
+      const bar1 = document.getElementById("barBug1");
+      const label2 = document.getElementById("labelBug2");
+      const prob2 = document.getElementById("probBug2");
+      const bar2 = document.getElementById("barBug2");
+
+      if (label1) label1.innerText = preset.bayesian.bug1Name;
+      if (prob1) prob1.innerText = preset.bayesian.bug1Prob;
+      if (bar1) bar1.style.width = preset.bayesian.bug1Width;
+
+      if (label2) label2.innerText = preset.bayesian.bug2Name;
+      if (prob2) prob2.innerText = preset.bayesian.bug2Prob;
+      if (bar2) bar2.style.width = preset.bayesian.bug2Width;
+
+      const stepperTitle = document.getElementById("diagStepperTitle");
+      if (stepperTitle) stepperTitle.innerText = preset.stepperTitle;
+
+      const stepperContainer = document.getElementById("diagStepperContainer");
+      if (stepperContainer) {
+        stepperContainer.innerHTML = "";
+        preset.steps.forEach(step => {
+          const div = document.createElement("div");
+          div.className = "step-item active-trace";
+          const bodyStyle = step.isRoot ? 'border-color: var(--danger-border); background: var(--danger-light);' : '';
+          const titleColor = step.isRoot ? 'var(--danger)' : 'var(--text-primary)';
+          div.innerHTML = `
+            <div class="step-num">${step.num}</div>
+            <div class="step-body" style="${bodyStyle}">
+              <strong style="color: ${titleColor}; display: block;">${step.title}</strong>
+              <span style="color: ${step.isRoot ? 'var(--text-primary)' : 'var(--text-secondary)'};">${step.desc}</span>
+            </div>
+          `;
+          stepperContainer.appendChild(div);
+        });
+      }
+
+      const prescContainer = document.getElementById("diagPrescriptionContent");
+      if (prescContainer) prescContainer.innerHTML = preset.prescription;
+    }
+
+    function selectDiagnosticOption(btn, optionType) {
+      document.querySelectorAll(".scenario-btn").forEach(b => {
+        b.classList.remove("selected-error");
+        const icon = b.querySelector("i");
+        if (icon) icon.style.opacity = "0";
+      });
+      btn.classList.add("selected-error");
+      const activeIcon = btn.querySelector("i");
+      if (activeIcon) activeIcon.style.opacity = "1";
+
+      const prob1 = document.getElementById("probBug1");
+      const bar1 = document.getElementById("barBug1");
+      const prob2 = document.getElementById("probBug2");
+      const bar2 = document.getElementById("barBug2");
+
+      if (optionType === "correct") {
+        if (prob1) prob1.innerText = "2.1%";
+        if (bar1) bar1.style.width = "2%";
+        if (prob2) prob2.innerText = "1.0%";
+        if (bar2) bar2.style.width = "1%";
+        showToast("정답 제출: 마스터 상태로 판정됩니다.");
+      } else {
+        const preset = DIAGNOSTIC_PRESETS[state.currentDiagPreset] || DIAGNOSTIC_PRESETS.k12_calculus;
+        if (prob1) prob1.innerText = preset.bayesian.bug1Prob;
+        if (bar1) bar1.style.width = preset.bayesian.bug1Width;
+        if (prob2) prob2.innerText = preset.bayesian.bug2Prob;
+        if (bar2) bar2.style.width = preset.bayesian.bug2Width;
+        showToast("오답 관찰: 인지 결손 연쇄 확률 검출!");
+      }
+    }
+
+    function triggerRunDiagnosis() {
+      const steps = document.querySelectorAll(".step-item");
+      steps.forEach(s => s.style.opacity = "0.25");
+
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        if (currentStep < steps.length) {
+          steps[currentStep].style.opacity = "1";
+          steps[currentStep].classList.add("active-trace");
+          currentStep++;
+        } else {
+          clearInterval(interval);
+          const preset = DIAGNOSTIC_PRESETS[state.currentDiagPreset] || DIAGNOSTIC_PRESETS.k12_calculus;
+          showToast(`역추적 완료: 근본 결손 원인 특정됨! (${preset.badge})`);
+        }
+      }, 350);
+    }
+
+    function applyRemediationToGraph() {
+      const preset = DIAGNOSTIC_PRESETS[state.currentDiagPreset] || DIAGNOSTIC_PRESETS.k12_calculus;
+      preset.chainNodeIds.forEach(id => {
+        const node = nodeMap.get(id);
+        if (node) {
+          node.status = "deficit";
+        }
+      });
+      computeReadyToLearn();
+      renderSidebarTopicList();
+      selectTopicNode(preset.focusNodeId || "mt_equal_part", true);
+      switchMainTab("tab-graph");
+      showToast(`${preset.badge} 결과가 지식 그래프에 반영되었습니다.`);
+    }
+
+    function openRemediationManipulative() {
+      switchMainTab("tab-manipulative");
+      switchManipulativeTool("fraction-bars");
+    }
+
+    // Lesson Planner Functions
+    function launchLessonPlannerForCurrent() {
+      const node = nodeMap.get(state.selectedNodeId);
+      if (node) {
+        const titleEl = document.getElementById("plannerLessonTitle");
+        if (titleEl) titleEl.innerText = `[3-9-3 완성형 수업설계] ${node.name}`;
+        const badgeEl = document.getElementById("plannerSubjectBadge");
+        if (badgeEl) badgeEl.innerText = `${node.subject} · ${node.grade}`;
+      }
+      switchMainTab("tab-planner");
+    }
+
+    function copyLessonScriptToClipboard() {
+      const title = document.getElementById("plannerLessonTitle")?.innerText || "3-9-3 수업설계안";
+      const scriptText = `${title}
+2022 개정 교육과정 연동 3-9-3 수업설계안 (도입 3단계 - 전개 9단계 - 정리 3단계)
+
+[1. 도입 (Intro · 3단계)]
+1단계 동기유발: 실생활 딜레마 상황 제시 및 어림 발문
+2단계 선수학습: 단위 개념 및 묶음 세기 확인
+3단계 학습문제: "분모가 같은 분수를 더할 때, 왜 분모는 그대로 두고 분자만 더할까?"
+
+[2. 전개 (Main · Bruner EIS 9단계)]
+- Enactive(동작적 조작 3단계): 분수 막대 띠 이어붙이기 물리적 실습
+- Iconic(영상적 표상 3단계): 수직선 점프 모델 및 면적 도식화 (오개념 즉시 대조)
+- Symbolic(기호적 추상화 3단계): 1/4 + 2/4 = (1+2)/4 = 3/4 형식 수식 일반화
+
+[3. 정리 (Wrap-up · 3단계)]
+1단계 개념 구조화: 학생 언어로 원리 말하기
+2단계 1:1 대조 형성평가: 3수준(상/중/하) 관찰 루브릭 진단
+3단계 메타인지 성찰: 진분수의 합이 1을 넘는 가분수/대분수 차시 예고
+`;
+      navigator.clipboard.writeText(scriptText).then(() => {
+        showToast("3-9-3 수업설계안이 클립보드에 복사되었습니다!");
+      }).catch(() => {
+        showToast("클립보드 복사 권한을 확인해주세요.");
+      });
+    }
+
+    function exportLessonScriptMarkdown() {
+      const title = document.getElementById("plannerLessonTitle")?.innerText || "lesson-plan";
+      const content = `# ${title}\n\nGenerated by Nomos Marble Taxonomy Dashboard\n...`;
+      const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${state.selectedNodeId}-lesson-plan.md`;
+      a.click();
+      showToast("마크다운 수업설계 파일이 다운로드되었습니다.");
+    }
+
+    function exportTaxonomySummary() {
+      const summary = {
+        exportedAt: new Date().toISOString(),
+        totalTopics: TAXONOMY_DATA.nodes.length,
+        mastered: TAXONOMY_DATA.nodes.filter(n => n.status === "mastered").length,
+        learning: TAXONOMY_DATA.nodes.filter(n => n.status === "learning").length,
+        deficit: TAXONOMY_DATA.nodes.filter(n => n.status === "deficit").length,
+        readyToLearn: TAXONOMY_DATA.nodes.filter(n => n.isReadyToLearn).map(n => n.name)
+      };
+      const blob = new Blob([JSON.stringify(summary, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "taxonomy-status-summary.json";
+      a.click();
+      showToast("택소노미 학습 상태 요약 JSON이 다운로드되었습니다.");
+    }
+
+    // Manipulative Tools
+    function switchManipulativeTool(toolKey) {
+      state.currentManipulative = toolKey;
+      document.querySelectorAll(".tool-tab-btn").forEach(b => b.classList.remove("active"));
+      const activeBtn = document.querySelector(`.tool-tab-btn[data-tool="${toolKey}"]`);
+      if (activeBtn) activeBtn.classList.add("active");
+      renderManipulativeTool(toolKey);
+    }
+
+    function launchManipulativeForCurrent() {
+      const node = nodeMap.get(state.selectedNodeId);
+      if (node && node.manipulative) {
+        switchManipulativeTool(node.manipulative);
+      }
+      switchMainTab("tab-manipulative");
+    }
+
+    function renderManipulativeTool(toolKey) {
+      const stage = document.getElementById("manipulativeStage");
+      if (!stage) return;
+
+      stage.innerHTML = `
+        <iframe src="simulations/${toolKey}.html" style="width: 100%; height: 580px; border: none; border-radius: var(--radius-md);"></iframe>
+      `;
+    }
+
+    // 2022 Standards Table Render
+    function filterStandardsBySchool(school) {
+      state.standardsSchoolFilter = school;
+      document.querySelectorAll("[data-tab5-school]").forEach(b => b.classList.remove("active"));
+      const btn = document.querySelector(`[data-tab5-school="${school}"]`);
+      if (btn) btn.classList.add("active");
+      renderCurriculumTable();
+    }
+
+    function handleStandardsSearch(query) {
+      state.standardsSearchQuery = query;
+      renderCurriculumTable();
+    }
+
+    function renderCurriculumTable() {
+      const chips = document.getElementById("curriculumCodeChips");
+      const tbody = document.getElementById("curriculumTableBody");
+      if (!chips || !tbody) return;
+
+      chips.innerHTML = "";
+      tbody.innerHTML = "";
+
+      const filtered = TAXONOMY_DATA.nodes.filter(node => {
+        if (state.standardsSchoolFilter !== "all" && node.schoolLevel !== state.standardsSchoolFilter) {
+          return false;
+        }
+        if (state.standardsSearchQuery) {
+          const q = state.standardsSearchQuery.toLowerCase();
+          const matchName = node.name.toLowerCase().includes(q);
+          const matchCode = node.curriculumCode.toLowerCase().includes(q);
+          const matchDesc = node.description.toLowerCase().includes(q);
+          const matchSubject = node.subject.toLowerCase().includes(q);
+          if (!matchName && !matchCode && !matchDesc && !matchSubject) return false;
+        }
+        return true;
+      });
+
+      filtered.forEach(node => {
+        // Chip
+        const chip = document.createElement("button");
+        chip.className = "btn-icon-subtle";
+        chip.style.fontSize = "11px";
+        chip.innerHTML = `<strong>${node.curriculumCode}</strong> <span>${node.name}</span>`;
+        chip.onclick = () => {
+          selectTopicNode(node.id, true);
+          switchMainTab("tab-graph");
+        };
+        chips.appendChild(chip);
+
+        // Row
+        const tr = document.createElement("tr");
+        let schoolBadge = "초등학교";
+        let schoolBadgeClass = "badge-mastered";
+        if (node.schoolLevel === "MS") {
+          schoolBadge = "중학교";
+          schoolBadgeClass = "badge-learning";
+        } else if (node.schoolLevel === "HS") {
+          schoolBadge = "고등학교";
+          schoolBadgeClass = "badge-deficit";
+        }
+
+        tr.innerHTML = `
+          <td><strong class="item-code">${node.curriculumCode}</strong></td>
+          <td><span class="badge-status ${schoolBadgeClass}">${schoolBadge} (${node.grade})</span></td>
+          <td>${node.subject} · ${node.domain}</td>
+          <td>${node.description}</td>
+          <td><span class="badge-status badge-${node.status}">${node.name}</span></td>
+          <td><button class="btn-icon-subtle" onclick="selectTopicNode('${node.id}', true); switchMainTab('tab-graph');" title="그래프에서 보기"><i class="fi fi-rr-arrow-right"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Theme Toggle Handler (Light/Dark)
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("nomos-theme", next);
+      
+      const themeBtn = document.getElementById("themeToggleBtn");
+      if (themeBtn) {
+        themeBtn.innerHTML = next === "dark" 
+          ? '<i class="fi fi-rr-sun"></i><span>라이트 모드</span>' 
+          : '<i class="fi fi-rr-moon"></i><span>다크 모드</span>';
+      }
+      renderKnowledgeGraph();
+    }
+
+    // Initialize Everything on Load
+    function initApp() {
+      const savedTheme = localStorage.getItem("nomos-theme") || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+
+      computeReadyToLearn();
+      renderSidebarTopicList();
+      initCanvas();
+      setupCanvasInteractions();
+      switchDiagnosticPreset("k12_calculus");
+      renderCurriculumTable();
+      selectTopicNode("mt_hs_calculus_deriv", true);
+    }
+
+    if (document.readyState === "loading") {
+      window.addEventListener("DOMContentLoaded", initApp);
+    } else {
+      initApp();
+    }
+
+  </script>
+
+<script>
+window.K12_CAUSAL_CHAINS = [
+  {
+    "chainId": "chain_math_fraction_rate_calculus",
+    "nameKo": "수와 연산·비율·함수·미적분 초·중·고 인과 역추적 체인",
+    "subject": "수학",
+    "terminalConcept": {
+      "schoolLevel": "고등학교",
+      "grade": 11,
+      "topic": "미적분 순간변화율 및 도함수",
+      "standard": "[12미적01-01]",
+      "commonError": "x의 증분과 y의 증분의 비율 극한을 단순 기계적 공식으로 외워, 순간적인 변화율과 접선의 기울기 개념을 해석하지 못함"
+    },
+    "causalPath": [
+      {
+        "step": 1,
+        "schoolLevel": "고등학교",
+        "grade": 11,
+        "topic": "순간변화율 및 미분계수",
+        "standard": "[12수학II02-01]",
+        "triggerError": "평균변화율의 극한값으로서의 미분계수를 이해하지 못하고 공식만 적용",
+        "deficitConcept": "평균변화율(두 점 사이의 기울기)의 기하학적 의미 결손",
+        "piagetStage": "formal_operational",
+        "scaffolding": {
+          "enactive": {
+            "tool": "phet_balance_scale",
+            "guide": "두 지점의 높이차와 거리비율을 시뮬레이터 조작을 통해 관찰"
+          },
+          "iconic": {
+            "model": "그래프 상의 할선이 접선으로 수렴하는 동적 궤적 시각화",
+            "guide": "두 점 사이의 거리가 0에 한없이 가까워질 때 직선의 기울기 변화 추적"
+          },
+          "symbolic": {
+            "formula": "lim_{Δx -> 0} (Δy / Δx) = f'(x)",
+            "guide": "기하학적 접선의 기울기를 대수적 극한 기호로 정식화"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "자동차가 2시간 동안 120km를 달렸을 때와, 단속 카메라 앞을 지나는 그 순간의 속도는 무엇이 다를까요?",
+          "cognitiveConflict": "시간 간격이 0초라면 거리를 시간으로 나눌 수 없는데(0/0), 어떻게 그 순간의 속도를 잴 수 있을까요?",
+          "internalization": "평균변화율에서 두 점 사이를 무한히 좁히면 무엇이 되는지 자신의 말로 설명해 보세요."
+        }
+      },
+      {
+        "step": 2,
+        "schoolLevel": "중학교",
+        "grade": 8,
+        "topic": "일차함수의 기울기",
+        "standard": "[9수03-04]",
+        "triggerError": "기울기가 음수이거나 분수일 때 그래프의 경사도와 방향을 혼동",
+        "deficitConcept": "x의 증가량에 대한 y의 증가량의 일정한 비율(단위비율) 결손",
+        "piagetStage": "early_formal",
+        "scaffolding": {
+          "enactive": {
+            "tool": "phet_fraction_rods",
+            "guide": "밑변 막대와 높이 막대를 조립하여 직각삼각형 빗변 경사도 조작"
+          },
+          "iconic": {
+            "model": "격자 좌표평면 상의 계단식 직각삼각형 궤적",
+            "guide": "오른쪽으로 1칸 갈 때 위/아래로 몇 칸 이동하는지 계단 모양으로 시각화"
+          },
+          "symbolic": {
+            "formula": "기울기 a = (y₂ - y₁) / (x₂ - x₁)",
+            "guide": "두 점의 좌표 차이의 비로 일반화"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "경사로를 올라갈 때 밑변이 2m이고 높이가 1m인 길과, 밑변이 4m이고 높이가 2m인 길 중 어느 쪽이 더 가파를까요?",
+          "cognitiveConflict": "길이가 다른 두 경사로인데, 왜 가파른 정도(기울기)는 똑같을까요?",
+          "internalization": "함수의 기울기가 뜻하는 바를 '한 걸음 걸을 때'를 기준으로 표현해 보세요."
+        }
+      },
+      {
+        "step": 3,
+        "schoolLevel": "초등학교",
+        "grade": 6,
+        "topic": "비와 비율, 비례식",
+        "standard": "[6수01-14]",
+        "triggerError": "비 3:4에서 기준량(4)과 비교하는 양(3)을 뒤바꿔 계산하거나 나눗셈 3÷4와의 관계를 파악하지 못함",
+        "deficitConcept": "두 양의 상대적 크기 비교(곱셈적 사고) 결손",
+        "piagetStage": "concrete_operational",
+        "scaffolding": {
+          "enactive": {
+            "tool": "three_poly_assets",
+            "guide": "빨간 사과 3개와 파란 사과 4개를 바구니에 직접 담으며 묶음 비 조작"
+          },
+          "iconic": {
+            "model": "이중 수직선(Double Number Line) 및 비례 막대 모델",
+            "guide": "기준량 1을 기준으로 비교하는 양이 차지하는 상대적 칸수를 색칠"
+          },
+          "symbolic": {
+            "formula": "비율 = (비교하는 양) / (기준량) = 3/4",
+            "guide": "기호 ':'를 분수와 소수 표기로 변환"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "주스를 만들 때 사과즙 2컵에 물 3컵을 섞는 것과, 사과즙 4컵에 물 6컵을 섞는 것은 맛이 같을까요?",
+          "cognitiveConflict": "사과즙의 양도 다르고 물의 양도 다른데, 왜 단맛의 진하기는 똑같을까요?",
+          "internalization": "비율이란 무엇인지 동생에게 설명하듯 한 문장으로 정리해 보세요."
+        }
+      },
+      {
+        "step": 4,
+        "schoolLevel": "초등학교",
+        "grade": 5,
+        "topic": "약분과 통분, 분수의 덧셈과 뺄셈",
+        "standard": "[6수01-05]",
+        "triggerError": "1/2 + 1/3 = 2/5 처럼 분모는 분모끼리 분자는 분자끼리 더하는 치명적 오류 발생",
+        "deficitConcept": "단위분수의 크기가 다르면 바로 더할 수 없다는 양감(동일 단위 원리) 결손",
+        "piagetStage": "concrete_operational",
+        "scaffolding": {
+          "enactive": {
+            "tool": "phet_fraction_rods",
+            "guide": "1/2 원판 조각과 1/3 원판 조각을 1/6 조각들로 치환하여 원판 틀에 끼우기"
+          },
+          "iconic": {
+            "model": "사각형 넓이 모델 격자 분할",
+            "guide": "가로를 2등분, 세로를 3등분하여 총 6칸의 동일한 사각형 단위로 시각화"
+          },
+          "symbolic": {
+            "formula": "1/2 + 1/3 = 3/6 + 2/6 = 5/6",
+            "guide": "최소공배수로 분모를 통일하는 분수 덧셈 식 수립"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "피자 반 판(1/2)과 피자 세 조각 중 한 조각(1/3)을 합치면 피자 반 판보다 많을까요, 적을까요?",
+          "cognitiveConflict": "만약 1/2 + 1/3이 2/5라면, 반 판(1/2)보다 더 작아지는데 이게 가능할까요?",
+          "internalization": "분모가 다른 분수를 더할 때 왜 먼저 '통분'을 해야 하는지 말해 보세요."
+        }
+      },
+      {
+        "step": 5,
+        "schoolLevel": "초등학교",
+        "grade": 3,
+        "topic": "나눗셈의 기초 (등분제와 포함제)",
+        "standard": "[4수01-07]",
+        "triggerError": "12÷3을 할 때 12개를 3명에게 똑같이 나누는 것과 3개씩 묶어 몇 묶음이 나오는지 구분을 못함",
+        "deficitConcept": "동일 묶음 덜어내기(반복 감산) 및 분배 원리 결손",
+        "piagetStage": "concrete_operational",
+        "scaffolding": {
+          "enactive": {
+            "tool": "three_poly_assets",
+            "guide": "3D 사과 12개를 3개의 바구니에 하나씩 나누어 담거나 3개씩 묶어 배치"
+          },
+          "iconic": {
+            "model": "바둑판 묶음 선 및 수직선 역점프(12에서 3씩 4번 뒤로 뛰기)",
+            "guide": "12 - 3 - 3 - 3 - 3 = 0의 묶음 과정을 화살표로 표상"
+          },
+          "symbolic": {
+            "formula": "12 ÷ 3 = 4 (곱셈구구 3 × 4 = 12의 역연산)",
+            "guide": "나눗셈 식과 곱셈식의 상호 가역적 관계 도출"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "사탕 12개를 3명에게 똑같이 나누어 주려면 어떻게 나누어 주면 공평할까요?",
+          "cognitiveConflict": "하나씩 번갈아 나누어 주는 것과, 3개씩 덜어내는 것은 왜 둘 다 몫이 4로 같을까요?",
+          "internalization": "나눗셈은 뺄셈이나 곱셈과 어떤 비밀스러운 친구 관계인지 말해 보세요."
+        }
+      },
+      {
+        "step": 6,
+        "schoolLevel": "초등학교",
+        "grade": 1,
+        "topic": "몇일까요 (1~5까지의 수 세기와 일대일 대응)",
+        "standard": "[2수01-01]",
+        "triggerError": "물건을 셀 때 하나를 건너뛰거나 두 번 세고, 마지막에 센 수가 전체 개수임을 인지하지 못함",
+        "deficitConcept": "일대일 대응(One-to-One Correspondence) 및 기수성(Cardinality) 결손",
+        "piagetStage": "preoperational",
+        "scaffolding": {
+          "enactive": {
+            "tool": "three_rigged_hand",
+            "guide": "3D 손가락을 하나씩 펴며 사과를 손가락 끝으로 1:1 터치하고 실로폰 도·레·미·파·솔 연주"
+          },
+          "iconic": {
+            "model": "PhET 10칸 상자(Ten-frame)에 사과를 한 칸에 하나씩 쏙 안착",
+            "guide": "칸마다 사과가 채워지며 숫자가 1, 2, 3.. 카운팅되는 격자 시각화"
+          },
+          "symbolic": {
+            "formula": "수 '5', 한글 '다섯', '오'",
+            "guide": "물체의 개수와 수 기호 '5'의 완벽한 1:1 결합"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "과일 바구니에서 맛있는 사과를 하나씩 꺼내볼까요? 손가락을 함께 펴 보아요!",
+          "cognitiveConflict": "사과를 '하나, 둘, 셋, 넷, 다섯' 하고 세었는데, 바구니 사과는 총 몇 개일까요? 왜 마지막 숫자가 답일까요?",
+          "internalization": "짝에게 사과 5개를 손가락으로 똑같이 보여주며 '다섯 개야!' 하고 말해볼까요?"
+        }
+      }
+    ]
+  },
+  {
+    "chainId": "chain_math_equality_balance_equations",
+    "nameKo": "등식의 성질·동치·방정식 초·중·고 인과 역추적 체인",
+    "subject": "수학",
+    "terminalConcept": {
+      "schoolLevel": "중학교",
+      "grade": 7,
+      "topic": "일차방정식의 풀이와 이항",
+      "standard": "[9수01-10]",
+      "commonError": "2x + 3 = 7 에서 3을 이항할 때 부호를 왜 바꾸어야 하는지 이해하지 못하고 기계적으로 암기하다가 2x = 7/3 같은 오류 유발"
+    },
+    "causalPath": [
+      {
+        "step": 1,
+        "schoolLevel": "중학교",
+        "grade": 7,
+        "topic": "일차방정식과 등식의 성질",
+        "standard": "[9수01-10]",
+        "triggerError": "좌변에서 우변으로 항을 옮길 때 덧셈과 곱셈의 역연산 규칙 혼동",
+        "deficitConcept": "등식의 양변에 같은 수를 빼거나 나누어도 등식이 성립한다는 동치 보존 원리 결손",
+        "piagetStage": "early_formal",
+        "scaffolding": {
+          "enactive": {
+            "tool": "phet_balance_scale",
+            "guide": "양팔 저울 좌변에 미지수 상자 2개와 100g 추 3개를 올리고, 우변에 700g 추를 올려 수평 유지 후 양변에서 동시에 300g 추 덜어내기"
+          },
+          "iconic": {
+            "model": "양팔 저울 수평 다이어그램 및 양변 동시 삭감 애니메이션",
+            "guide": "양쪽 접시에서 똑같은 무게를 덜어내도 저울이 여전히 수평을 유지함을 시각 확인"
+          },
+          "symbolic": {
+            "formula": "2x + 3 - 3 = 7 - 3  ➔  2x = 4  ➔  x = 2",
+            "guide": "이항은 등식의 양변에 같은 수를 뺀 결과임을 수식으로 증명"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "양팔 저울이 완벽하게 수평일 때, 양쪽 접시에서 똑같은 사과 1개씩을 빼면 저울은 어떻게 될까요?",
+          "cognitiveConflict": "식을 풀 때 '+3'이 넘어가서 '-3'이 되는 마법이 아니라, 실은 양쪽에 무슨 일이 일어난 걸까요?",
+          "internalization": "이항이라는 말의 진짜 의미를 양팔 저울의 수평을 지키는 규칙으로 설명해 보세요."
+        }
+      },
+      {
+        "step": 2,
+        "schoolLevel": "초등학교",
+        "grade": 2,
+        "topic": "덧셈과 뺄셈의 관계와 등호(=)의 개념",
+        "standard": "[2수01-08]",
+        "triggerError": "3 + 4 = □ + 2 문제에서 등호 뒤의 네모에 7을 써넣음 (등호를 계산 결과 버튼으로만 인식)",
+        "deficitConcept": "등호(=)는 연산 명령어가 아니라 '양쪽의 크기가 같음'을 나타내는 동치 관계(Equivalence) 결손",
+        "piagetStage": "concrete_operational",
+        "scaffolding": {
+          "enactive": {
+            "tool": "phet_balance_scale",
+            "guide": "좌측 접시에 3g, 4g 추를 놓고, 우측 접시에 2g 추와 빈 상자를 올려 수평 맞추기"
+          },
+          "iconic": {
+            "model": "시소(Seesaw)와 10칸 상자 균형 모델",
+            "guide": "좌측 7칸과 우측 2칸 + 5칸의 면적이 정확히 일치함을 시각화"
+          },
+          "symbolic": {
+            "formula": "3 + 4 = 5 + 2 = 7",
+            "guide": "등호의 좌변과 우변이 완벽한 쌍둥이 무게임을 기호로 표현"
+          }
+        },
+        "vygotskyPrompts": {
+          "activation": "친구와 시소를 탈 때 몸무게가 같으면 시소가 어떻게 되나요?",
+          "cognitiveConflict": "3 + 4 = □ + 2 에서 왜 네모는 7이 아니라 5일까요? 등호(=)의 진짜 역할은 무엇일까요?",
+          "internalization": "수학에서 등호(=) 마크는 어떤 마음을 가진 기호인지 말해 보세요."
+        }
+      }
+    ]
+  }
+];
+
+// LLM 프롬프트 생성 헬퍼 함수
+window.generateLLMExpansionPromptFromClient = function(chainId, stepIndex) {
+  const chain = window.K12_CAUSAL_CHAINS.find(c => c.chainId === chainId);
+  if (!chain) return "";
+  const step = chain.causalPath[stepIndex] || chain.causalPath[0];
+  const foundation = chain.causalPath[chain.causalPath.length - 1];
+
+  return `[K-12 인지 위계 온톨로지 기반 정밀 차시 생성 지시서]
+1. 주제 및 교육과정 성취기준:
+   - 주제: ${step.topic} (${step.schoolLevel} ${step.grade ? step.grade + "학년" : ""})
+   - 성취기준: ${step.standard || "2022 개정 교육과정 역량 체계"}
+   - 인지 발달 단계: 피아제 ${step.piagetStage}
+
+2. 오답 초·중·고 인과 역추적(DAG Backtracking) 분석:
+   - 학생 유발 오류: ${step.triggerError}
+   - 근본 결손 개념: ${foundation.topic} (${foundation.schoolLevel} ${foundation.deficitConcept})
+   - 역추적 경로: ${chain.causalPath.map(s => `[${s.schoolLevel} ${s.topic}]`).join(" ➔ ")}
+
+3. 피아제·비고츠키 3-Tier 구체 조작기 & 발문 비계:
+   - 활동적 구체물 (Enactive): ${step.scaffolding?.enactive?.tool || "three_poly_assets"}
+     * 조작 가이드: ${step.scaffolding?.enactive?.guide}
+   - 영상적 표상 (Iconic): ${step.scaffolding?.iconic?.model}
+     * 시각화 가이드: ${step.scaffolding?.iconic?.guide}
+   - 상징적 기호화 (Symbolic): ${step.scaffolding?.symbolic?.formula}
+   - 비고츠키 3단계 발문:
+     * 도입: ${step.vygotskyPrompts?.activation}
+     * 인지 갈등: ${step.vygotskyPrompts?.cognitiveConflict}
+     * 자기화: ${step.vygotskyPrompts?.internalization}
+
+4. 40분 완결 수업 분량 확장 (3-9-3 풀스펙):
+   - 도입 5분: 구체 조작물과 신체 수감각을 통한 생각 열기 & 인지 갈등
+   - 전개 28분: 3~4개의 심층 인터랙티브 조작 미션 (Put Task, Say Task, 짝 하브루타, 물리 저울/상자 실험)
+   - 정리 7분: 3분 짝 하브루타 대본, 출구 퀴즈 3문항, 참 잘했어요 배움 성찰 도장 쾅!
+   - 매트 크림 보드(#FAF6ED) 및 이모지 0개 Paper-Cutting UI 표준 준수`;
+};
+
+// 모듈러 에디터 등 외부 연동 파라미터 수신 리스너
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromStudio = urlParams.get('fromStudio');
+  const tool = urlParams.get('tool');
+  if (fromStudio) {
+    setTimeout(() => {
+      showToast(`[에디터 연동] ${fromStudio} (교구: ${tool || '기본'}) 비계 데이터가 수신되었습니다.`);
+    }, 600);
+  }
+});
+</script>
+
+</body>
+</html>

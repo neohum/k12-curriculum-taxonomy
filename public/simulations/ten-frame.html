@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10칸 상자 바둑알 놓기 및 묶음 수세기 조작기</title>
+  <style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", "Noto Sans KR", sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    line-height: 1.5;
+    padding: 16px;
+    word-break: keep-all;
+    overflow-x: hidden;
+  }
+  .sim-container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+  }
+  header.sim-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 16px;
+  }
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 9999px;
+    line-height: 1;
+  }
+  .badge-primary { background: #e0e7ff; color: #3730a3; }
+  .badge-stage { background: #dcfce7; color: #166534; }
+  .badge-subject { background: #fef3c7; color: #92400e; }
+  h1.sim-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+    text-wrap: balance;
+  }
+  p.sim-subtitle {
+    font-size: 15px;
+    color: #64748b;
+  }
+  .pedagogy-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #14532d;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pedagogy-box .pedagogy-title {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Tactile touch targets (min 44px) */
+  button, .touch-btn, select, input[type="range"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+    font-family: inherit;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+  }
+  button:active, .touch-btn:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+  }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 0 14px;
+  }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-accent {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+  }
+  .btn-accent:hover { background: #059669; }
+  .btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    padding: 0 12px;
+  }
+  .btn-danger:hover { background: #fecaca; }
+  .control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .frames-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+  .ten-frame-box {
+    background: #ffffff;
+    border: 3px solid #1e293b;
+    border-radius: 14px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4px;
+    padding: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 560px;
+  }
+  .frame-cell {
+    aspect-ratio: 1 / 1;
+    min-height: 56px;
+    min-width: 56px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s ease, transform 0.1s ease;
+  }
+  .frame-cell:hover {
+    background: #f1f5f9;
+  }
+  .frame-cell:active {
+    transform: scale(0.94);
+  }
+  .counter-token {
+    width: 78%;
+    height: 78%;
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #ffffff;
+    animation: popIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .token-red {
+    background: radial-gradient(circle at 35% 35%, #ef4444, #b91c1c);
+  }
+  .token-blue {
+    background: radial-gradient(circle at 35% 35%, #3b82f6, #1d4ed8);
+  }
+  .status-dashboard {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .count-summary {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0369a1;
+    margin-bottom: 8px;
+  }
+  .scaffold-text {
+    font-size: 15px;
+    color: #0c4a6e;
+    line-height: 1.6;
+  }
+  .color-picker-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .color-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .color-btn.selected {
+    border-color: #0f172a;
+    box-shadow: 0 0 0 2px rgba(15,23,42,0.2);
+  }
+  .celebrate-banner {
+    background: #ecfdf5;
+    border: 2px solid #34d399;
+    color: #065f46;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 16px;
+    display: none;
+  }
+  </style>
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-row">
+        <span class="badge badge-primary">교구 시뮬레이션</span>
+        <span class="badge badge-stage">초등 1~2학년 (전조작기)</span>
+        <span class="badge badge-subject">수학 (수와 연산)</span>
+      </div>
+      <h1 class="sim-title">10칸 상자 바둑알 놓기 및 묶음 수세기 조작기</h1>
+      <p class="sim-subtitle">칸을 탭하여 바둑알을 채우고, 5와 10의 묶음을 확인해 보세요.</p>
+    </header>
+
+    <div class="pedagogy-box">
+      <div class="pedagogy-title">💡 수업 탐구 안내 (비계 설정)</div>
+      <div>5개씩 채워지는 윗줄과 아랫줄 구조를 통해 5와 10의 묶음 수세기를 익히고, 10이 되기 위해 몇 개가 더 필요한지(10의 보수)를 즐겁게 놀이로 체득합니다.</div>
+    </div>
+
+    <!-- Color selector -->
+    <div class="color-picker-row">
+      <span style="font-weight: 700; font-size: 14px; color: #475569;">놓을 바둑알 색상:</span>
+      <button class="color-btn touch-btn selected" id="btnRed" onclick="selectColor('red')">
+        <span style="display:inline-block; width:16px; height:16px; border-radius:50%; background:#ef4444;"></span>
+        빨간 알
+      </button>
+      <button class="color-btn touch-btn" id="btnBlue" onclick="selectColor('blue')">
+        <span style="display:inline-block; width:16px; height:16px; border-radius:50%; background:#3b82f6;"></span>
+        파란 알
+      </button>
+    </div>
+
+    <!-- Celebration banner -->
+    <div class="celebrate-banner" id="celebBanner">
+      🎉 <strong>참 잘했어요!</strong> 10칸이 가득 차서 완벽한 10이 완성되었습니다!
+    </div>
+
+    <!-- Frames -->
+    <div class="frames-wrapper">
+      <div class="ten-frame-box" id="frame1"></div>
+      <div class="ten-frame-box" id="frame2" style="display: none;"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="status-dashboard">
+      <div class="count-summary" id="countSummary">현재 바둑알: 빨강 0개 + 파랑 0개 = 총 0개</div>
+      <div class="scaffold-text" id="complementText">10이 되려면 바둑알 10개가 더 필요해요.</div>
+      <div class="scaffold-text" id="bundleText" style="margin-top: 4px; color: #0284c7;"></div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="control-bar">
+      <button class="btn-primary touch-btn" onclick="addOne()">+1 개 놓기</button>
+      <button class="btn-secondary touch-btn" onclick="removeOne()">-1 개 빼기</button>
+      <button class="btn-accent touch-btn" onclick="fillFive()">윗줄 5개 채우기</button>
+      <button class="btn-accent touch-btn" onclick="fillTen()">10개 가득 채우기</button>
+      <button class="btn-secondary touch-btn" onclick="toggleDoubleFrame()" id="frameToggleBtn">20칸 모드로 확장</button>
+      <button class="btn-danger touch-btn" onclick="clearFrame()">🔄 비우기</button>
+      <div style="margin-left: auto;">
+        <button class="btn-secondary touch-btn" id="muteBtn" onclick="toggleMute()">🔊 소리 켜짐</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+  }
+  _init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+  toggleMute() {
+    this.muted = !this.muted;
+    return this.muted;
+  }
+  playTone(freq, type = "sine", duration = 0.12, vol = 0.15) {
+    if (this.muted) return;
+    try {
+      this._init();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration);
+    } catch (e) {}
+  }
+  playPop() {
+    this.playTone(460, "sine", 0.08, 0.22);
+  }
+  playThud() {
+    this.playTone(140, "triangle", 0.14, 0.25);
+  }
+  playClick() {
+    this.playTone(850, "sine", 0.04, 0.08);
+  }
+  playChime() {
+    if (this.muted) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((f, i) => {
+      setTimeout(() => this.playTone(f, "triangle", 0.25, 0.18), i * 85);
+    });
+  }
+  playFanfare() {
+    if (this.muted) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    notes.forEach((f, i) => {
+      setTimeout(() => this.playTone(f, "sine", 0.35, 0.2), i * 90);
+    });
+  }
+  playLaserBeep() {
+    this.playTone(720, "sawtooth", 0.08, 0.08);
+    setTimeout(() => this.playTone(1100, "sine", 0.12, 0.12), 60);
+  }
+}
+const sound = new SoundEngine();
+
+    let currentColor = 'red';
+    let isDouble = false;
+    const cells = new Array(20).fill(null);
+
+    const frame1 = document.getElementById("frame1");
+    const frame2 = document.getElementById("frame2");
+    const countSummary = document.getElementById("countSummary");
+    const complementText = document.getElementById("complementText");
+    const bundleText = document.getElementById("bundleText");
+    const celebBanner = document.getElementById("celebBanner");
+    const frameToggleBtn = document.getElementById("frameToggleBtn");
+    const muteBtn = document.getElementById("muteBtn");
+
+    function toggleMute() {
+      const isMuted = sound.toggleMute();
+      muteBtn.textContent = isMuted ? "🔇 소리 꺼짐" : "🔊 소리 켜짐";
+    }
+
+    function selectColor(color) {
+      currentColor = color;
+      sound.playClick();
+      document.getElementById("btnRed").classList.toggle("selected", color === 'red');
+      document.getElementById("btnBlue").classList.toggle("selected", color === 'blue');
+    }
+
+    function toggleCell(index) {
+      if (cells[index] === currentColor) {
+        cells[index] = null;
+        sound.playClick();
+      } else {
+        cells[index] = currentColor;
+        sound.playPop();
+      }
+      render();
+      checkMilestones();
+    }
+
+    function addOne() {
+      const limit = isDouble ? 20 : 10;
+      const emptyIdx = cells.slice(0, limit).findIndex(c => c === null);
+      if (emptyIdx !== -1) {
+        cells[emptyIdx] = currentColor;
+        sound.playPop();
+        render();
+        checkMilestones();
+      }
+    }
+
+    function removeOne() {
+      const limit = isDouble ? 20 : 10;
+      for (let i = limit - 1; i >= 0; i--) {
+        if (cells[i] !== null) {
+          cells[i] = null;
+          sound.playClick();
+          render();
+          checkMilestones();
+          break;
+        }
+      }
+    }
+
+    function fillFive() {
+      for (let i = 0; i < 5; i++) {
+        if (!cells[i]) cells[i] = currentColor;
+      }
+      sound.playChime();
+      render();
+      checkMilestones();
+    }
+
+    function fillTen() {
+      for (let i = 0; i < 10; i++) {
+        if (!cells[i]) cells[i] = currentColor;
+      }
+      sound.playFanfare();
+      render();
+      checkMilestones();
+    }
+
+    function clearFrame() {
+      cells.fill(null);
+      sound.playClick();
+      render();
+      checkMilestones();
+    }
+
+    function toggleDoubleFrame() {
+      isDouble = !isDouble;
+      frame2.style.display = isDouble ? "grid" : "none";
+      frameToggleBtn.textContent = isDouble ? "10칸 모드로 축소" : "20칸 모드로 확장";
+      sound.playClick();
+      render();
+      checkMilestones();
+    }
+
+    function checkMilestones() {
+      const limit = isDouble ? 20 : 10;
+      const count = cells.slice(0, limit).filter(Boolean).length;
+      if (count === 10 || (isDouble && count === 20)) {
+        celebBanner.style.display = "block";
+        sound.playFanfare();
+      } else {
+        celebBanner.style.display = "none";
+      }
+    }
+
+    function render() {
+      const limit = isDouble ? 20 : 10;
+      let redCount = 0;
+      let blueCount = 0;
+
+      for (let i = 0; i < limit; i++) {
+        if (cells[i] === 'red') redCount++;
+        if (cells[i] === 'blue') blueCount++;
+      }
+      const total = redCount + blueCount;
+      const needed = Math.max(0, 10 - total);
+
+      countSummary.textContent = `현재 바둑알: 빨강 ${redCount}개 + 파랑 ${blueCount}개 = 총 ${total}개`;
+      
+      if (!isDouble) {
+        if (total === 10) {
+          complementText.textContent = `10의 짝꿍: ${redCount}와(과) ${blueCount}을(를) 모으면 10이 돼요!`;
+        } else {
+          complementText.textContent = `10이 되려면 바둑알 ${needed}개가 더 필요해요. (10 - ${total} = ${needed})`;
+        }
+      } else {
+        complementText.textContent = `20까지의 수: 10개짜리 묶음 ${Math.floor(total/10)}개와 낱개 ${total % 10}개`;
+      }
+
+      bundleText.textContent = `5단위 구조: 5개 묶음 ${Math.floor(total/5)}개와 낱개 ${total % 5}개`;
+
+      // Render cells in Frame 1
+      frame1.innerHTML = "";
+      for (let i = 0; i < 10; i++) {
+        const cell = document.createElement("div");
+        cell.className = "frame-cell touch-btn";
+        cell.onclick = () => toggleCell(i);
+        if (cells[i]) {
+          const tok = document.createElement("div");
+          tok.className = "counter-token token-" + cells[i];
+          tok.textContent = i + 1;
+          cell.appendChild(tok);
+        }
+        frame1.appendChild(cell);
+      }
+
+      // Render cells in Frame 2 if double
+      if (isDouble) {
+        frame2.innerHTML = "";
+        for (let i = 10; i < 20; i++) {
+          const cell = document.createElement("div");
+          cell.className = "frame-cell touch-btn";
+          cell.onclick = () => toggleCell(i);
+          if (cells[i]) {
+            const tok = document.createElement("div");
+            tok.className = "counter-token token-" + cells[i];
+            tok.textContent = i + 1;
+            cell.appendChild(tok);
+          }
+          frame2.appendChild(cell);
+        }
+      }
+    }
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
