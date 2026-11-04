@@ -1,0 +1,33 @@
+{
+  "name": "k12-curriculum-taxonomy",
+  "version": "1.0.0",
+  "description": "K-12 Full-Subject Cognitive Hierarchy Ontology & Taxonomy based on 2022 Korea Revised Curriculum (OpenStax Extended)",
+  "type": "module",
+  "main": "src/core/index.mjs",
+  "bin": {
+    "k12-taxonomy": "src/server/index.mjs"
+  },
+  "scripts": {
+    "start": "node src/server/index.mjs",
+    "dev": "node src/server/index.mjs",
+    "server": "node src/server/index.mjs",
+    "test": "node --test tests/**/*.test.mjs"
+  },
+  "keywords": [
+    "k12",
+    "curriculum",
+    "taxonomy",
+    "ontology",
+    "cognitive-hierarchy",
+    "piaget",
+    "korea-2022-curriculum",
+    "openstax",
+    "scaffolding",
+    "edutech"
+  ],
+  "author": "neohum",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

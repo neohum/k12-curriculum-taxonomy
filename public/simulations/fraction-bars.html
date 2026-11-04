@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>분수 막대 분할 및 크기 비교 조작기</title>
+  <style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", "Noto Sans KR", sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    line-height: 1.5;
+    padding: 16px;
+    word-break: keep-all;
+    overflow-x: hidden;
+  }
+  .sim-container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+  }
+  header.sim-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 16px;
+  }
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 9999px;
+    line-height: 1;
+  }
+  .badge-primary { background: #e0e7ff; color: #3730a3; }
+  .badge-stage { background: #dcfce7; color: #166534; }
+  .badge-subject { background: #fef3c7; color: #92400e; }
+  h1.sim-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+    text-wrap: balance;
+  }
+  p.sim-subtitle {
+    font-size: 15px;
+    color: #64748b;
+  }
+  .pedagogy-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #14532d;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pedagogy-box .pedagogy-title {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Tactile touch targets (min 44px) */
+  button, .touch-btn, select, input[type="range"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+    font-family: inherit;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+  }
+  button:active, .touch-btn:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+  }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 0 14px;
+  }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-accent {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+  }
+  .btn-accent:hover { background: #059669; }
+  .btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    padding: 0 12px;
+  }
+  .btn-danger:hover { background: #fecaca; }
+  .control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .whole-bar-container {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+  }
+  .whole-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .bars-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .fraction-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: background 0.15s;
+  }
+  .fraction-row.highlighted {
+    background: #fef9c3;
+    border-color: #fde047;
+  }
+  .row-meta {
+    width: 90px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .row-denom {
+    font-size: 15px;
+    font-weight: 700;
+    color: #334155;
+  }
+  .row-val {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .bar-track {
+    flex: 1;
+    height: 48px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    overflow: hidden;
+    border: 2px solid #cbd5e1;
+    position: relative;
+    touch-action: none;
+  }
+  .bar-segment {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    border-right: 1px solid rgba(255,255,255,0.7);
+    background: #f1f5f9;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s ease;
+    min-width: 24px;
+  }
+  .bar-segment:last-child {
+    border-right: none;
+  }
+  .bar-segment.active {
+    background: #3b82f6;
+    color: #ffffff;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
+  }
+  .bar-segment:hover {
+    filter: brightness(0.95);
+  }
+  .row-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .palette-section {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 16px;
+  }
+  .palette-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 10px;
+  }
+  .palette-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .denom-btn {
+    padding: 0 14px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    color: #1e293b;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .denom-btn:hover {
+    border-color: #3b82f6;
+    color: #2563eb;
+  }
+  .alignment-guide {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ef4444;
+    pointer-events: none;
+    z-index: 20;
+    display: none;
+  }
+  .alignment-guide::after {
+    content: "기준선";
+    position: absolute;
+    top: -20px;
+    left: -18px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #ef4444;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .equivalence-card {
+    background: #fdf4ff;
+    border: 1px solid #f0abfc;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-top: 14px;
+    font-size: 14px;
+    color: #701a75;
+    font-weight: 600;
+    display: none;
+  }
+  </style>
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-row">
+        <span class="badge badge-primary">교구 시뮬레이션</span>
+        <span class="badge badge-stage">초등 3~4학년 (구체적 조작기)</span>
+        <span class="badge badge-subject">수학 (수와 연산)</span>
+      </div>
+      <h1 class="sim-title">분수 막대 분할 및 크기 비교 조작기</h1>
+      <p class="sim-subtitle">막대를 추가하고 칸을 클릭하여 분수의 크기를 눈으로 직접 비교해 보세요.</p>
+    </header>
+
+    <div class="pedagogy-box">
+      <div class="pedagogy-title">💡 수업 탐구 안내 (비계 설정)</div>
+      <div>분모가 다른 분수들의 길이를 직접 비교하고, 같은 크기를 가진 동치분수(1/2 = 2/4 = 3/6)의 관계를 시각적으로 탐구합니다.</div>
+    </div>
+
+    <!-- Whole Bar Reference -->
+    <div class="whole-bar-container">
+      <div class="whole-label">
+        <span>기준 전체 (1)</span>
+        <span>1 / 1 (100%)</span>
+      </div>
+      <div class="bar-track" style="border-color: #93c5fd; background: #dbeafe;">
+        <div style="flex: 1; height: 100%; background: #60a5fa; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+          전체 1
+        </div>
+      </div>
+    </div>
+
+    <!-- Denominator palette -->
+    <div class="palette-section">
+      <div class="palette-title">+ 분수 막대 추가하기 (분모 선택)</div>
+      <div class="palette-buttons">
+        <button class="denom-btn touch-btn" onclick="addBar(2)">1/2 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(3)">1/3 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(4)">1/4 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(5)">1/5 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(6)">1/6 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(8)">1/8 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(10)">1/10 막대</button>
+        <button class="denom-btn touch-btn" onclick="addBar(12)">1/12 막대</button>
+      </div>
+    </div>
+
+    <!-- Bars Area -->
+    <div class="bars-area" id="barsContainer">
+      <div class="alignment-guide" id="guideLine"></div>
+    </div>
+
+    <!-- Equivalence banner -->
+    <div class="equivalence-card" id="equivCard">
+      🎉 <strong>동치분수 발견!</strong> <span id="equivText"></span>
+    </div>
+
+    <!-- Global Controls -->
+    <div class="control-bar">
+      <button class="btn-secondary touch-btn" onclick="toggleGuide()">📏 수직 기준선 켜기/끄기</button>
+      <button class="btn-secondary touch-btn" onclick="fillAll()">✨ 모두 채우기</button>
+      <button class="btn-secondary touch-btn" onclick="clearAll()">🔄 모두 비우기</button>
+      <button class="btn-danger touch-btn" onclick="resetAll()">🗑️ 처음 상태로</button>
+      <div style="margin-left: auto;">
+        <button class="btn-secondary touch-btn" id="muteBtn" onclick="toggleMute()">🔊 소리 켜짐</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+  }
+  _init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+  toggleMute() {
+    this.muted = !this.muted;
+    return this.muted;
+  }
+  playTone(freq, type = "sine", duration = 0.12, vol = 0.15) {
+    if (this.muted) return;
+    try {
+      this._init();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration);
+    } catch (e) {}
+  }
+  playPop() {
+    this.playTone(460, "sine", 0.08, 0.22);
+  }
+  playThud() {
+    this.playTone(140, "triangle", 0.14, 0.25);
+  }
+  playClick() {
+    this.playTone(850, "sine", 0.04, 0.08);
+  }
+  playChime() {
+    if (this.muted) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((f, i) => {
+      setTimeout(() => this.playTone(f, "triangle", 0.25, 0.18), i * 85);
+    });
+  }
+  playFanfare() {
+    if (this.muted) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    notes.forEach((f, i) => {
+      setTimeout(() => this.playTone(f, "sine", 0.35, 0.2), i * 90);
+    });
+  }
+  playLaserBeep() {
+    this.playTone(720, "sawtooth", 0.08, 0.08);
+    setTimeout(() => this.playTone(1100, "sine", 0.12, 0.12), 60);
+  }
+}
+const sound = new SoundEngine();
+
+    let rows = [];
+    let showGuide = false;
+    let guideX = 200;
+
+    const container = document.getElementById("barsContainer");
+    const guideLine = document.getElementById("guideLine");
+    const equivCard = document.getElementById("equivCard");
+    const equivText = document.getElementById("equivText");
+    const muteBtn = document.getElementById("muteBtn");
+
+    function toggleMute() {
+      const isMuted = sound.toggleMute();
+      muteBtn.textContent = isMuted ? "🔇 소리 꺼짐" : "🔊 소리 켜짐";
+    }
+
+    function addBar(denom, activeCount = 1) {
+      sound.playPop();
+      const id = Date.now() + Math.random().toString(36).substring(2, 6);
+      const row = { id, denom, activeCount };
+      rows.push(row);
+      render();
+      checkEquivalence();
+    }
+
+    function removeBar(id) {
+      sound.playClick();
+      rows = rows.filter(r => r.id !== id);
+      render();
+      checkEquivalence();
+    }
+
+    function setSegment(id, index) {
+      const row = rows.find(r => r.id === id);
+      if (!row) return;
+      if (row.activeCount === index + 1) {
+        row.activeCount = index;
+      } else {
+        row.activeCount = index + 1;
+      }
+      sound.playTone(300 + (row.activeCount * 40), "sine", 0.1, 0.15);
+      render();
+      checkEquivalence();
+    }
+
+    function fillRow(id) {
+      const row = rows.find(r => r.id === id);
+      if (row) {
+        row.activeCount = row.denom;
+        sound.playChime();
+        render();
+        checkEquivalence();
+      }
+    }
+
+    function clearRow(id) {
+      const row = rows.find(r => r.id === id);
+      if (row) {
+        row.activeCount = 0;
+        sound.playClick();
+        render();
+        checkEquivalence();
+      }
+    }
+
+    function fillAll() {
+      rows.forEach(r => r.activeCount = r.denom);
+      sound.playFanfare();
+      render();
+      checkEquivalence();
+    }
+
+    function clearAll() {
+      rows.forEach(r => r.activeCount = 0);
+      sound.playClick();
+      render();
+      checkEquivalence();
+    }
+
+    function resetAll() {
+      rows = [];
+      addBar(2, 1);
+      addBar(4, 2);
+      addBar(6, 3);
+      sound.playClick();
+      render();
+      checkEquivalence();
+    }
+
+    function toggleGuide() {
+      showGuide = !showGuide;
+      guideLine.style.display = showGuide ? "block" : "none";
+      sound.playClick();
+    }
+
+    container.addEventListener("pointermove", (e) => {
+      if (!showGuide) return;
+      const rect = container.getBoundingClientRect();
+      const x = Math.max(90, Math.min(e.clientX - rect.left, rect.width - 10));
+      guideLine.style.left = x + "px";
+    });
+
+    function checkEquivalence() {
+      const activeRows = rows.filter(r => r.activeCount > 0);
+      const groups = {};
+      for (const r of activeRows) {
+        const val = (r.activeCount / r.denom).toFixed(4);
+        if (!groups[val]) groups[val] = [];
+        groups[val].push(r);
+      }
+
+      let found = null;
+      for (const val in groups) {
+        if (groups[val].length >= 2) {
+          found = groups[val];
+          break;
+        }
+      }
+
+      if (found) {
+        const eqStr = found.map(r => r.activeCount + "/" + r.denom).join(" = ");
+        equivText.textContent = eqStr + " (크기: " + (found[0].activeCount / found[0].denom).toFixed(2) + ")";
+        equivCard.style.display = "block";
+      } else {
+        equivCard.style.display = "none";
+      }
+    }
+
+    function render() {
+      container.innerHTML = "";
+      container.appendChild(guideLine);
+
+      rows.forEach(row => {
+        const rowEl = document.createElement("div");
+        rowEl.className = "fraction-row";
+        rowEl.id = "row-" + row.id;
+
+        const metaEl = document.createElement("div");
+        metaEl.className = "row-meta";
+        metaEl.innerHTML = `
+          <span class="row-denom">1/${row.denom}</span>
+          <span class="row-val">${row.activeCount}/${row.denom} (${(row.activeCount / row.denom).toFixed(2)})</span>
+        `;
+
+        const trackEl = document.createElement("div");
+        trackEl.className = "bar-track";
+
+        for (let i = 0; i < row.denom; i++) {
+          const seg = document.createElement("div");
+          seg.className = "bar-segment touch-btn" + (i < row.activeCount ? " active" : "");
+          seg.textContent = "1/" + row.denom;
+          seg.onclick = () => setSegment(row.id, i);
+          trackEl.appendChild(seg);
+        }
+
+        const actionsEl = document.createElement("div");
+        actionsEl.className = "row-actions";
+        actionsEl.innerHTML = `
+          <button class="btn-secondary touch-btn" style="min-width:44px; padding:0 8px; font-size:12px;" onclick="fillRow('${row.id}')">가득</button>
+          <button class="btn-secondary touch-btn" style="min-width:44px; padding:0 8px; font-size:12px;" onclick="clearRow('${row.id}')">비움</button>
+          <button class="btn-danger touch-btn" style="min-width:44px; padding:0 8px;" onclick="removeBar('${row.id}')">✕</button>
+        `;
+
+        rowEl.appendChild(metaEl);
+        rowEl.appendChild(trackEl);
+        rowEl.appendChild(actionsEl);
+        container.appendChild(rowEl);
+      });
+    }
+
+    // Initial default rows
+    resetAll();
+  </script>
+</body>
+</html>
