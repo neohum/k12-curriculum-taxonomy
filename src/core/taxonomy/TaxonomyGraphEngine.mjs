@@ -433,7 +433,10 @@ export class TaxonomyGraphEngine {
             depth: nextDepth,
             strength: edge.strength,
             reason: edge.reason,
-            parentId: currentId
+            parentId: currentId,
+            transitionProbability: edge.transitionProbability ?? (edge.strength === "hard" ? 0.70 : 0.40),
+            empiricalWeight: edge.empiricalWeight ?? 0.70,
+            empiricalSampleSize: edge.empiricalSampleSize ?? 0
           });
 
           if (nextDepth < maxDepth) {
