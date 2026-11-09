@@ -21,6 +21,7 @@ import {
 } from "../core/taxonomy/Korea2022K12CurriculumAdapter.mjs";
 import { LessonPlannerRAG } from "../core/taxonomy/LessonPlannerRAG.mjs";
 import { recommendConcreteManipulative } from "../core/taxonomy/DiagnosticAssessmentEngine.mjs";
+import { EmpiricalWeightCalibrator } from "../core/taxonomy/EmpiricalWeightCalibrator.mjs";
 
 const NEW_SPIRAL_CHAIN_KEYS = Object.freeze([
   "reading_comprehension",
@@ -93,6 +94,7 @@ export class K12TaxonomyServer {
 
     this.adapter = options.adapter || new Korea2022K12CurriculumAdapter({ graphEngine: this.graphEngine });
     this.lessonPlanner = options.lessonPlanner || new LessonPlannerRAG(this.graphEngine);
+    this.calibrator = options.calibrator || new EmpiricalWeightCalibrator();
 
     const defaultPublicDir = fileURLToPath(new URL("../../public", import.meta.url));
     const cwdPublicDir = path.resolve(process.cwd(), "public");
@@ -241,6 +243,33 @@ export class K12TaxonomyServer {
         timestamp: new Date().toISOString(),
         standardsCount
       });
+    }
+
+    // 2-1. Empirical Telemetry Stats & Ingestion
+    if (method === "GET" && pathname === "/api/taxonomy/empirical-stats") {
+      this.calibrator.applyToGraph(this.graphEngine);
+      const snapshot = this.calibrator.toJSON();
+      const topMisconceptions = this.calibrator.getMisconceptionHeatmap(10);
+      return sendJson(res, 200, {
+        status: "ok",
+        calibrated: snapshot,
+        topMisconceptions
+      });
+    }
+
+    if (method === "POST" && pathname === "/api/taxonomy/empirical-ingest") {
+      try {
+        const body = await parseJsonBody(req);
+        const events = body.events || (Array.isArray(body) ? body : [body]);
+        this.calibrator.ingestBatch(events);
+        this.calibrator.applyToGraph(this.graphEngine);
+        return sendJson(res, 202, {
+          status: "accepted",
+          ingestedEventsCount: events.length
+        });
+      } catch (err) {
+        return sendJson(res, 400, { error: err.message });
+      }
     }
 
     // 3. GET /api/taxonomy/standards

@@ -32,5 +32,6 @@ export {
 export { CognitiveScaffoldingEngine } from "./CognitiveScaffoldingEngine.mjs";
 export { BrunerRepresentation, ManipulativeEngineType } from "./LessonTaxonomySchema.mjs";
 export { DiagnosticAssessmentEngine, determinePiagetStage, recommendConcreteManipulative } from "./DiagnosticAssessmentEngine.mjs";
+export { EmpiricalWeightCalibrator } from "./EmpiricalWeightCalibrator.mjs";
 export { K12TaxonomyServer, createK12TaxonomyServer } from "../../server/K12TaxonomyServer.mjs";
 export { K12TaxonomyClient } from "../../sdk/K12TaxonomyClient.mjs";
