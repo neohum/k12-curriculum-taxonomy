@@ -1,7 +1,7 @@
 {
   "name": "k12-curriculum-taxonomy",
   "version": "1.0.0",
-  "description": "K-12 Full-Subject Cognitive Hierarchy Ontology & Taxonomy based on 2022 Korea Revised Curriculum (OpenStax Extended)",
+  "description": "K-12 Full-Subject Cognitive Hierarchy Ontology & Taxonomy based on 2022 Korea Revised Curriculum (extends Marble Skill Taxonomy, withmarbleapp/os-taxonomy)",
   "type": "module",
   "main": "src/core/index.mjs",
   "bin": {
@@ -21,12 +21,12 @@
     "cognitive-hierarchy",
     "piaget",
     "korea-2022-curriculum",
-    "openstax",
+    "marble-skill-taxonomy",
     "scaffolding",
     "edutech"
   ],
   "author": "neohum",
-  "license": "MIT",
+  "license": "MIT AND ODbL-1.0 AND CC-BY-SA-4.0",
   "engines": {
     "node": ">=18.0.0"
   }
