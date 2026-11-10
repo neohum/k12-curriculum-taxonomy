@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "사람이 직접 넣는 선수관계. 각 간선: {from, to, strength: hard|soft, evidence: [{type: \"manual\", ref, note}]}. from/to는 standards.json의 공식 코드여야 한다.",
+  "edges": []
+}

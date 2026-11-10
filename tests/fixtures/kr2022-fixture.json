@@ -1,0 +1,33 @@
+{
+  "_notice": "테스트 전용 가짜 데이터. 교과 '테스트'와 코드 [n테..]는 실제 성취기준이 아니다. data/ 아래로 옮기지 말 것.",
+  "standards": {
+    "schemaVersion": 1,
+    "source": { "title": "픽스처 — 실제 고시 아님", "fixture": true },
+    "standards": [
+      { "code": "[2테01-01]", "subject": "테스트", "course": "테스트", "schoolLevel": "ES", "gradeBand": "초등학교 1~2학년", "domain": "가짜 영역", "text": "픽스처 문장 사과 블록을 열 개씩 묶어 세고 묶음의 수를 말할 수 있다.", "source": { "book": "픽스처", "page": 1 }, "parseWarning": null },
+      { "code": "[2테01-02]", "subject": "테스트", "course": "테스트", "schoolLevel": "ES", "gradeBand": "초등학교 1~2학년", "domain": "가짜 영역", "text": "픽스처 문장 바나나 스티커를 색깔별로 나누어 붙이고 개수를 비교할 수 있다.", "source": { "book": "픽스처", "page": 1 }, "parseWarning": null },
+      { "code": "[2테01-03]", "subject": "테스트", "course": "테스트", "schoolLevel": "ES", "gradeBand": "초등학교 1~2학년", "domain": "가짜 영역", "text": "픽스처 문장 바나나 스티커를 색깔별로 나누어 붙이고 개수를 비교하여 말할 수 있다.", "source": { "book": "픽스처", "page": 1 }, "parseWarning": null },
+      { "code": "[4테01-01]", "subject": "테스트", "course": "테스트", "schoolLevel": "ES", "gradeBand": "초등학교 3~4학년", "domain": "가짜 영역", "text": "픽스처 문장 사과 블록 묶음 여러 개를 모아 백 단위로 셀 수 있다.", "source": { "book": "픽스처", "page": 2 }, "parseWarning": null },
+      { "code": "[6테02-01]", "subject": "테스트", "course": "테스트", "schoolLevel": "ES", "gradeBand": "초등학교 5~6학년", "domain": "다른 가짜 영역", "text": "픽스처 문장 투명 구슬의 무게를 저울로 비교할 수 있다.", "source": { "book": "픽스처", "page": 3 }, "parseWarning": null },
+      { "code": "[9테01-01]", "subject": "테스트", "course": "테스트", "schoolLevel": "MS", "gradeBand": "중학교 1~3학년", "domain": "가짜 영역", "text": "픽스처 문장 사과 블록 묶음을 문자로 나타낼 수 있다.", "source": { "book": "픽스처", "page": 4 }, "parseWarning": null }
+    ]
+  },
+  "handwritten": [
+    { "code": "[1테01-01]", "subject": "테스트", "schoolLevel": "ES", "gradeCluster": "초등 1~2학년군", "grade": "초1", "domain": "손작성 가짜 영역", "statement": "픽스처 문장 사과 블록을 열 개씩 묶어서 세고 묶음 수를 말한다.", "keywords": ["픽스처 키워드"], "mappedTopicIds": ["mt_fixture_a"], "piagetStage": "Concrete Operational", "manipulative": "픽스처 교구", "misconception": "픽스처 오개념" },
+    { "code": "[1테01-02]", "subject": "테스트", "schoolLevel": "ES", "gradeCluster": "초등 1~2학년군", "grade": "초1", "domain": "손작성 가짜 영역", "statement": "픽스처 문장 바나나 스티커를 색깔별로 나누어 붙이고 개수를 비교한다.", "mappedTopicIds": ["mt_fixture_c"] },
+    { "code": "[1테01-09]", "subject": "테스트", "schoolLevel": "ES", "gradeCluster": "초등 1~2학년군", "grade": "초2", "domain": "손작성 가짜 영역", "statement": "전혀 관계없는 줄: 무지개 우산 접기 놀이." },
+    { "code": "[1다01-01]", "subject": "다른테스트", "schoolLevel": "ES", "gradeCluster": "초등 1~2학년군", "grade": "초1", "domain": "손작성 가짜 영역", "statement": "픽스처 문장 사과 블록을 열 개씩 묶어서 세고 묶음 수를 말한다." },
+    { "code": "[3테01-01]", "subject": "테스트", "schoolLevel": "ES", "gradeCluster": "초등 3~4학년군", "grade": "초3", "domain": "손작성 가짜 영역", "statement": "픽스처 문장 사과 블록 묶음 여러 개를 모아서 백 단위로 센다.", "mappedTopicIds": ["mt_fixture_b"] },
+    { "code": "[5테02-01]", "subject": "테스트", "schoolLevel": "ES", "gradeCluster": "초등 5~6학년군", "grade": "초5", "domain": "손작성 가짜 영역", "statement": "픽스처 문장 투명 구슬 무게를 손으로 들어 어림한다." },
+    { "code": "[5테02-01]", "subject": "테스트", "schoolLevel": "ES", "gradeCluster": "초등 5~6학년군", "grade": "초6", "domain": "손작성 가짜 영역", "statement": "투명 구슬을 굴려 본다." },
+    { "code": "[7테01-01]", "subject": "테스트", "schoolLevel": "MS", "gradeCluster": "중학교 1~3학년군", "grade": "중1", "domain": "손작성 가짜 영역", "statement": "픽스처 문장 사과 블록 묶음을 문자로 나타낸다.", "mappedTopicIds": ["mt_fixture_d", "mt_fixture_missing"] }
+  ],
+  "marble": {
+    "topics": { "version": "fixture", "topics": [ { "id": "mt_fixture_a" }, { "id": "mt_fixture_b" }, { "id": "mt_fixture_c" }, { "id": "mt_fixture_d" } ] },
+    "dependencies": { "version": "fixture", "dependencies": [
+      { "topicId": "mt_fixture_b", "prerequisiteId": "mt_fixture_a", "strength": "hard", "reason": "픽스처 의존 a→b" },
+      { "topicId": "mt_fixture_b", "prerequisiteId": "mt_fixture_c", "strength": "hard", "reason": "픽스처 의존 c→b (c는 ambiguous라 쓰이면 안 됨)" },
+      { "topicId": "mt_fixture_d", "prerequisiteId": "mt_fixture_b", "strength": "soft", "reason": "픽스처 의존 b→d" }
+    ] }
+  }
+}
