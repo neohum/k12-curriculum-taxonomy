@@ -4,7 +4,7 @@
 
 | 대상 | 라이선스 |
 | :--- | :--- |
-| 코드 (`src/`, `scripts/`, `public/`, `tests/` 등 저장소 작성 코드) | [MIT](LICENSE) |
+| 코드 (`src/`, `scripts/`, `public/`, `tests/` 등 저장소 작성 코드) | [MIT](LICENSE) (단, 파일 안에 내장된 Marble 토픽 매핑 값 `mappedTopicIds` 등은 [ODbL 1.0](data/os-taxonomy/LICENSE) — 아래 "동일조건 의무" 참고) |
 | `data/os-taxonomy/topics.json`, `dependencies.json`, `clusters.json`, `teaching-research.json` (Marble 원본 데이터) | 데이터베이스: [ODbL 1.0](data/os-taxonomy/LICENSE) / Marble 작성 텍스트: [CC BY-SA 4.0](data/os-taxonomy/LICENSE-CONTENT) |
 | `data/os-taxonomy/k12-causal-chains.json` | 저장소 작성 데이터로 Marble 토픽 ID를 포함하지 않으므로 저장소 [MIT](LICENSE) 적용 |
 
@@ -65,12 +65,12 @@
   합니다(ODbL 4.6항).
 - 이 저장소에서 한국 성취기준을 Marble 토픽 ID(`mt_…`)에 연결한 매핑 데이터
   (`src/core/taxonomy/Korea2022CurriculumAdapter.mjs`,
-  `src/core/taxonomy/Korea2022K12CurriculumAdapter.mjs`,
-  `scripts/build-k12-full-ontology.mjs`의 `mappedTopicIds` 등)는 Marble 데이터베이스와
+  `src/core/taxonomy/Korea2022K12CurriculumAdapter.mjs`의 `mappedTopicIds` 등)는 Marble 데이터베이스와
   결합해 쓰이므로, 파생 데이터베이스에 해당하는 범위에서 **ODbL 1.0으로 제공**합니다.
   즉 `src/`·`scripts/` 안에 들어 있는 `mappedTopicIds` 등 매핑 값은 그 파일의 라이선스(MIT)와
   별개로 ODbL 1.0이 적용됩니다.
-  이 매핑을 가져다 다시 공개하는 경우에도 같은 조건이 적용됩니다.
+  이 매핑을 가져다 다시 공개하는 경우에도 같은 조건이 적용됩니다. 두 파일 맨 위에도 같은
+  내용의 라이선스 헤더 주석을 달았습니다.
 
 ## 2. 이 저장소에서 추가·변경한 것
 
@@ -80,7 +80,18 @@ Marble 원본 파일은 수정하지 않았고, 다음을 별도 파일로 추�
 - 초·중·고 인과 사슬 데이터 `data/os-taxonomy/k12-causal-chains.json` (저장소 작성)
 - 그래프 탐색·진단·수업 비계 엔진과 웹 대시보드(코드, MIT)
 
-한국 성취기준 데이터의 출처와 한계는 [README](README.md)의 "알려진 한계" 절를 참고하세요.
+한국 성취기준 데이터의 출처와 한계는 [README](README.md)의 "알려진 한계" 절을 참고하세요.
+
+## 알려진 한계
+
+- Marble 토픽 매핑 값은 아직 코드 파일(위 두 어댑터) 안에 내장되어 있습니다. 매핑 값을 별도
+  JSON 데이터 파일로 물리적으로 분리하는 일은 공식 성취기준 원문 기반 교체 작업(별도 PR)에서
+  함께 하며, 이번 정정에서는 하지 않습니다.
+- `mappedTopicIds`에 든 값이 모두 실제 Marble 토픽 ID는 아닙니다. 커밋 시점에 `topics.json`과
+  대조한 결과, `Korea2022CurriculumAdapter.mjs`는 고유 ID 54개 중 53개가,
+  `Korea2022K12CurriculumAdapter.mjs`는 109개 중 32개가 실제 Marble ID였고 나머지는 직접 만든
+  임시 ID입니다. `scripts/build-k12-full-ontology.mjs`의 `mappedTopicIds`(`mt_1su01_02` 등)는
+  모두 임시 ID로, Marble ID를 담고 있지 않습니다.
 
 ## 3. 원문 라이선스 전문
 
