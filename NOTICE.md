@@ -6,7 +6,7 @@
 | :--- | :--- |
 | 코드 (`src/`, `scripts/`, `public/`, `tests/` 등 저장소 작성 코드) | [MIT](LICENSE) |
 | `data/os-taxonomy/topics.json`, `dependencies.json`, `clusters.json`, `teaching-research.json` (Marble 원본 데이터) | 데이터베이스: [ODbL 1.0](data/os-taxonomy/LICENSE) / Marble 작성 텍스트: [CC BY-SA 4.0](data/os-taxonomy/LICENSE-CONTENT) |
-| `data/os-taxonomy/k12-causal-chains.json` | 저장소 작성 데이터 (Marble 원본 아님) |
+| `data/os-taxonomy/k12-causal-chains.json` | 저장소 작성 데이터로 Marble 토픽 ID를 포함하지 않으므로 저장소 [MIT](LICENSE) 적용 |
 
 > 이 문서는 출처 표기와 라이선스 조건을 정리한 것이며 법률 자문이 아닙니다.
 
@@ -68,6 +68,8 @@
   `src/core/taxonomy/Korea2022K12CurriculumAdapter.mjs`,
   `scripts/build-k12-full-ontology.mjs`의 `mappedTopicIds` 등)는 Marble 데이터베이스와
   결합해 쓰이므로, 파생 데이터베이스에 해당하는 범위에서 **ODbL 1.0으로 제공**합니다.
+  즉 `src/`·`scripts/` 안에 들어 있는 `mappedTopicIds` 등 매핑 값은 그 파일의 라이선스(MIT)와
+  별개로 ODbL 1.0이 적용됩니다.
   이 매핑을 가져다 다시 공개하는 경우에도 같은 조건이 적용됩니다.
 
 ## 2. 이 저장소에서 추가·변경한 것

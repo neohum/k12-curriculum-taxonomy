@@ -12,7 +12,7 @@
 
 ## 📖 프로젝트 개요 (Overview)
 
-Marble이 공개한 초등 중심의 **Marble Skill Taxonomy([withmarbleapp/os-taxonomy](https://github.com/withmarbleapp/os-taxonomy), 1,800+ 토픽, 선수관계 그래프, 교수학습 연구)**를 기반으로, **대한민국 2022 개정 교육과정 초·중·고(K-12) 전과목(국어, 수학, 영어, 사회, 도덕, 과학, 정보, 체육·음악·미술)**의 12개 학년 성취기준과 인지 발달 위계를 1:1로 결합·확장한 온톨로지 엔진 및 독립형 시각화 대시보드입니다.
+Marble이 공개한 초등 중심의 **Marble Skill Taxonomy([withmarbleapp/os-taxonomy](https://github.com/withmarbleapp/os-taxonomy), 영문 토픽 1,861개, 선수관계 그래프, 교수학습 연구)**의 영문 토픽(Mathematics·Science·English·History 등 9개 분야)에 **직접 작성한 한국 2022 개정 교육과정 성취기준**을 연결해 보는 **실험 단계**의 온톨로지 엔진 및 독립형 시각화 대시보드입니다. 한국 성취기준은 고시 원문에서 추출한 것이 아니며, 공식 원문 기반 데이터로 교체하는 작업이 진행 중입니다(아래 "알려진 한계" 절 참고).
 
 - **Zero External Dependencies**: 외부 npm 라이브러리 설치(`npm install`) 없이 순수 Node.js 내장 런타임만으로 100% 즉시 구동.
 - **Spiral Progression DAG Backtracking**: 고등학교 미적분의 학습 결손이 발생했을 때, 중학교 일차방정식을 거쳐 초등학교 3학년 '등분할과 분수'까지 인과 사슬을 1ms 내로 역추적.
