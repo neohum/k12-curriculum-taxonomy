@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedBy": "scripts/kr2022/remap-handwritten.mjs",
+  "humanVerified": false,
   "notice": "자동 판정(matched 포함)을 사람이 확인해야 하는 항목. matched가 아닌 항목은 선수관계 생성에 쓰이지 않습니다.",
   "method": {
     "name": "char-bigram-cosine",
