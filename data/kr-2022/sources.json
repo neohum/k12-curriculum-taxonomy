@@ -1,0 +1,380 @@
+{
+  "schemaVersion": 1,
+  "note": "NCIC(국가교육과정정보센터) 우리나라 교육과정 > 원문 및 해설서 > 2022 개정 시기(2022.12) 첨부파일. 로그인 없이 공개 다운로드. 원본 파일은 저장소에 넣지 않는다.",
+  "books": [
+    {
+      "book": "별책 5",
+      "subject": "국어",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b5_1002_10004267.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10004267&orgType=ogi4",
+          "ncicAttachmentNo": "10004267",
+          "retrievedAt": "2026-11-11T07:15:20+09:00",
+          "sha256": "18f571cf174126d3a825727b385707384c8d2a32196326c7bd01e3bddc1eb576"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b5_1002_10004268.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10004268&orgType=ogi4",
+          "ncicAttachmentNo": "10004268",
+          "retrievedAt": "2026-11-11T07:10:21+09:00",
+          "sha256": "fceb0e83f62c0749de8f73e0209f1d1cfe5433f408ca1ad648acef8cfa0ce44e"
+        }
+      ]
+    },
+    {
+      "book": "별책 6",
+      "subject": "도덕",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b6_1002_10004261.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10004261&orgType=ogi4",
+          "ncicAttachmentNo": "10004261",
+          "retrievedAt": "2026-11-11T07:15:21+09:00",
+          "sha256": "7da482bad6e470a890f29219a4de31006558f1e8aed2594f1648ce32786a22d1"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b6_1002_10004262.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10004262&orgType=ogi4",
+          "ncicAttachmentNo": "10004262",
+          "retrievedAt": "2026-11-11T07:10:30+09:00",
+          "sha256": "153ee646d8d96fdbf1c535faa278383f45a4b85d6a3606c5631556b3cb561e3d"
+        }
+      ]
+    },
+    {
+      "book": "별책 7",
+      "subject": "사회",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b7_1002_10003801.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003801&orgType=ogi4",
+          "ncicAttachmentNo": "10003801",
+          "retrievedAt": "2026-11-11T07:15:23+09:00",
+          "sha256": "3815d0c5254d3012026e3a0b6ee36873ec566c47217bb5a660098ec2a82f93d6"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b7_1002_10003800.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003800&orgType=ogi4",
+          "ncicAttachmentNo": "10003800",
+          "retrievedAt": "2026-11-11T07:10:24+09:00",
+          "sha256": "a852e8da3e6aea7d1c95690dcae140be02e014b779ac2e5cc0801200cfb16923"
+        }
+      ]
+    },
+    {
+      "book": "별책 8",
+      "subject": "수학",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b8_1002_10003560.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003560&orgType=ogi4",
+          "ncicAttachmentNo": "10003560",
+          "retrievedAt": "2026-11-11T07:14:04+09:00",
+          "sha256": "aab8eed59ecf244223d04afad75f4cf5ac5085fadcfc3cf52c2f6d54ddfc7856"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b8_1002_10003559.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003559&orgType=ogi4",
+          "ncicAttachmentNo": "10003559",
+          "retrievedAt": "2026-11-11T07:10:26+09:00",
+          "sha256": "ba7c7c63ad31ba0fd32e5eb8148d696dd73288acce111495c593298112f8f840"
+        }
+      ]
+    },
+    {
+      "book": "별책 9",
+      "subject": "과학",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b9_1002_10003552.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003552&orgType=ogi4",
+          "ncicAttachmentNo": "10003552",
+          "retrievedAt": "2026-11-11T07:15:24+09:00",
+          "sha256": "d049caa5b3e7420a0505345dc70ca325faf65a18468ba393eec103b44b78c790"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b9_1002_10003551.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003551&orgType=ogi4",
+          "ncicAttachmentNo": "10003551",
+          "retrievedAt": "2026-11-11T07:10:19+09:00",
+          "sha256": "0cf53427691d54366d6805767c428a15b0e817580807b4354947de7e3b58b738"
+        }
+      ]
+    },
+    {
+      "book": "별책 10",
+      "subject": "실과(기술·가정)/정보",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b10_1002_10004243.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10004243&orgType=ogi4",
+          "ncicAttachmentNo": "10004243",
+          "retrievedAt": "2026-11-11T07:15:26+09:00",
+          "sha256": "2114def16787c184c088bc333a3a1e8cb4b790c654c71a92cdc89eb007354fca"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b10_1002_10004244.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10004244&orgType=ogi4",
+          "ncicAttachmentNo": "10004244",
+          "retrievedAt": "2026-11-11T07:10:35+09:00",
+          "sha256": "8eaa773fc8767d6fc081ba6324e40188e9635443c4d242ba1b53047b73d9ef38"
+        }
+      ]
+    },
+    {
+      "book": "별책 11",
+      "subject": "체육",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b11_1002_10003696.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003696&orgType=ogi4",
+          "ncicAttachmentNo": "10003696",
+          "retrievedAt": "2026-11-11T07:15:27+09:00",
+          "sha256": "a7e55b984bec384e65b0d167f74788fd801b87a45ada082b6eb85d49ae509ee7"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b11_1002_10003695.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003695&orgType=ogi4",
+          "ncicAttachmentNo": "10003695",
+          "retrievedAt": "2026-11-11T07:10:29+09:00",
+          "sha256": "49cdef2bbcdf1decb796204ab66a0b6a308cd2903ead7168dde892b1f48cf2fb"
+        }
+      ]
+    },
+    {
+      "book": "별책 12",
+      "subject": "음악",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b12_1002_10003562.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003562&orgType=ogi4",
+          "ncicAttachmentNo": "10003562",
+          "retrievedAt": "2026-11-11T07:15:29+09:00",
+          "sha256": "e8d09ded2708e080d470e79a1a298df68860189e75cc1c480e97a3afa4309d03"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b12_1002_10003561.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003561&orgType=ogi4",
+          "ncicAttachmentNo": "10003561",
+          "retrievedAt": "2026-11-11T07:10:27+09:00",
+          "sha256": "db2d03b4e2accfd442ca1297b84e43061feb1422659914e486e27f7b555f7bd6"
+        }
+      ]
+    },
+    {
+      "book": "별책 13",
+      "subject": "미술",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b13_1002_10003556.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003556&orgType=ogi4",
+          "ncicAttachmentNo": "10003556",
+          "retrievedAt": "2026-11-11T07:15:30+09:00",
+          "sha256": "029bf171f97590c099535555b5ac4d9a097d818ad78aecfb86a0de34aaa25426"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b13_1002_10003555.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003555&orgType=ogi4",
+          "ncicAttachmentNo": "10003555",
+          "retrievedAt": "2026-11-11T07:10:22+09:00",
+          "sha256": "b47363c9a1060b00777c6de555d972b509b64b886d7beca89460a552a33c77b2"
+        }
+      ]
+    },
+    {
+      "book": "별책 14",
+      "subject": "영어",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b14_1002_10003795.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003795&orgType=ogi4",
+          "ncicAttachmentNo": "10003795",
+          "retrievedAt": "2026-11-11T07:15:32+09:00",
+          "sha256": "0e006d706ba2666ec32135ce2d8e739cd3748764559492e04fb7a3e04b77aeb6"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b14_1002_10003794.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003794&orgType=ogi4",
+          "ncicAttachmentNo": "10003794",
+          "retrievedAt": "2026-11-11T07:10:32+09:00",
+          "sha256": "596d13897b002a4279a3e21f16396bdae7ac74988450f45fb348f87af943f92a"
+        }
+      ]
+    },
+    {
+      "book": "별책 15",
+      "subject": "바른 생활, 슬기로운 생활, 즐거운 생활",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b15_1002_10003572.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003572&orgType=ogi4",
+          "ncicAttachmentNo": "10003572",
+          "retrievedAt": "2026-11-11T07:15:33+09:00",
+          "sha256": "b4d25e4d1cf003b0296d416a4973c48e1389ccb355938a7236a81b231b472f17"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b15_1002_10003571.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003571&orgType=ogi4",
+          "ncicAttachmentNo": "10003571",
+          "retrievedAt": "2026-11-11T07:10:33+09:00",
+          "sha256": "5fe191f258d11cc77741c57cfb16324b26d5db14649809cc694dcbcd4662adee"
+        }
+      ]
+    },
+    {
+      "book": "별책 16",
+      "subject": "제2외국어",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b16_1004_10003763.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003763&orgType=ogi4",
+          "ncicAttachmentNo": "10003763",
+          "retrievedAt": "2026-11-11T07:15:35+09:00",
+          "sha256": "ed3751b3c6c0981554674f13a2b68cb3ccb83265741a491bcc732866401320e0"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b16_1004_10003762.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003762&orgType=ogi4",
+          "ncicAttachmentNo": "10003762",
+          "retrievedAt": "2026-11-11T07:11:20+09:00",
+          "sha256": "442629889f75ad2f8544936008b445b46a42ea3e54786c8f57b7e764be920339"
+        }
+      ]
+    },
+    {
+      "book": "별책 17",
+      "subject": "한문",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b17_1003_10003749.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003749&orgType=ogi4",
+          "ncicAttachmentNo": "10003749",
+          "retrievedAt": "2026-11-11T07:15:36+09:00",
+          "sha256": "af388d83a1730a9e03effeaa72499a790fbd9ff81bdd7f60ec550fee45ef740d"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b17_1003_10003748.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003748&orgType=ogi4",
+          "ncicAttachmentNo": "10003748",
+          "retrievedAt": "2026-11-11T07:10:42+09:00",
+          "sha256": "e3466e192e1e3943b669ff627ae19c5f223d7f0fb8b2c52fe7bac63be13d7301"
+        }
+      ]
+    },
+    {
+      "book": "별책 18",
+      "subject": "중학교 선택 교과",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b18_1003_10003768.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003768&orgType=ogi4",
+          "ncicAttachmentNo": "10003768",
+          "retrievedAt": "2026-11-11T07:15:38+09:00",
+          "sha256": "8ba1d17228248f1e9dad71b6a860d7faeb8cd07a655f395006826c63f0b14d26"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b18_1003_10003767.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003767&orgType=ogi4",
+          "ncicAttachmentNo": "10003767",
+          "retrievedAt": "2026-11-11T07:10:39+09:00",
+          "sha256": "87beaa32402e0b35ddb2cf7c4604decc7d1273d8251cd333df6910cbc73518d4"
+        }
+      ]
+    },
+    {
+      "book": "별책 20",
+      "subject": "과학 계열 선택 과목",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b20_1004_10003684.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003684&orgType=ogi4",
+          "ncicAttachmentNo": "10003684",
+          "retrievedAt": "2026-11-11T07:15:39+09:00",
+          "sha256": "4b0aaa86a2899b6bbc68b83a8ef66177fc0bbaa827fae35c35851bf27971ef3a"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b20_1004_10003683.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003683&orgType=ogi4",
+          "ncicAttachmentNo": "10003683",
+          "retrievedAt": "2026-11-11T07:11:21+09:00",
+          "sha256": "efe03e71806e48e92855d24121e016ba9e911947f9b36fc6c5ab3b8b310a4ab7"
+        }
+      ]
+    },
+    {
+      "book": "별책 21",
+      "subject": "체육 계열 선택 과목",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b21_1004_10003686.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003686&orgType=ogi4",
+          "ncicAttachmentNo": "10003686",
+          "retrievedAt": "2026-11-11T07:15:41+09:00",
+          "sha256": "e041033f9354fe8fc23f30eaf74de18778131c28117c36601b12197dadfb1676"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b21_1004_10003685.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003685&orgType=ogi4",
+          "ncicAttachmentNo": "10003685",
+          "retrievedAt": "2026-11-11T07:11:23+09:00",
+          "sha256": "a5a611a2db27aea9d8b2623ce3aaabff4317fd3bfb033740400d6e4a5afc90da"
+        }
+      ]
+    },
+    {
+      "book": "별책 22",
+      "subject": "예술 계열 선택 교과",
+      "files": [
+        {
+          "format": "hwp",
+          "fileName": "b22_1004_10003688.hwp",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003688&orgType=ogi4",
+          "ncicAttachmentNo": "10003688",
+          "retrievedAt": "2026-11-11T07:15:42+09:00",
+          "sha256": "a65f250eb3cdd9e33667138253cd7d7e5fc91050c024c4e53f9ed9e6407affc5"
+        },
+        {
+          "format": "pdf",
+          "fileName": "b22_1004_10003687.pdf",
+          "url": "https://www.ncic.re.kr/inv/org/download.do?year=2022&seq=10003687&orgType=ogi4",
+          "ncicAttachmentNo": "10003687",
+          "retrievedAt": "2026-11-11T07:11:24+09:00",
+          "sha256": "b6c2cb06c5312f93ce0b70121400ce98d8ddc0c251fc9e8d8f2f9e68ce74078c"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "generatedBy": "scripts/kr2022/extract-standards.mjs",
+  "books": [
+    {
+      "book": "별책 5",
+      "subject": "국어",
+      "extracted": 257,
+      "uniqueCodesAnywhere": 257
+    },
+    {
+      "book": "별책 6",
+      "subject": "도덕",
+      "extracted": 103,
+      "uniqueCodesAnywhere": 103
+    },
+    {
+      "book": "별책 7",
+      "subject": "사회",
+      "extracted": 414,
+      "uniqueCodesAnywhere": 416
+    },
+    {
+      "book": "별책 8",
+      "subject": "수학",
+      "extracted": 435,
+      "uniqueCodesAnywhere": 435
+    },
+    {
+      "book": "별책 9",
+      "subject": "과학",
+      "extracted": 473,
+      "uniqueCodesAnywhere": 474
+    },
+    {
+      "book": "별책 10",
+      "subject": "실과(기술·가정)/정보",
+      "extracted": 320,
+      "uniqueCodesAnywhere": 320
+    },
+    {
+      "book": "별책 11",
+      "subject": "체육",
+      "extracted": 148,
+      "uniqueCodesAnywhere": 148
+    },
+    {
+      "book": "별책 12",
+      "subject": "음악",
+      "extracted": 76,
+      "uniqueCodesAnywhere": 76
+    },
+    {
+      "book": "별책 13",
+      "subject": "미술",
+      "extracted": 75,
+      "uniqueCodesAnywhere": 75
+    },
+    {
+      "book": "별책 14",
+      "subject": "영어",
+      "extracted": 270,
+      "uniqueCodesAnywhere": 270
+    },
+    {
+      "book": "별책 15",
+      "subject": "바른 생활, 슬기로운 생활, 즐거운 생활",
+      "extracted": 48,
+      "uniqueCodesAnywhere": 48
+    },
+    {
+      "book": "별책 16",
+      "subject": "제2외국어",
+      "extracted": 607,
+      "uniqueCodesAnywhere": 607
+    },
+    {
+      "book": "별책 17",
+      "subject": "한문",
+      "extracted": 45,
+      "uniqueCodesAnywhere": 45
+    },
+    {
+      "book": "별책 18",
+      "subject": "중학교 선택 교과",
+      "extracted": 59,
+      "uniqueCodesAnywhere": 59
+    },
+    {
+      "book": "별책 20",
+      "subject": "과학 계열 선택 과목",
+      "extracted": 389,
+      "uniqueCodesAnywhere": 389
+    },
+    {
+      "book": "별책 21",
+      "subject": "체육 계열 선택 과목",
+      "extracted": 91,
+      "uniqueCodesAnywhere": 91
+    },
+    {
+      "book": "별책 22",
+      "subject": "예술 계열 선택 교과",
+      "extracted": 486,
+      "uniqueCodesAnywhere": 486
+    }
+  ],
+  "unextractedCodes": [
+    {
+      "book": "별책 7",
+      "code": "[12동역-01-01]"
+    },
+    {
+      "book": "별책 7",
+      "code": "[12동역-01-02]"
+    },
+    {
+      "book": "별책 9",
+      "code": "[10과탐02-01-03]"
+    },
+    {
+      "book": "별책 21",
+      "code": "[12스경02-03]"
+    }
+  ],
+  "codeConflicts": [
+    {
+      "code": "[12스문01-01]",
+      "kind": "cross-subject",
+      "ids": [
+        "b11:[12스문01-01]",
+        "b16:[12스문01-01]"
+      ]
+    },
+    {
+      "code": "[12스문01-02]",
+      "kind": "cross-subject",
+      "ids": [
+        "b11:[12스문01-02]",
+        "b16:[12스문01-02]"
+      ]
+    },
+    {
+      "code": "[12스문01-03]",
+      "kind": "cross-subject",
+      "ids": [
+        "b11:[12스문01-03]",
+        "b16:[12스문01-03]"
+      ]
+    },
+    {
+      "code": "[12심독01-01]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독01-01]",
+        "b16:[12심독01-01]"
+      ]
+    },
+    {
+      "code": "[12심독01-02]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독01-02]",
+        "b16:[12심독01-02]"
+      ]
+    },
+    {
+      "code": "[12심독01-03]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독01-03]",
+        "b16:[12심독01-03]"
+      ]
+    },
+    {
+      "code": "[12심독01-04]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독01-04]",
+        "b16:[12심독01-04]"
+      ]
+    },
+    {
+      "code": "[12심독02-01]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독02-01]",
+        "b16:[12심독02-01]"
+      ]
+    },
+    {
+      "code": "[12심독02-02]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독02-02]",
+        "b16:[12심독02-02]"
+      ]
+    },
+    {
+      "code": "[12심독02-03]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독02-03]",
+        "b16:[12심독02-03]"
+      ]
+    },
+    {
+      "code": "[12심독02-04]",
+      "kind": "cross-subject",
+      "ids": [
+        "b14:[12심독02-04]",
+        "b16:[12심독02-04]"
+      ]
+    },
+    {
+      "code": "[12스경02-02]",
+      "kind": "same-book-duplicate",
+      "ids": [
+        "b21:[12스경02-02]",
+        "b21:[12스경02-02]#2"
+      ]
+    }
+  ],
+  "totals": {
+    "standards": 4296,
+    "parseWarnings": 23,
+    "pageUnknown": 0,
+    "codesWithConflict": 12
+  }
+}

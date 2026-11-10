@@ -1,5 +1,5 @@
 {
   "schemaVersion": 1,
-  "description": "사람이 직접 넣는 선수관계. 각 간선: {from, to, strength: hard|soft, evidence: [{type: \"manual\", ref, note}]}. from/to는 standards.json의 공식 코드여야 한다.",
+  "description": "사람이 직접 넣는 선수관계. 각 간선: {from, to, strength: hard|soft, evidence: [{type: \"manual\", ref, note}]}. from/to는 standards.json의 공식 성취기준 id(예: \"b8:[2수01-01]\")여야 한다. 원문 코드는 과목 사이에 겹치는 경우가 있어 code는 쓰지 않는다.",
   "edges": []
 }
