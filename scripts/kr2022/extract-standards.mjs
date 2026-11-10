@@ -33,6 +33,7 @@ function parseArgs(argv) {
     else if (a === '--out') args.out = argv[++i];
     else if (a === '--sources') args.sources = argv[++i];
     else if (a === '--report') args.report = argv[++i];
+    else if (a === '--no-report') args.noReport = true;
     else throw new Error(`unknown argument: ${a}`);
   }
   if (!args.rawDir) throw new Error('--raw-dir <dir> is required');
@@ -247,11 +248,31 @@ function courseFor(f) {
   return pickCourse(f.chapterTitle, f.bracketCourses, f.abbr);
 }
 
+// 어떤 필드가 원문 그대로이고 어떤 필드가 구조·코드 약호에서 붙인 값인지 (standards.json 최상위에 기록)
+export const FIELD_PROVENANCE = {
+  id: { kind: 'derived-from-structure', note: '"b<별책 번호>:<code>". 같은 별책 안에서 같은 코드가 다시 나오면 출현 순번 "#2"를 붙인다. 원문에 없는 식별자.' },
+  code: { kind: 'verbatim', note: '원문 코드 그대로. 예외 3건: [4사01-01]·[4사01-02](원문 en dash "–"를 "-"로 정규화), [12연몸02-04](원문에 여는 대괄호 누락, 코드에만 보충). 세 건 모두 parseWarning에 원래 표기가 있다. 원문 자체가 같은 코드를 두 번 쓰는 12건은 codeConflict 참고.' },
+  text: { kind: 'verbatim', note: 'HWP 문단 텍스트 그대로(앞뒤 공백만 제거). 수식 개체는 평문 변환 또는 {{EQ:스크립트}}로 표기하고 parseWarning에 적는다.' },
+  subject: { kind: 'derived-from-structure', note: '별책 이름. 별책 10·15·18처럼 한 별책에 여러 교과가 있으면 코드 약호로 나눈다.' },
+  course: { kind: 'derived-from-structure', note: '초·중학교는 교과명 또는 코드 약호 대응표, 고등학교는 "1. 성격 및 목표" 앞의 과목 제목과 [과목명] 소제목에서 추정.' },
+  schoolLevel: { kind: 'derived-from-code', note: '코드 앞 숫자: 2·4·6 → ES, 9 → MS, 10·12 → HS' },
+  gradeBand: { kind: 'derived-from-code', note: '코드 앞 숫자에서 정함(2 → 초등학교 1~2학년 … 10 → 고등학교 공통 과목, 12 → 고등학교 선택 과목)' },
+  domain: { kind: 'derived-from-structure', note: '성취기준 목록 위의 "(n) 영역명" 소제목. 소제목이 없는 과목은 null.' },
+  source: { kind: 'derived-from-structure', note: 'book은 별책 번호, page는 PDF 텍스트 대조로 찾은 PDF 물리 쪽 순번' },
+  parseWarning: { kind: 'derived-from-structure', note: '추출기가 남긴 경고' },
+  codeConflict: { kind: 'derived-from-structure', note: '원문에서 같은 코드가 둘 이상의 항목에 쓰인 경우만 값이 있다' },
+};
+
+export const COPYRIGHT_BASIS =
+  '저작권법 제7조 제2호(국가 또는 지방자치단체의 고시)에 따라 고시 원문(별책 포함)은 보호받지 못하는 저작물이라고 보는 것이 이 저장소의 판단이다. ' +
+  '다만 원문을 받은 NCIC 게시물에는 공공누리 제2유형(출처표시·상업적 이용 금지) 표시가 붙어 있다. ' +
+  '해설서·평가기준 등 고시가 아닌 자료는 포함하지 않았다. 이 표기는 법률 자문이 아니며, 상업적으로 이용하기 전에는 권리자(교육부·NCIC)에게 확인해야 한다.';
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const sources = JSON.parse(readFileSync(args.sources, 'utf8'));
   const standards = [];
-  const report = { generatedBy: 'scripts/kr2022/extract-standards.mjs', books: [], duplicates: [], unextractedCodes: [] };
+  const report = { generatedBy: 'scripts/kr2022/extract-standards.mjs', books: [], unextractedCodes: [] };
 
   for (const book of sources.books) {
     const hwp = book.files.find((x) => x.format === 'hwp');
@@ -259,6 +280,7 @@ function main() {
     const paragraphs = hwpParagraphs(loadVerified(args.rawDir, hwp));
     loadVerified(args.rawDir, pdf);
     const pages = pdfPages(join(args.rawDir, pdf.fileName)).map(squash);
+    const bookNo = book.book.match(/\d+/)[0];
 
     const subjectFor = SUBJECT_BY_ABBR[book.book];
     const rows = extractBook(paragraphs, { ...book, subjectFor });
@@ -272,15 +294,10 @@ function main() {
     }
     for (const c of anywhere) if (!listed.has(c)) report.unextractedCodes.push({ book: book.book, code: c });
 
-    const seen = new Map();
-    let kept = 0;
+    const occurrence = new Map();
     for (const r of rows) {
-      if (seen.has(r.code)) {
-        const first = seen.get(r.code);
-        report.duplicates.push({ book: book.book, code: r.code, firstText: first.body, duplicateText: r.body, sameText: first.body === r.body });
-        continue;
-      }
-      seen.set(r.code, r);
+      const n = (occurrence.get(r.code) ?? 0) + 1;
+      occurrence.set(r.code, n);
       const warnings = [];
       if (!r.rawCode.startsWith('[')) warnings.push(`원문 코드 표기: ${r.rawCode} (여는 대괄호 누락, 코드에만 보충)`);
       else if (r.rawCode !== r.code) warnings.push(`원문 코드 표기: ${r.rawCode}`);
@@ -293,6 +310,7 @@ function main() {
       if (page === null) warnings.push('PDF 텍스트와 대조되지 않음(쪽 번호 미확인)');
       else if (!exact) warnings.push('PDF 텍스트와 문장 전체 대조 실패(코드와 앞부분으로만 쪽 확인)');
       standards.push({
+        id: `b${bookNo}:${r.code}${n > 1 ? `#${n}` : ''}`,
         code: r.code,
         subject: r.subject,
         course: courseFor(r),
@@ -302,36 +320,41 @@ function main() {
         text: eq.text,
         source: { book: book.book, page },
         parseWarning: warnings.length ? warnings.join('; ') : null,
+        codeConflict: null,
       });
-      kept++;
     }
-    report.books.push({ book: book.book, subject: book.subject, extracted: kept, codeParagraphsInList: rows.length, uniqueCodesAnywhere: anywhere.size });
+    report.books.push({ book: book.book, subject: book.subject, extracted: rows.length, uniqueCodesAnywhere: anywhere.size });
   }
 
-  // 별책 사이 코드 충돌: 원문 자체에서 서로 다른 과목이 같은 코드를 쓴다
-  // (예: 별책 14 '심화 영어 독해와 작문'과 별책 16 '심화 독일어'가 [12심독..]).
-  // 출력 계약상 code는 유일해야 하므로 sources.json 순서상 먼저 나온 별책의 것을 남기고,
-  // 나머지는 원문 그대로 보고서에 옮겨 둔다(버리지 않는다).
-  const global = new Map();
-  report.excludedCodeCollisions = [];
-  for (let i = 0; i < standards.length; i++) {
-    const s = standards[i];
-    if (global.has(s.code)) {
-      report.excludedCodeCollisions.push({ keptFrom: global.get(s.code), excluded: s });
-      standards.splice(i--, 1);
-    } else global.set(s.code, s.source.book);
+  // 원문에서 같은 코드가 여러 항목에 쓰인 경우. 버리지 않고 모두 넣고 표시만 한다.
+  const byCode = new Map();
+  for (const s of standards) (byCode.get(s.code) ?? byCode.set(s.code, []).get(s.code)).push(s);
+  report.codeConflicts = [];
+  for (const [code, list] of byCode) {
+    if (list.length < 2) continue;
+    const sameBook = new Set(list.map((s) => s.source.book)).size === 1;
+    const kind = sameBook ? 'same-book-duplicate' : 'cross-subject';
+    const where = list.map((s) => `${s.source.book} '${s.course}'`).join(', ');
+    const note = sameBook
+      ? `원문 ${list[0].source.book} 성취기준 목록에 같은 코드가 ${list.length}번 나오고 문장이 다르다(${list.map((s) => s.id).join(', ')}). 원문 오기로 보이나 코드는 고치지 않았다.`
+      : `원문에서 서로 다른 과목이 같은 코드를 쓴다: ${where}. 구별은 id로 한다.`;
+    for (const s of list) s.codeConflict = { kind, note };
+    report.codeConflicts.push({ code, kind, ids: list.map((s) => s.id) });
   }
-  for (const b of report.books) b.excludedAsCollision = report.excludedCodeCollisions.filter((x) => x.excluded.source.book === b.book).length;
+  const ids = new Set(standards.map((s) => s.id));
+  if (ids.size !== standards.length) throw new Error('internal: id is not unique');
 
   const out = {
     schemaVersion: 1,
     source: {
       notice: '교육부 고시 제2022-33호',
       noticeDate: '2022-12-22',
-      copyrightBasis: '저작권법 제7조(보호받지 못하는 저작물) — 고시',
+      copyrightBasis: COPYRIGHT_BASIS,
       pageBasis: 'PDF 파일의 물리적 쪽 순번(1부터). 인쇄된 쪽 번호와 다를 수 있음',
       files: sources.books.flatMap((b) => b.files.map((f) => ({ book: b.book, subject: b.subject, format: f.format, url: f.url, retrievedAt: f.retrievedAt, sha256: f.sha256 }))),
     },
+    fieldProvenance: Object.fromEntries(Object.entries(FIELD_PROVENANCE).map(([k, v]) => [k, v.kind])),
+    fieldProvenanceNotes: Object.fromEntries(Object.entries(FIELD_PROVENANCE).map(([k, v]) => [k, v.note])),
     standards,
   };
   mkdirSync(dirname(args.out), { recursive: true });
@@ -340,8 +363,9 @@ function main() {
     standards: standards.length,
     parseWarnings: standards.filter((s) => s.parseWarning).length,
     pageUnknown: standards.filter((s) => s.source.page === null).length,
+    codesWithConflict: report.codeConflicts.length,
   };
-  writeFileSync(args.report, JSON.stringify(report, null, 2) + '\n');
+  if (!args.noReport) writeFileSync(args.report, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report.totals));
 }
 

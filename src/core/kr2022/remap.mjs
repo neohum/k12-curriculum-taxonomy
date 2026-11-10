@@ -74,6 +74,13 @@ export function loadOfficialStandards(filePath) {
       `공식 성취기준 ${bad.length}건에 code/subject/text가 없습니다: ${filePath}`
     );
   }
+  const ids = doc.standards.map(officialKey);
+  const dupIds = ids.filter((id, i) => ids.indexOf(id) !== i);
+  if (dupIds.length) {
+    throw new StandardsFileError(
+      `공식 성취기준 식별자(id, 없으면 code)가 중복됩니다: ${[...new Set(dupIds)].slice(0, 5).join(", ")} (${filePath})`
+    );
+  }
   if (doc.standards.length === 0) {
     throw new StandardsFileError(`공식 성취기준 파일에 항목이 없습니다: ${filePath}`);
   }
@@ -151,6 +158,14 @@ export function bandKey({ schoolLevel, gradeBand, gradeCluster, grade } = {}) {
     return `ES:${lo}-${lo + 1}`;
   }
   return null;
+}
+
+/**
+ * 공식 성취기준의 고유 식별자. 원문에는 서로 다른 과목이 같은 코드를 쓰는 경우가 있어
+ * (예: [12심독01-01]이 영어와 독일어에 모두 있음) code는 고유하지 않다. id가 있으면 id를 쓴다.
+ */
+export function officialKey(std) {
+  return std.id ?? std.code;
 }
 
 export function officialBandKey(std) {
@@ -237,8 +252,8 @@ export function rankCandidates(item, officialStandards) {
   const pool = officialStandards.filter(o => subjectMatches(item, o) && band && officialBandKey(o) === band);
   const query = charNgrams(item.oldText);
   const scored = pool
-    .map(o => ({ code: o.code, text: o.text, score: round(cosine(query, charNgrams(o.text))), method: METHOD }))
-    .sort((a, b) => b.score - a.score || a.code.localeCompare(b.code));
+    .map(o => ({ id: officialKey(o), code: o.code, text: o.text, score: round(cosine(query, charNgrams(o.text))), method: METHOD }))
+    .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
   return { band, poolSize: pool.length, scored };
 }
 
@@ -265,6 +280,7 @@ export function remapOne(item, officialStandards) {
     candidates,
     status,
     matchedCode: status === "matched" ? scored[0].code : null,
+    matchedId: status === "matched" ? scored[0].id : null,
     sources: item.sources,
     addedByUs: item.addedByUs
   };
@@ -290,7 +306,8 @@ export function remapAll(handwrittenItems, officialStandards) {
 export function buildReviewQueue(items) {
   const targetCount = new Map();
   for (const it of items) {
-    if (it.matchedCode) targetCount.set(it.matchedCode, (targetCount.get(it.matchedCode) || 0) + 1);
+    const target = it.matchedId ?? it.matchedCode;
+    if (target) targetCount.set(target, (targetCount.get(target) || 0) + 1);
   }
   const queue = [];
   for (const it of items) {
@@ -301,7 +318,7 @@ export function buildReviewQueue(items) {
     if (it.status === "matched") {
       if (top.score < REVIEW_SCORE_BELOW) reasons.push("low-score");
       if (margin < REVIEW_MARGIN_BELOW) reasons.push("narrow-margin");
-      if (targetCount.get(it.matchedCode) > 1) reasons.push("shared-target");
+      if (targetCount.get(it.matchedId ?? it.matchedCode) > 1) reasons.push("shared-target");
     }
     if (it.status === "unmapped" && top) reasons.push("near-miss");
     if (!reasons.length) continue;

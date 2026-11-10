@@ -2,6 +2,8 @@
  * 2022 개정 공식 성취기준 사이의 선수관계 간선 생성 (순수 로직, 무의존성)
  *
  * 간선 방향: from = 먼저 배울 성취기준(선수), to = 그 위에 쌓이는 성취기준.
+ * from/to는 공식 성취기준의 id(없으면 code)다. 원문 코드는 과목 사이에 겹치는 경우가 있어
+ * code만으로는 끝점을 정할 수 없다.
  * 근거(evidence)가 없는 간선은 만들지 않는다. 허용되는 근거 유형은 셋뿐이다.
  *
  * - marble-dependency: Marble os-taxonomy 의존 간선(topicId가 prerequisiteId에 의존)을
@@ -12,7 +14,7 @@
  * - manual: 사람이 data/kr-2022/prerequisites.manual.json에 넣은 것.
  */
 
-import { officialBandKey } from "./remap.mjs";
+import { officialBandKey, officialKey } from "./remap.mjs";
 
 export const EVIDENCE_TYPES = Object.freeze(["marble-dependency", "same-domain-sequence", "manual"]);
 const STRENGTHS = new Set(["hard", "soft"]);
@@ -60,7 +62,8 @@ export function topicToOfficialCodes(remapItems, knownTopicIds) {
   const map = new Map();
   const unknownTopicIds = new Set();
   for (const it of remapItems) {
-    if (it.status !== "matched" || !it.matchedCode) continue;
+    const target = it.matchedId ?? it.matchedCode;
+    if (it.status !== "matched" || !target) continue;
     for (const t of it.addedByUs?.mappedTopicIds ?? []) {
       if (knownTopicIds && !knownTopicIds.has(t)) {
         unknownTopicIds.add(t);
@@ -68,8 +71,8 @@ export function topicToOfficialCodes(remapItems, knownTopicIds) {
       }
       if (!map.has(t)) map.set(t, new Map());
       const via = map.get(t);
-      if (!via.has(it.matchedCode)) via.set(it.matchedCode, []);
-      via.get(it.matchedCode).push(it.oldCode);
+      if (!via.has(target)) via.set(target, []);
+      via.get(target).push(it.oldCode);
     }
   }
   return { map, unknownTopicIds: [...unknownTopicIds].sort() };
@@ -126,9 +129,9 @@ export function sameDomainSequenceEdges(edges, officialStandards) {
       if (!upper) continue;
       for (const a of lower) {
         for (const b of upper) {
-          const ok = edges.add(a.code, b.code, "soft", {
+          const ok = edges.add(officialKey(a), officialKey(b), "soft", {
             type: "same-domain-sequence",
-            ref: `${a.code}->${b.code}`,
+            ref: `${officialKey(a)}->${officialKey(b)}`,
             note: `${a.subject} · ${a.domain}: ${a.gradeBand} → ${b.gradeBand}`
           });
           if (ok) added++;
@@ -146,8 +149,8 @@ export function validateManual(manualDoc, officialCodes) {
   }
   const problems = [];
   manualDoc.edges.forEach((e, i) => {
-    if (!officialCodes.has(e?.from)) problems.push(`edges[${i}].from이 공식 코드가 아님: ${e?.from}`);
-    if (!officialCodes.has(e?.to)) problems.push(`edges[${i}].to가 공식 코드가 아님: ${e?.to}`);
+    if (!officialCodes.has(e?.from)) problems.push(`edges[${i}].from이 공식 코드가 아님(standards.json의 id 필요): ${e?.from}`);
+    if (!officialCodes.has(e?.to)) problems.push(`edges[${i}].to가 공식 코드가 아님(standards.json의 id 필요): ${e?.to}`);
     if (e?.from === e?.to) problems.push(`edges[${i}] 자기 자신으로의 간선`);
     if (!STRENGTHS.has(e?.strength)) problems.push(`edges[${i}].strength는 hard|soft: ${e?.strength}`);
     if (!Array.isArray(e?.evidence) || e.evidence.length === 0) problems.push(`edges[${i}].evidence가 비어 있음`);
@@ -189,7 +192,7 @@ export function findCycle(edgeList) {
 }
 
 export function buildPrerequisites({ officialStandards, remapItems, marbleDependencies, marbleTopicIds, manualDoc }) {
-  const officialCodes = new Set(officialStandards.map(s => s.code));
+  const officialCodes = new Set(officialStandards.map(officialKey));
   const edges = new EdgeSet();
 
   const marble = marbleEdges(edges, marbleDependencies, remapItems, marbleTopicIds, officialCodes);

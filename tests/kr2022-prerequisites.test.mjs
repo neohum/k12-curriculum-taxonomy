@@ -149,3 +149,15 @@ test("스크립트: 픽스처로 끝까지 돌리면 근거별 개수와 라이�
   assert.equal(r3.status, 1);
   assert.match(r3.stderr, /다른 공식 파일로 만들어졌습니다/);
 });
+
+test("선수관계: 끝점은 id이며 코드가 겹치는 두 성취기준을 하나로 합치지 않는다", () => {
+  const std = (id, code, gradeBand, schoolLevel) => ({ id, code, subject: "테스트", course: "테스트", domain: "영역", schoolLevel, gradeBand, text: id });
+  const officialStandards = [
+    std("b1:[6테01-01]", "[6테01-01]", "초등학교 5~6학년", "ES"),
+    std("b1:[9테01-01]", "[9테01-01]", "중학교 1~3학년", "MS"),
+    std("b2:[9테01-01]", "[9테01-01]", "중학교 1~3학년", "MS")
+  ];
+  const r = buildPrerequisites({ officialStandards, remapItems: [], marbleDependencies: [], marbleTopicIds: new Set(), manualDoc: { schemaVersion: 1, edges: [] } });
+  assert.deepEqual(r.edges.map(e => `${e.from}->${e.to}`), ["b1:[6테01-01]->b1:[9테01-01]", "b1:[6테01-01]->b2:[9테01-01]"]);
+  assert.throws(() => validateManual({ schemaVersion: 1, edges: [{ from: "[6테01-01]", to: "b1:[9테01-01]", strength: "soft", evidence: [{ type: "manual", ref: "x" }] }] }, new Set(officialStandards.map(s => s.id))), /id 필요/);
+});

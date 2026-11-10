@@ -176,3 +176,22 @@ test("스크립트: 픽스처로 재매핑 파일과 검토 큐 파일을 쓴다
   const review = JSON.parse(fs.readFileSync(reviewOut, "utf8"));
   assert.equal(review.items.length, 3);
 });
+
+test("재매핑: 원문에서 코드가 겹쳐도 id로 구별하고, id 중복 파일은 거부한다", () => {
+  const officials = [
+    { id: "b14:[12심독01-01]", code: "[12심독01-01]", subject: "테스트", course: "테스트", schoolLevel: "HS", gradeBand: "고등학교 선택 과목", text: "다양한 분야의 기초 학문 주제에 관한 글을 읽고 주요 내용을 파악한다." },
+    { id: "b16:[12심독01-01]", code: "[12심독01-01]", subject: "테스트", course: "테스트", schoolLevel: "HS", gradeBand: "고등학교 선택 과목", text: "낱말이나 구, 문장을 듣고 의미를 이해한다." }
+  ];
+  const hw = [{ code: "[12테01-01]", subject: "테스트", schoolLevel: "HS", gradeCluster: "고등학교", statement: "낱말이나 구, 문장을 듣고 의미를 이해할 수 있다." }];
+  const { items } = remapAll(mergeHandwritten([{ source: "t", standards: hw }]), officials);
+  assert.equal(items[0].status, "matched");
+  assert.equal(items[0].matchedId, "b16:[12심독01-01]");
+  assert.equal(items[0].matchedCode, "[12심독01-01]");
+
+  const dir = tmpDir();
+  const f = path.join(dir, "dup.json");
+  fs.writeFileSync(f, JSON.stringify({ schemaVersion: 1, standards: [officials[0], { ...officials[1], id: officials[0].id }] }));
+  assert.throws(() => loadOfficialStandards(f), /중복/);
+  fs.writeFileSync(f, JSON.stringify({ schemaVersion: 1, standards: officials }));
+  assert.equal(loadOfficialStandards(f).standards.length, 2, "code가 겹쳐도 id가 다르면 허용");
+});
