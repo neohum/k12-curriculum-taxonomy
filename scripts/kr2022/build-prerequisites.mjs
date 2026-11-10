@@ -4,7 +4,7 @@
  *
  *   node scripts/kr2022/build-prerequisites.mjs \
  *     [--standards data/kr-2022/standards.json] \
- *     [--remap data/kr-2022/handwritten-remap.json] \
+ *     [--remap review/kr2022-remap/handwritten-remap.json] \
  *     [--manual data/kr-2022/prerequisites.manual.json] \
  *     [--marble-deps data/os-taxonomy/dependencies.json] \
  *     [--marble-topics data/os-taxonomy/topics.json] \
@@ -35,7 +35,7 @@ async function main() {
   const { values } = parseArgs({
     options: {
       standards: { type: "string", default: path.join(ROOT, "data/kr-2022/standards.json") },
-      remap: { type: "string", default: path.join(ROOT, "data/kr-2022/handwritten-remap.json") },
+      remap: { type: "string", default: path.join(ROOT, "review/kr2022-remap/handwritten-remap.json") },
       manual: { type: "string", default: path.join(ROOT, "data/kr-2022/prerequisites.manual.json") },
       "marble-deps": { type: "string", default: path.join(ROOT, "data/os-taxonomy/dependencies.json") },
       "marble-topics": { type: "string", default: path.join(ROOT, "data/os-taxonomy/topics.json") },

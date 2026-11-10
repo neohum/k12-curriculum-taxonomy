@@ -5,8 +5,8 @@
  *   node scripts/kr2022/remap-handwritten.mjs \
  *     [--standards data/kr-2022/standards.json] \
  *     [--handwritten <손작성 목록 JSON 배열; 생략하면 저장소 안 출처에서 수집>] \
- *     [--out data/kr-2022/handwritten-remap.json] \
- *     [--review-out data/kr-2022/handwritten-remap.review.json]
+ *     [--out review/kr2022-remap/handwritten-remap.json] \
+ *     [--review-out review/kr2022-remap/handwritten-remap.review.json]
  *
  * 공식 파일이 없으면 종료 코드 2로 멈춘다.
  */
@@ -66,8 +66,8 @@ async function main() {
     options: {
       standards: { type: "string", default: path.join(ROOT, "data/kr-2022/standards.json") },
       handwritten: { type: "string" },
-      out: { type: "string", default: path.join(ROOT, "data/kr-2022/handwritten-remap.json") },
-      "review-out": { type: "string", default: path.join(ROOT, "data/kr-2022/handwritten-remap.review.json") }
+      out: { type: "string", default: path.join(ROOT, "review/kr2022-remap/handwritten-remap.json") },
+      "review-out": { type: "string", default: path.join(ROOT, "review/kr2022-remap/handwritten-remap.review.json") }
     }
   });
 
@@ -104,6 +104,8 @@ async function main() {
   const remapDoc = {
     schemaVersion: 1,
     generatedBy: "scripts/kr2022/remap-handwritten.mjs",
+    humanVerified: false,
+    statusMeaning: "matched/ambiguous/unmapped는 문자 bigram 유사도에 따른 자동 판정이며 사람이 확인하지 않았습니다. matched도 공식 매핑이 아니라 검토 후보입니다.",
     notice: "addedByUs의 내용(오개념, 교구, 피아제 단계, 키워드, Marble 토픽 매핑 등)은 고시 원문이 아니라 이 저장소가 덧붙인 것입니다. oldText도 고시 원문이 아닌 손작성 문장입니다.",
     method,
     inputs,
@@ -113,6 +115,7 @@ async function main() {
   const reviewDoc = {
     schemaVersion: 1,
     generatedBy: "scripts/kr2022/remap-handwritten.mjs",
+    humanVerified: false,
     notice: "자동 판정(matched 포함)을 사람이 확인해야 하는 항목. matched가 아닌 항목은 선수관계 생성에 쓰이지 않습니다.",
     method,
     items: reviewQueue
