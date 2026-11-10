@@ -1,8 +1,9 @@
 # 🌐 K-12 Curriculum Cognitive Hierarchy Taxonomy & Scaffolding Engine
 > **2022 개정 K-12 전과목 인지위계 온톨로지 & 인터랙티브 웹 대시보드**  
-> *(영미권 OpenStax 온톨로지의 한국어 K-12 전과목 확장 오픈소스 프로젝트)*
+> *(Marble Skill Taxonomy(withmarbleapp/os-taxonomy)를 기반으로 한 한국어 K-12 전과목 확장 오픈소스 프로젝트)*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Code License: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+[![Data License: ODbL 1.0 / CC BY-SA 4.0](https://img.shields.io/badge/data-ODbL%201.0%20%2F%20CC%20BY--SA%204.0-orange.svg)](NOTICE.md)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
 [![Tests Passing](https://img.shields.io/badge/tests-79%20passed-success.svg)](tests/)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-informational.svg)](package.json)
@@ -11,7 +12,7 @@
 
 ## 📖 프로젝트 개요 (Overview)
 
-영미권 고등·대학 중심의 **OpenStax OS-Taxonomy(1,800+ 토픽, 인과관계 그래프, 교수학습 연구)**를 기반으로, **대한민국 2022 개정 교육과정 초·중·고(K-12) 전과목(국어, 수학, 영어, 사회, 도덕, 과학, 정보, 체육·음악·미술)**의 12개 학년 성취기준과 인지 발달 위계를 1:1로 결합·확장한 온톨로지 엔진 및 독립형 시각화 대시보드입니다.
+Marble이 공개한 초등 중심의 **Marble Skill Taxonomy([withmarbleapp/os-taxonomy](https://github.com/withmarbleapp/os-taxonomy), 영문 토픽 1,861개, 선수관계 그래프, 교수학습 연구)**의 영문 토픽(Mathematics·Science·English·History 등 9개 분야)에 **직접 작성한 한국 2022 개정 교육과정 성취기준**을 연결해 보는 **실험 단계**의 온톨로지 엔진 및 독립형 시각화 대시보드입니다. 한국 성취기준은 고시 원문에서 추출한 것이 아니며, 공식 원문 기반 데이터로 교체하는 작업이 진행 중입니다(아래 "알려진 한계" 절 참고).
 
 - **Zero External Dependencies**: 외부 npm 라이브러리 설치(`npm install`) 없이 순수 Node.js 내장 런타임만으로 100% 즉시 구동.
 - **Spiral Progression DAG Backtracking**: 고등학교 미적분의 학습 결손이 발생했을 때, 중학교 일차방정식을 거쳐 초등학교 3학년 '등분할과 분수'까지 인과 사슬을 1ms 내로 역추적.
@@ -102,7 +103,7 @@ npm test
 ```
 k12-curriculum-taxonomy/
 ├── data/
-│   └── os-taxonomy/                 # OpenStax 원본 데이터셋 & K-12 인과 사슬 JSON
+│   └── os-taxonomy/                 # Marble os-taxonomy 원본 데이터(ODbL/CC BY-SA) & K-12 인과 사슬 JSON
 ├── public/
 │   ├── index.html                   # 독립형 인터랙티브 웹 대시보드
 │   └── simulations/                 # 4대 피아제 구체 조작기 독립 HTML
@@ -120,13 +121,41 @@ k12-curriculum-taxonomy/
 │       └── K12TaxonomyServer.mjs    # 고성능 Zero-dependency HTTP 서버
 ├── tests/                           # 79개 무결성 테스트 스위트
 ├── package.json                     # 프로젝트 매니페스트 (Zero external npm deps)
-├── LICENSE                          # MIT License
+├── LICENSE                          # MIT License (코드)
+├── NOTICE.md                        # 데이터 출처·라이선스 (Marble, ODbL 1.0 / CC BY-SA 4.0)
 └── README.md                        # 본 문서
 ```
 
 ---
 
+## ⚠️ 알려진 한계 (Known Limitations)
+
+- **한국 성취기준은 고시 원문에서 추출한 것이 아닙니다.** `scripts/build-k12-full-ontology.mjs`,
+  `src/core/taxonomy/Korea2022CurriculumAdapter.mjs`,
+  `src/core/taxonomy/Korea2022K12CurriculumAdapter.mjs`에 들어 있는 성취기준 문장·학년 배정·
+  키워드·오개념 설명은 2022 개정 교육과정 고시 문서를 기계적으로 옮긴 것이 아니라 **직접 작성한
+  것**입니다. 문장이 공식 성취기준과 다를 수 있으므로 공식 자료로 인용하지 마세요.
+- **성취기준 코드 형식이 공식과 다릅니다.** 공식 코드는 학년군의 **끝 학년** 숫자를 씁니다
+  (예: 초등 1~2학년군 수학 `[2수01-01]`, 3~4학년군 과학 `[4과01-01]`, 중학교 `[9…]`).
+  이 저장소에는 `[1수01-02]`, `[1국01-01]`, `[3과01-01]`처럼 개별 학년 숫자를 붙인 비공식
+  코드가 섞여 있습니다. 공식 코드와 같은 모양이라도 내용이 공식 성취기준과 일치한다는 보장은 없습니다.
+- **Marble 토픽 매핑(`mappedTopicIds`)도 직접 작성한 것**이며, Marble 쪽에서 검토·승인한 정렬이 아닙니다.
+- **교체 작업 진행 중:** 고시 원문(교육부 고시 2022-33호 별책)에 근거한 성취기준 데이터로
+  교체하는 작업이 진행 중입니다. 교체 전까지 위 데이터는 시연·연구용으로만 취급해 주세요.
+
+---
+
 ## 📄 라이선스 (License)
 
-이 프로젝트는 [MIT License](LICENSE)에 따라 자유롭게 사용, 수정, 배포할 수 있습니다.
-2022 대한민국 개정 교육과정 성취기준 체계와 OpenStax 오픈 콘텐츠 라이선스를 존중합니다.
+이 저장소는 **코드와 데이터의 라이선스가 다릅니다.** 자세한 내용은 [NOTICE.md](NOTICE.md)를 보세요.
+
+- **코드**: [MIT License](LICENSE)
+- **`data/os-taxonomy/`의 Marble 원본 데이터** (`topics.json`, `dependencies.json`, `clusters.json`,
+  `teaching-research.json`): 데이터베이스는 [ODbL 1.0](data/os-taxonomy/LICENSE),
+  Marble이 작성한 텍스트는 [CC BY-SA 4.0](data/os-taxonomy/LICENSE-CONTENT).
+  두 라이선스 모두 **동일조건(share-alike)** 이므로, 이 데이터를 수정하거나 다른 데이터와 섞어 만든
+  파생 데이터베이스를 공개할 때는 같은 라이선스로 공개해야 합니다.
+
+출처 표기 (원본이 요구하는 형식):
+
+> Marble Skill Taxonomy (v1) · © Generative Spark, Inc. (Marble) · https://withmarble.com · licensed under ODbL 1.0 (database) and CC BY-SA 4.0 (content).

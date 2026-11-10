@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT AND ODbL-1.0
+// 코드: MIT. 이 파일에 내장된 Marble 토픽 매핑 값(mappedTopicIds 등)은 Marble Skill Taxonomy의
+// 파생 데이터베이스로 ODbL 1.0을 따릅니다. 출처·조건은 NOTICE.md 참조.
 /**
  * Korea 2022 Revised K-12 Curriculum Adapter
  *
