@@ -13,9 +13,11 @@ import { TaxonomyGraphEngine } from "../core/taxonomy/TaxonomyGraphEngine.mjs";
 import {
   Korea2022K12CurriculumAdapter,
   K12_SPIRAL_CHAINS,
-  K12_TERMINOLOGY_DICTIONARY,
   K12_STANDARDS
 } from "../core/taxonomy/Korea2022K12CurriculumAdapter.mjs";
+import { loadOfficial } from "../core/kr2022/official.mjs";
+import { searchStandards, tagContent } from "../core/kr2022/standards-service.mjs";
+import { handwrittenBasis, loadDecisions } from "../core/kr2022/handwritten-links.mjs";
 import { LessonPlannerRAG } from "../core/taxonomy/LessonPlannerRAG.mjs";
 import { recommendConcreteManipulative } from "../core/taxonomy/DiagnosticAssessmentEngine.mjs";
 
@@ -46,6 +48,17 @@ export class K12TaxonomyClient {
       this.adapter = options.adapter || null;
       this.lessonPlanner = options.lessonPlanner || null;
     }
+  }
+
+  /**
+   * 손작성 코드 → 검토 결정과 맞출 { code, text } (text는 손작성 문장, 없으면 null)
+   * @private
+   */
+  _handwrittenItems(codes) {
+    return codes.filter(Boolean).map(c => {
+      const std = this.adapter.getK12Standard(c);
+      return std ? { code: std.code, text: std.statement } : { code: c, text: null };
+    });
   }
 
   /**
@@ -122,7 +135,9 @@ export class K12TaxonomyClient {
       status: "ok",
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
-      standardsCount: K12_STANDARDS.length
+      standardsCount: loadOfficial().dataset.count,
+      standardsSource: "official",
+      handwrittenStandardsCount: K12_STANDARDS.length
     };
   }
 
@@ -134,6 +149,8 @@ export class K12TaxonomyClient {
    * @param {string} [options.subject]
    * @param {"ES"|"MS"|"HS"|"ALL"} [options.schoolLevel]
    * @param {number} [options.limit=20]
+   * @param {string} [options.gradeBand]
+   * @param {"official"|"handwritten"} [options.source="official"] - "handwritten"은 비공식 손작성 데이터
    * @returns {Promise<Array<Object>|Object>}
    */
   async searchStandards(query = "", options = {}) {
@@ -143,17 +160,22 @@ export class K12TaxonomyClient {
           query,
           subject: options.subject,
           schoolLevel: options.schoolLevel,
-          limit: options.limit
+          gradeBand: options.gradeBand,
+          limit: options.limit,
+          source: options.source
         }
       });
       return data.standards || data;
     }
 
-    return this.adapter.searchK12Standards(query, {
+    return searchStandards({
+      query,
       subject: options.subject,
       schoolLevel: options.schoolLevel,
-      limit: options.limit || 20
-    });
+      gradeBand: options.gradeBand,
+      limit: options.limit || 20,
+      source: options.source
+    }, { adapter: this.adapter }).standards;
   }
 
   /**
@@ -180,7 +202,8 @@ export class K12TaxonomyClient {
       chains: allChains,
       newChains: allChains.filter(c => c.isNew),
       totalCount: allChains.length,
-      newChainsCount: newKeys.length
+      newChainsCount: newKeys.length,
+      dataBasis: handwrittenBasis(loadDecisions())
     };
   }
 
@@ -199,7 +222,10 @@ export class K12TaxonomyClient {
     if (!chain) {
       throw new Error(`Spiral chain not found for key: ${key}`);
     }
-    return chain;
+    return {
+      ...chain,
+      dataBasis: handwrittenBasis(loadDecisions(), this._handwrittenItems((chain.stages || []).map(st => st.standardCode)))
+    };
   }
 
   /**
@@ -240,7 +266,8 @@ export class K12TaxonomyClient {
       standardCode,
       mistakePattern: mistakePattern || null,
       remediationAdvice,
-      ...diagnosis
+      ...diagnosis,
+      dataBasis: handwrittenBasis(loadDecisions(), this._handwrittenItems([standardCode]))
     };
   }
 
@@ -303,7 +330,8 @@ export class K12TaxonomyClient {
       scaffold393: lessonPlan.modular393,
       dialogScript: lessonPlan.dialogScript,
       rubric: lessonPlan.rubric,
-      lessonPlan
+      lessonPlan,
+      dataBasis: handwrittenBasis(loadDecisions(), this._handwrittenItems([topicId]))
     };
   }
 
@@ -313,9 +341,10 @@ export class K12TaxonomyClient {
    * @param {Object} params
    * @param {string} params.text
    * @param {string} [params.subject]
+   * @param {"official"|"handwritten"} [params.source="official"]
    * @returns {Promise<Object>}
    */
-  async tagContent({ text, subject } = {}) {
+  async tagContent({ text, subject, source } = {}) {
     if (!text || typeof text !== "string" || !text.trim()) {
       throw new Error("text is required");
     }
@@ -323,79 +352,11 @@ export class K12TaxonomyClient {
     if (this.mode === "remote") {
       return this._remoteRequest("/api/taxonomy/tag-content", {
         method: "POST",
-        body: {
-          text,
-          subject
-        }
+        body: { text, subject },
+        query: { source }
       });
     }
 
-    const cleanText = text.trim();
-    const cleanSubject = subject ? subject.trim() : null;
-
-    // 1. Detect explicit code
-    const codeRegex = /\[?([1-9]|1[0-2])([가-힣]+)([0-9]{2})-([0-9]{2})\]?/g;
-    const explicitCodes = [];
-    let match;
-    while ((match = codeRegex.exec(cleanText)) !== null) {
-      explicitCodes.push(`[${match[1]}${match[2]}${match[3]}-${match[4]}]`);
-    }
-
-    const searchResults = this.adapter.searchK12Standards(cleanText, {
-      subject: cleanSubject,
-      limit: 10
-    });
-
-    const scoredMap = new Map();
-
-    for (const code of explicitCodes) {
-      const std = this.adapter.getK12Standard(code);
-      if (std) {
-        scoredMap.set(std.code, { standard: std, score: (scoredMap.get(std.code)?.score || 0) + 300 });
-      }
-    }
-
-    for (const std of searchResults) {
-      scoredMap.set(std.code, { standard: std, score: (scoredMap.get(std.code)?.score || 0) + 100 });
-    }
-
-    const lowerText = cleanText.toLowerCase();
-    for (const [term, meta] of Object.entries(K12_TERMINOLOGY_DICTIONARY)) {
-      if (lowerText.includes(term.toLowerCase())) {
-        const matched = this.adapter.searchK12Standards(term, {
-          subject: cleanSubject || meta.subject,
-          limit: 3
-        });
-        for (const std of matched) {
-          scoredMap.set(std.code, { standard: std, score: (scoredMap.get(std.code)?.score || 0) + 50 });
-        }
-      }
-    }
-
-    const scoredStandards = Array.from(scoredMap.values()).sort((a, b) => b.score - a.score);
-    const matchedStandards = scoredStandards.map(s => s.standard);
-    const primaryStandard = matchedStandards[0] || null;
-
-    let remediation = null;
-    if (primaryStandard) {
-      try {
-        remediation = this.graphEngine.diagnoseK12RemediationPath(primaryStandard.code, []);
-      } catch {
-        remediation = null;
-      }
-    }
-
-    return {
-      text: cleanText,
-      subject: cleanSubject || primaryStandard?.subject || null,
-      matchedStandardsCount: matchedStandards.length,
-      matchedStandards,
-      primaryStandard,
-      foundationalPrerequisites: remediation?.unmasteredPrerequisites || [],
-      earliestFoundationalGap: remediation?.earliestFoundationalGap || null,
-      remediationPath: remediation?.remediationPath || [],
-      piagetStageProgression: remediation?.piagetStageProgression || null,
-      schoolLevelsTraversed: remediation?.schoolLevelsTraversed || []
-    };
+    return tagContent({ text, subject, source }, { adapter: this.adapter, graphEngine: this.graphEngine });
   }
 }
