@@ -15,6 +15,9 @@
  */
 
 import { officialBandKey, officialKey } from "./remap.mjs";
+import { checkManualEdges, findCycle } from "./manual-rules.mjs";
+
+export { findCycle };
 
 export const EVIDENCE_TYPES = Object.freeze(["marble-dependency", "same-domain-sequence", "manual"]);
 const STRENGTHS = new Set(["hard", "soft"]);
@@ -142,53 +145,19 @@ export function sameDomainSequenceEdges(edges, officialStandards) {
   return { standardsWithoutBandOrDomain: unbanded, newEdges: added };
 }
 
-/** 수동 간선 검증. 틀린 항목은 조용히 버리지 않고 에러로 멈춘다. */
+/**
+ * 수동 간선 검증. 틀린 항목은 조용히 버리지 않고 에러로 멈춘다.
+ * 규칙(검토 화면과 공유): 없는 id·자기 간선·학년 역전·중복·수동 간선끼리의 순환은 거부.
+ */
+export class ManualEdgesError extends Error {}
+
 export function validateManual(manualDoc, officialCodes) {
   if (manualDoc?.schemaVersion !== 1 || !Array.isArray(manualDoc.edges)) {
-    throw new Error("prerequisites.manual.json 형식이 다릅니다 (schemaVersion 1과 edges 배열 필요)");
+    throw new ManualEdgesError("prerequisites.manual.json 형식이 다릅니다 (schemaVersion 1과 edges 배열 필요)");
   }
-  const problems = [];
-  manualDoc.edges.forEach((e, i) => {
-    if (!officialCodes.has(e?.from)) problems.push(`edges[${i}].from이 공식 코드가 아님(standards.json의 id 필요): ${e?.from}`);
-    if (!officialCodes.has(e?.to)) problems.push(`edges[${i}].to가 공식 코드가 아님(standards.json의 id 필요): ${e?.to}`);
-    if (e?.from === e?.to) problems.push(`edges[${i}] 자기 자신으로의 간선`);
-    if (!STRENGTHS.has(e?.strength)) problems.push(`edges[${i}].strength는 hard|soft: ${e?.strength}`);
-    if (!Array.isArray(e?.evidence) || e.evidence.length === 0) problems.push(`edges[${i}].evidence가 비어 있음`);
-    else if (e.evidence.some(ev => ev?.type !== "manual" || !ev.ref)) problems.push(`edges[${i}].evidence는 type "manual"과 ref가 필요`);
-  });
-  if (problems.length) throw new Error(`prerequisites.manual.json 검증 실패:\n- ${problems.join("\n- ")}`);
+  const problems = checkManualEdges(manualDoc.edges, officialCodes).map(p => p.message);
+  if (problems.length) throw new ManualEdgesError(`prerequisites.manual.json 검증 실패:\n- ${problems.join("\n- ")}`);
   return manualDoc.edges;
-}
-
-export function findCycle(edgeList) {
-  const adj = new Map();
-  for (const e of edgeList) {
-    if (!adj.has(e.from)) adj.set(e.from, []);
-    adj.get(e.from).push(e.to);
-  }
-  const state = new Map();
-  const stack = [];
-  const visit = (n) => {
-    state.set(n, 1);
-    stack.push(n);
-    for (const m of adj.get(n) ?? []) {
-      if (state.get(m) === 1) return [...stack.slice(stack.indexOf(m)), m];
-      if (!state.has(m)) {
-        const c = visit(m);
-        if (c) return c;
-      }
-    }
-    stack.pop();
-    state.set(n, 2);
-    return null;
-  };
-  for (const n of [...adj.keys()].sort()) {
-    if (!state.has(n)) {
-      const c = visit(n);
-      if (c) return c;
-    }
-  }
-  return null;
 }
 
 export function buildPrerequisites({ officialStandards, remapItems, marbleDependencies, marbleTopicIds, manualDoc }) {

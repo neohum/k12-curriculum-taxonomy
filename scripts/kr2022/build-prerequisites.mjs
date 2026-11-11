@@ -10,7 +10,8 @@
  *     [--marble-topics data/os-taxonomy/topics.json] \
  *     [--out data/kr-2022/prerequisites.json]
  *
- * 공식 파일이 없으면 종료 코드 2로 멈춘다. remap 파일은 remap-handwritten.mjs로 먼저 만든다.
+ * 공식 파일이 없으면 종료 코드 2로 멈춘다. 수동 간선이 규칙(없는 id·자기 간선·학년 역전·중복·순환)에
+ * 맞지 않으면 종료 코드 3으로 멈추고 출력 파일을 쓰지 않는다. remap 파일은 remap-handwritten.mjs로 먼저 만든다.
  */
 
 import fs from "node:fs";
@@ -18,7 +19,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 import { StandardsFileError, loadOfficialStandards } from "../../src/core/kr2022/remap.mjs";
-import { MARBLE_LICENSE, buildPrerequisites } from "../../src/core/kr2022/prerequisites.mjs";
+import { MARBLE_LICENSE, ManualEdgesError, buildPrerequisites } from "../../src/core/kr2022/prerequisites.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -105,6 +106,10 @@ main().catch(err => {
   if (err instanceof StandardsFileError) {
     process.stderr.write(`오류: ${err.message}\n`);
     process.exit(2);
+  }
+  if (err instanceof ManualEdgesError) {
+    process.stderr.write(`오류: ${err.message}\n`);
+    process.exit(3);
   }
   process.stderr.write(`${err.stack || err}\n`);
   process.exit(1);
