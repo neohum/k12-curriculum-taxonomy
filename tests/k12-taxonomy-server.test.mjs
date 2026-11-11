@@ -2,12 +2,17 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { K12TaxonomyServer } from "../src/server/K12TaxonomyServer.mjs";
 import { K12TaxonomyClient } from "../src/sdk/K12TaxonomyClient.mjs";
+import os from "node:os";
+import path from "node:path";
+
+// decisions.json이 생겨도 이 테스트가 흔들리지 않도록 없는 경로를 쓴다(연결 없음 상태).
+const NO_DECISIONS = path.join(os.tmpdir(), "k12-no-decisions-" + process.pid, "decisions.json");
 
 const TEST_PORT = 8991;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
 
 test("K12TaxonomyServer & Universal SDK Integration Suite", async (t) => {
-  const server = new K12TaxonomyServer({ port: TEST_PORT, host: "127.0.0.1" });
+  const server = new K12TaxonomyServer({ port: TEST_PORT, host: "127.0.0.1", decisionsPath: NO_DECISIONS });
   await server.start();
 
   t.after(async () => {
@@ -27,7 +32,9 @@ test("K12TaxonomyServer & Universal SDK Integration Suite", async (t) => {
     assert.equal(data.status, "ok");
     assert.ok(typeof data.uptime === "number");
     assert.ok(typeof data.timestamp === "string");
-    assert.ok(data.standardsCount >= 50, `Expected at least 50 standards, got ${data.standardsCount}`);
+    assert.equal(data.standardsCount, 4296, "공식 고시 원문 성취기준 수");
+    assert.equal(data.standardsSource, "official");
+    assert.equal(data.handwrittenStandardsCount, 316);
   });
 
   // --------------------------------------------------------------------------
@@ -41,6 +48,12 @@ test("K12TaxonomyServer & Universal SDK Integration Suite", async (t) => {
     assert.ok(Array.isArray(dataQuery.standards));
     assert.ok(dataQuery.total > 0);
     assert.ok(dataQuery.standards.some(s => s.code.includes("미적") || s.statement.includes("미적")));
+    assert.equal(dataQuery.source, "official");
+    for (const s of dataQuery.standards) {
+      assert.equal(s.source, "official");
+      assert.equal(s.statement, s.text, "statement는 원문 text의 하위 호환 별칭");
+      assert.match(s.id, /^b\d+:\[/);
+    }
 
     // 2-2. Filter by schoolLevel ES and subject 수학
     const resElem = await fetch(`${BASE_URL}/api/taxonomy/standards?subject=수학&schoolLevel=ES&limit=5`);
@@ -148,6 +161,8 @@ test("K12TaxonomyServer & Universal SDK Integration Suite", async (t) => {
     // Mistake pattern advice generated
     assert.ok(data.remediationAdvice);
     assert.ok(data.remediationAdvice.includes("오개념 패턴"));
+    assert.equal(data.dataBasis.official, false);
+    assert.equal(data.dataBasis.label, "비공식 손작성 성취기준 기반");
   });
 
   // --------------------------------------------------------------------------
@@ -188,6 +203,7 @@ test("K12TaxonomyServer & Universal SDK Integration Suite", async (t) => {
     // Dialog script and Rubric
     assert.ok(data.dialogScript);
     assert.ok(data.rubric);
+    assert.equal(data.dataBasis.official, false);
   });
 
   // --------------------------------------------------------------------------
@@ -205,9 +221,37 @@ test("K12TaxonomyServer & Universal SDK Integration Suite", async (t) => {
 
     assert.equal(res.status, 200);
     const data = await res.json();
+    assert.equal(data.source, "official");
     assert.ok(data.matchedStandardsCount > 0);
     assert.ok(data.primaryStandard);
     assert.ok(data.primaryStandard.code.includes("미적"));
+    assert.equal(data.primaryStandard.source, "official");
+    assert.equal(data.primaryStandard.citation.book, "별책 8");
+
+    // 선수학습 역추적은 손작성 그래프에만 있어, 확정 연결(decisions.json)이 없으면 비워 둔다.
+    assert.deepEqual(data.foundationalPrerequisites, []);
+    assert.deepEqual(data.remediationPath, []);
+    assert.equal(data.remediationBasis.official, false);
+    assert.equal(data.remediationBasis.decisionsFile, "absent");
+  });
+
+  await t.test("POST /api/taxonomy/tag-content?source=handwritten keeps legacy backtracking with warning", async () => {
+    const res = await fetch(`${BASE_URL}/api/taxonomy/tag-content?source=handwritten`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: "고등학교 미적분 단원에서 순간변화율과 미분계수의 기하학적 의미를 접선의 기울기로 파악하고 정적분의 넓이를 계산하는 원리를 탐구한다.",
+        subject: "수학"
+      })
+    });
+
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.source, "handwritten");
+    assert.equal(data.official, false);
+    assert.ok(data.warning.includes("손으로 쓴 성취기준"));
+    assert.ok(data.primaryStandard.code.includes("미적"));
+    assert.equal(data.primaryStandard.official, false);
 
     // Foundational prerequisites should be backtracked
     assert.ok(data.foundationalPrerequisites.length > 0);

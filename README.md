@@ -70,13 +70,26 @@ npm run dev
 | Method | Endpoint | 설명 |
 | :--- | :--- | :--- |
 | `GET` | `/` or `/dashboard` | 인터랙티브 웹 대시보드 HTML 서빙 |
-| `GET` | `/api/health` | 서버 상태, 가동 시간, 탑재된 성취기준 수 확인 |
-| `GET` | `/api/taxonomy/standards` | 2022 개정 성취기준 키워드·과목·학교급 검색 (`?query=분수&subject=수학`) |
-| `GET` | `/api/taxonomy/chains` | K-12 나선형 인과 체인 전체 목록 조회 |
-| `GET` | `/api/taxonomy/chain/:key` | 특정 나선형 인과 사슬 상세 위계 조회 |
-| `POST` | `/api/taxonomy/diagnose` | 성취기준 코드 기반 선수학습 결손 경로 역추적 |
-| `POST` | `/api/taxonomy/lesson-scaffold`| 3-9-3 수업 지도안 비계 및 추천 구체 조작기 자동 생성 |
-| `POST` | `/api/taxonomy/tag-content` | 교재·활동지 텍스트 입력 시 2022 성취기준 자동 태깅 |
+| `GET` | `/api/health` | 서버 상태, 가동 시간, 공식 성취기준 수(`standardsCount`)와 손작성 성취기준 수(`handwrittenStandardsCount`) |
+| `GET` | `/api/taxonomy/standards` | **고시 원문** 성취기준 검색 (`?query=일차함수&subject=수학&schoolLevel=MS&gradeBand=3~4&id=b8:[9수02-15]&limit=20`) |
+| `GET` | `/api/taxonomy/chains` | K-12 나선형 인과 체인 전체 목록 조회 (손작성 기반, `dataBasis` 표시) |
+| `GET` | `/api/taxonomy/chain/:key` | 특정 나선형 인과 사슬 상세 위계 조회 (손작성 기반) |
+| `POST` | `/api/taxonomy/diagnose` | 성취기준 코드 기반 선수학습 결손 경로 역추적 (손작성 기반) |
+| `POST` | `/api/taxonomy/lesson-scaffold`| 3-9-3 수업 지도안 비계 및 추천 구체 조작기 자동 생성 (손작성 기반) |
+| `POST` | `/api/taxonomy/tag-content` | 교재·활동지 텍스트에 **고시 원문** 성취기준 자동 태깅 |
+
+### 공식 성취기준과 손작성 데이터
+
+- `/api/taxonomy/standards`와 `/api/taxonomy/tag-content`는 기본으로 `data/kr-2022/standards.json`(교육부 고시
+  제2022-33호 원문 추출본)을 씁니다. 항목에는 `source: "official"`, 고유 `id`, 원문 `code`·`text`, 별책·쪽
+  (`citation`)이 붙습니다. `statement`는 예전 응답과 같은 이름으로 `text`를 그대로 넣은 하위 호환 필드입니다.
+- 원문은 같은 코드를 두 번 쓰는 경우가 있어(12개 코드) 항목 구분은 `id`로 합니다. `?query=[12스문01-01]`은 두 항목을 모두 돌려줍니다.
+- 예전 손작성 데이터는 `?source=handwritten`일 때만 나오고, 그때 응답과 항목에 `official: false`와 경고 문구가 붙습니다.
+- 진단·수업 비계·나선형 사슬 응답에는 `dataBasis`(`label: "비공식 손작성 성취기준 기반"`)가 붙습니다.
+- 공식 성취기준과 손작성 데이터(오개념·교구·피아제 단계·선수관계)를 잇는 근거는 `review/kr2022-remap/decisions.json`의
+  **사람이 확정한 결정**뿐입니다(`decision`이 `confirmed`·`accepted`·`approved`이고, `officialIds`/`officialId`가
+  standards.json에 있는 항목). 자동 재매핑 결과(`matched` 포함)는 쓰지 않습니다. 파일이 없으면 연결 없이 동작하므로,
+  공식 태깅 결과의 선수학습 역추적(`foundationalPrerequisites` 등)은 비어 있습니다.
 
 ---
 
@@ -130,7 +143,14 @@ k12-curriculum-taxonomy/
 
 ## ⚠️ 알려진 한계 (Known Limitations)
 
-- **한국 성취기준은 고시 원문에서 추출한 것이 아닙니다.** `scripts/build-k12-full-ontology.mjs`,
+- **검색·태깅은 고시 원문, 진단·비계는 아직 손작성입니다.** 성취기준 검색(`/api/taxonomy/standards`),
+  콘텐츠 태깅(`/api/taxonomy/tag-content`, `MarketCurriculumTagger`), 대시보드의 성취기준 목록은
+  교육부 고시 제2022-33호 원문(`data/kr-2022/standards.json`)을 씁니다. 지식 그래프, 결손 진단, 3-9-3 수업 비계,
+  교구 추천, 나선형 사슬은 여전히 아래의 손작성 성취기준을 쓰며, API 응답의 `dataBasis`와 대시보드의
+  '비공식 데이터' 배지로 표시합니다. `LessonLabCurriculumBridge`와 `Korea2022CurriculumAdapter`도 아직 손작성입니다.
+- **태깅 순위는 검증되지 않았습니다.** 공식 태깅은 문자 bigram TF-IDF 코사인으로 후보를 고르며, 하한값(0.1)은
+  표본 몇 개를 보고 정한 값입니다. 결과는 후보로만 보세요.
+- **손작성 성취기준은 고시 원문에서 추출한 것이 아닙니다.** `scripts/build-k12-full-ontology.mjs`,
   `src/core/taxonomy/Korea2022CurriculumAdapter.mjs`,
   `src/core/taxonomy/Korea2022K12CurriculumAdapter.mjs`에 들어 있는 성취기준 문장·학년 배정·
   키워드·오개념 설명은 2022 개정 교육과정 고시 문서를 기계적으로 옮긴 것이 아니라 **직접 작성한
@@ -140,8 +160,9 @@ k12-curriculum-taxonomy/
   이 저장소에는 `[1수01-02]`, `[1국01-01]`, `[3과01-01]`처럼 개별 학년 숫자를 붙인 비공식
   코드가 섞여 있습니다. 공식 코드와 같은 모양이라도 내용이 공식 성취기준과 일치한다는 보장은 없습니다.
 - **Marble 토픽 매핑(`mappedTopicIds`)도 직접 작성한 것**이며, Marble 쪽에서 검토·승인한 정렬이 아닙니다.
-- **교체 작업 진행 중:** 고시 원문(교육부 고시 2022-33호 별책)에 근거한 성취기준 데이터로
-  교체하는 작업이 진행 중입니다. 교체 전까지 위 데이터는 시연·연구용으로만 취급해 주세요.
+- **교체 작업 진행 중:** 손작성 데이터에 붙은 오개념·교구·피아제 단계·선수관계는 사람이 손작성↔공식 연결을
+  확인(`review/kr2022-remap/decisions.json`)한 뒤에 공식 성취기준으로 옮길 예정입니다. 그 전까지 손작성 기반
+  기능은 시연·연구용으로만 취급해 주세요.
 
 ---
 

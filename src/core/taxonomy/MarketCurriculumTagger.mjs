@@ -8,7 +8,22 @@
  * 3. 피아제 인지 발달 단계 (Preoperational -> Concrete Operational -> Early Formal -> Formal) 적합성 판별
  * 4. 나선형 교육과정(Spiral Curriculum) 기반 구매 교사용 선수 필수 지식(Prerequisites) 도출
  * 5. 초등 저학년 추상 기호 남용, 인지 과부하(Cognitive Overload) 감지 및 품질 검증 라벨/위험 플래그 생성
+ *
+ * 성취기준 후보는 기본으로 교육부 고시 원문(data/kr-2022/standards.json)에서 찾는다.
+ * 아래 CORE_CURRICULUM_STANDARDS·PREREQUISITE_RULES·SPIRAL_TRAJECTORIES는 손작성 데이터라
+ * 원문과 코드·문장이 다르다. `new MarketCurriculumTagger({ source: "handwritten" })`일 때만
+ * 후보로 쓰고, 공식 모드에서는 사람이 확정한 연결(review/kr2022-remap/decisions.json)이 있을 때만
+ * 선수학습·나선형 궤적을 빌려 온다.
  */
+
+import { tagOfficial } from "../kr2022/official.mjs";
+import {
+  DEFAULT_DECISIONS_PATH,
+  HANDWRITTEN_WARNING,
+  handwrittenBasis,
+  handwrittenCodesFor,
+  loadConfirmedLinks
+} from "../kr2022/handwritten-links.mjs";
 
 export const PIAGET_STAGES = Object.freeze({
   PREOPERATIONAL: "Preoperational",                     // 전조작기 (유치원~초1)
@@ -48,7 +63,7 @@ export const ALL_MARKET_TAXONOMY = Object.freeze({
 });
 
 /**
- * 2022 개정 K-12 핵심 성취기준 데이터베이스 (독립 실행 보장 빌트인 레지스트리)
+ * 손작성 성취기준 16개 (비공식 — 고시 원문 아님). source "handwritten" 모드에서만 후보로 쓴다.
  */
 export const CORE_CURRICULUM_STANDARDS = Object.freeze([
   // --- [초등 수학 (ES Math)] ---
@@ -411,11 +426,57 @@ const DEVELOPMENTAL_RISK_RULES = [
 /**
  * MarketCurriculumTagger 엔진
  */
+const OFFICIAL_SUBJECT_DOMAINS = Object.freeze({
+  "수학": ALL_MARKET_TAXONOMY.DOMAINS.math,
+  "사회": ALL_MARKET_TAXONOMY.DOMAINS.social,
+  "과학": ALL_MARKET_TAXONOMY.DOMAINS.science,
+  "과학 계열 선택 과목": ALL_MARKET_TAXONOMY.DOMAINS.science,
+  "국어": ALL_MARKET_TAXONOMY.DOMAINS.korean,
+  "영어": ALL_MARKET_TAXONOMY.DOMAINS.english,
+  "체육": ALL_MARKET_TAXONOMY.DOMAINS.arts_sports,
+  "체육 계열 선택 과목": ALL_MARKET_TAXONOMY.DOMAINS.arts_sports,
+  "음악": ALL_MARKET_TAXONOMY.DOMAINS.arts_sports,
+  "미술": ALL_MARKET_TAXONOMY.DOMAINS.arts_sports,
+  "예술 계열 선택 교과": ALL_MARKET_TAXONOMY.DOMAINS.arts_sports,
+  "실과": ALL_MARKET_TAXONOMY.DOMAINS.tech_home,
+  "기술·가정": ALL_MARKET_TAXONOMY.DOMAINS.tech_home,
+  "정보": ALL_MARKET_TAXONOMY.DOMAINS.info_ai
+});
+
+/** 공식 gradeBand("초등학교 1~2학년" 등) → all_market 학제 */
+function officialTargetStage(std) {
+  if (std.schoolLevel === "MS") return ALL_MARKET_TAXONOMY.STAGES.middle;
+  if (std.schoolLevel === "HS") return ALL_MARKET_TAXONOMY.STAGES.high_general;
+  return /1~2/.test(std.gradeBand) ? ALL_MARKET_TAXONOMY.STAGES.elem_lower : ALL_MARKET_TAXONOMY.STAGES.elem_upper;
+}
+
+/** tagOfficial 결과를 이 클래스의 내부 후보 형태로 바꾼다. 손작성 전용 필드(keywords, piagetStage)는 붙이지 않는다. */
+function officialCandidate(item) {
+  return {
+    ...item,
+    targetStage: officialTargetStage(item),
+    // all_market 택소노미의 domain 키. 대응표에 없는 교과는 null로 두고 지어내지 않는다.
+    domain: OFFICIAL_SUBJECT_DOMAINS[item.subject] ?? null,
+    curriculumDomain: item.domain,
+    gradeCluster: item.gradeBand
+  };
+}
+
 export class MarketCurriculumTagger {
+  /**
+   * @param {Object} [options]
+   * @param {"official"|"handwritten"} [options.source] 기본 "official". standards를 직접 넘기면 "handwritten".
+   * @param {string} [options.decisionsPath] 손작성↔공식 확정 연결 파일 경로
+   */
   constructor(options = {}) {
+    this.source = options.source || (options.standards ? "handwritten" : "official");
+    if (!["official", "handwritten"].includes(this.source)) {
+      throw new Error(`source는 official 또는 handwritten만 쓸 수 있습니다: '${this.source}'`);
+    }
     this.standards = options.standards || CORE_CURRICULUM_STANDARDS;
     this.prerequisiteRules = options.prerequisiteRules || PREREQUISITE_RULES;
     this.trajectories = options.trajectories || SPIRAL_TRAJECTORIES;
+    this.decisionsPath = options.decisionsPath || DEFAULT_DECISIONS_PATH;
   }
 
   /**
@@ -440,24 +501,35 @@ export class MarketCurriculumTagger {
       };
     }
 
-    // 1. 성취기준 코드 직접 명시(Regex) 및 개념 키워드 매칭 분석
-    const explicitCodes = this._extractExplicitCodes(fullText);
-    const scoredMatches = this._scoreCandidateStandards(fullText, explicitCodes);
+    const official = this.source === "official";
+    const linkState = loadConfirmedLinks(this.decisionsPath);
+
+    // 1. 성취기준 후보: 공식 모드는 고시 원문에서, 손작성 모드는 손작성 16개에서 찾는다.
+    const scoredMatches = official
+      ? tagOfficial(fullText, { subject: input.declaredSubject || null, limit: 10 }).map(officialCandidate)
+      : this._scoreCandidateStandards(fullText, this._extractExplicitCodes(fullText));
 
     // 최고 득점 성취기준 선정
     const primaryStandard = scoredMatches.length > 0 ? scoredMatches[0] : null;
+
+    // 선수학습·나선형 궤적·피아제 단계 정보는 손작성 데이터에만 있다. 공식 모드에서는
+    // 사람이 확정한 연결로 찾은 손작성 성취기준이 있을 때만 그 정보를 빌려 온다.
+    const linkedCodes = official && primaryStandard ? handwrittenCodesFor(primaryStandard.id, linkState) : [];
+    const handwrittenRef = official
+      ? (linkedCodes.length ? CORE_CURRICULUM_STANDARDS.find(s => linkedCodes.includes(s.code)) || { code: linkedCodes[0] } : null)
+      : primaryStandard;
 
     // 2. 학제(Target Stage), 교과(Subject Domain), 대분류(Major Category) 도출
     const taxonomy = this._resolveTaxonomy(primaryStandard, input.declaredStage, input.declaredSubject, fullText);
 
     // 3. 피아제 인지 발달 단계(Piaget Stage) 매핑
-    const piagetStage = this._resolvePiagetStage(taxonomy.targetStage, primaryStandard);
+    const piagetStage = this._resolvePiagetStage(taxonomy.targetStage, handwrittenRef);
 
     // 4. 구매 교사용 필수 선수학습(Prerequisites) 자동 도출
-    const prerequisites = this._derivePrerequisites(primaryStandard, scoredMatches);
+    const prerequisites = this._derivePrerequisites(handwrittenRef, scoredMatches);
 
     // 5. 나선형 교육과정 궤적(Spiral Trajectory) 연결 확인
-    const spiralTrajectory = this._identifySpiralTrajectory(primaryStandard, prerequisites);
+    const spiralTrajectory = this._identifySpiralTrajectory(handwrittenRef, prerequisites);
 
     // 6. 인지 발달 적합성 검증 및 위험 플래그 생성
     const cognitiveAudit = this._auditCognitiveDevelopment(taxonomy.targetStage, fullText, primaryStandard);
@@ -465,8 +537,10 @@ export class MarketCurriculumTagger {
     // 7. 교사용 품질 검증 뱃지 및 액션 가이드 발급
     const qualityLabel = this._generateQualityLabel(cognitiveAudit, primaryStandard, prerequisites);
 
-    return {
+    const report = {
       success: true,
+      source: this.source,
+      official,
       timestamp: new Date().toISOString(),
       metadata: {
         title,
@@ -474,12 +548,16 @@ export class MarketCurriculumTagger {
         analyzedAt: new Date().toISOString()
       },
       curriculum: {
+        source: this.source,
         primaryCode: primaryStandard ? primaryStandard.code : null,
+        primaryId: official && primaryStandard ? primaryStandard.id : null,
         standardTitle: primaryStandard ? primaryStandard.statement : null,
         schoolLevel: primaryStandard ? primaryStandard.schoolLevel : taxonomy.schoolLevel,
         gradeCluster: primaryStandard ? primaryStandard.gradeCluster : null,
         confidenceScore: primaryStandard ? primaryStandard.confidence : 0,
+        citation: official && primaryStandard ? primaryStandard.citation : null,
         candidateStandards: scoredMatches.slice(0, 4).map(s => ({
+          ...(official ? { id: s.id, text: s.text, citation: s.citation } : {}),
           code: s.code,
           statement: s.statement,
           confidence: s.confidence,
@@ -495,12 +573,23 @@ export class MarketCurriculumTagger {
       prerequisites: {
         count: prerequisites.length,
         list: prerequisites,
-        teacherSummaryKo: this._buildPrerequisiteSummary(prerequisites, primaryStandard)
+        teacherSummaryKo: official && !handwrittenRef
+          ? "선수학습 정보가 없습니다. 선수학습 규칙은 손작성 성취기준에만 있고, 이 공식 성취기준과 사람이 확정한 연결이 아직 없습니다."
+          : this._buildPrerequisiteSummary(prerequisites, primaryStandard)
       },
       spiralTrajectory,
       cognitiveAudit,
-      qualityLabel
+      qualityLabel,
+      // 선수학습·나선형 궤적·피아제 단계가 손작성 데이터에서 왔는지 표시한다.
+      handwrittenBasis: {
+        ...handwrittenBasis(linkState, handwrittenRef?.code ? [handwrittenRef.code] : []),
+        handwrittenCode: handwrittenRef?.code ?? null,
+        used: Boolean(handwrittenRef),
+        appliesTo: ["prerequisites", "spiralTrajectory", "taxonomy.piagetStage"]
+      }
     };
+    if (!official) report.warning = HANDWRITTEN_WARNING;
+    return report;
   }
 
   /**

@@ -16,12 +16,14 @@ import { TaxonomyGraphEngine } from "../core/taxonomy/TaxonomyGraphEngine.mjs";
 import {
   Korea2022K12CurriculumAdapter,
   K12_STANDARDS,
-  K12_SPIRAL_CHAINS,
-  K12_TERMINOLOGY_DICTIONARY
+  K12_SPIRAL_CHAINS
 } from "../core/taxonomy/Korea2022K12CurriculumAdapter.mjs";
 import { LessonPlannerRAG } from "../core/taxonomy/LessonPlannerRAG.mjs";
 import { recommendConcreteManipulative } from "../core/taxonomy/DiagnosticAssessmentEngine.mjs";
 import { EmpiricalWeightCalibrator } from "../core/taxonomy/EmpiricalWeightCalibrator.mjs";
+import { loadOfficial } from "../core/kr2022/official.mjs";
+import { DEFAULT_DECISIONS_PATH, handwrittenBasis, loadConfirmedLinks } from "../core/kr2022/handwritten-links.mjs";
+import { searchStandards, tagContent, UnknownSourceError } from "../core/kr2022/standards-service.mjs";
 
 const NEW_SPIRAL_CHAIN_KEYS = Object.freeze([
   "reading_comprehension",
@@ -95,6 +97,7 @@ export class K12TaxonomyServer {
     this.adapter = options.adapter || new Korea2022K12CurriculumAdapter({ graphEngine: this.graphEngine });
     this.lessonPlanner = options.lessonPlanner || new LessonPlannerRAG(this.graphEngine);
     this.calibrator = options.calibrator || new EmpiricalWeightCalibrator();
+    this.decisionsPath = options.decisionsPath || DEFAULT_DECISIONS_PATH;
 
     const defaultPublicDir = fileURLToPath(new URL("../../public", import.meta.url));
     const cwdPublicDir = path.resolve(process.cwd(), "public");
@@ -236,12 +239,13 @@ export class K12TaxonomyServer {
 
     // 2. GET /api/health
     if (method === "GET" && (pathname === "/api/health" || pathname === "/health")) {
-      const standardsCount = K12_STANDARDS.length;
       return sendJson(res, 200, {
         status: "ok",
         uptime: (Date.now() - this.startTime) / 1000,
         timestamp: new Date().toISOString(),
-        standardsCount
+        standardsCount: loadOfficial().dataset.count,
+        standardsSource: "official",
+        handwrittenStandardsCount: K12_STANDARDS.length
       });
     }
 
@@ -274,22 +278,22 @@ export class K12TaxonomyServer {
 
     // 3. GET /api/taxonomy/standards
     if (method === "GET" && pathname === "/api/taxonomy/standards") {
-      const query = reqUrl.searchParams.get("query") || "";
-      const subject = reqUrl.searchParams.get("subject") || null;
-      const schoolLevel = reqUrl.searchParams.get("schoolLevel") || null;
-      const limitParam = reqUrl.searchParams.get("limit");
-      const limit = limitParam ? parseInt(limitParam, 10) : 20;
-
-      const standards = this.adapter.searchK12Standards(query, {
-        subject,
-        schoolLevel,
-        limit
-      });
-
-      return sendJson(res, 200, {
-        total: standards.length,
-        standards
-      });
+      const p = reqUrl.searchParams;
+      const limitParam = p.get("limit");
+      try {
+        return sendJson(res, 200, searchStandards({
+          query: p.get("query") || "",
+          id: p.get("id") || null,
+          subject: p.get("subject") || null,
+          schoolLevel: p.get("schoolLevel") || null,
+          gradeBand: p.get("gradeBand") || null,
+          limit: limitParam ? parseInt(limitParam, 10) : 20,
+          source: p.get("source")
+        }, { adapter: this.adapter, decisionsPath: this.decisionsPath }));
+      } catch (err) {
+        if (err instanceof UnknownSourceError) return sendJson(res, 400, { error: err.message });
+        throw err;
+      }
     }
 
     // 4. GET /api/taxonomy/chains
@@ -304,7 +308,8 @@ export class K12TaxonomyServer {
         chains: allChains,
         newChains,
         totalCount: allChains.length,
-        newChainsCount: newChains.length
+        newChainsCount: newChains.length,
+        dataBasis: handwrittenBasis(loadConfirmedLinks(this.decisionsPath))
       });
     }
 
@@ -329,7 +334,11 @@ export class K12TaxonomyServer {
         description: chain.description,
         stages: chain.stages,
         stagesCount: chain.stagesCount,
-        transitions: chain.transitions
+        transitions: chain.transitions,
+        dataBasis: handwrittenBasis(
+          loadConfirmedLinks(this.decisionsPath),
+          (chain.stages || []).map(st => st.standardCode)
+        )
       });
     }
 
@@ -361,7 +370,8 @@ export class K12TaxonomyServer {
           standardCode,
           mistakePattern: mistakePattern || null,
           remediationAdvice,
-          ...diagnosis
+          ...diagnosis,
+          dataBasis: handwrittenBasis(loadConfirmedLinks(this.decisionsPath), [standardCode])
         });
       } catch (err) {
         return sendJson(res, 400, {
@@ -421,7 +431,8 @@ export class K12TaxonomyServer {
           scaffold393: lessonPlan.modular393,
           dialogScript: lessonPlan.dialogScript,
           rubric: lessonPlan.rubric,
-          lessonPlan
+          lessonPlan,
+          dataBasis: handwrittenBasis(loadConfirmedLinks(this.decisionsPath), [topicId])
         });
       } catch (err) {
         return sendJson(res, 500, {
@@ -445,80 +456,15 @@ export class K12TaxonomyServer {
         return sendJson(res, 400, { error: "text is required in request body" });
       }
 
-      const cleanText = text.trim();
-      const cleanSubject = subject ? subject.trim() : null;
-
-      // 1. Check for explicit standard code in text (e.g. "[6수01-06]" or "6수01-06")
-      const codeRegex = /\[?([1-9]|1[0-2])([가-힣]+)([0-9]{2})-([0-9]{2})\]?/g;
-      const explicitCodes = [];
-      let match;
-      while ((match = codeRegex.exec(cleanText)) !== null) {
-        explicitCodes.push(`[${match[1]}${match[2]}${match[3]}-${match[4]}]`);
+      try {
+        return sendJson(res, 200, tagContent(
+          { text, subject, source: reqUrl.searchParams.get("source") ?? body.source },
+          { adapter: this.adapter, graphEngine: this.graphEngine, decisionsPath: this.decisionsPath }
+        ));
+      } catch (err) {
+        if (err instanceof UnknownSourceError) return sendJson(res, 400, { error: err.message });
+        throw err;
       }
-
-      // 2. Search standards matching query text
-      const searchResults = this.adapter.searchK12Standards(cleanText, {
-        subject: cleanSubject,
-        limit: 10
-      });
-
-      // 3. Score standards based on explicit mention, keyword dictionary, and search
-      const scoredMap = new Map();
-
-      // Explicit code matches first
-      for (const code of explicitCodes) {
-        const std = this.adapter.getK12Standard(code);
-        if (std) {
-          scoredMap.set(std.code, { standard: std, score: (scoredMap.get(std.code)?.score || 0) + 300 });
-        }
-      }
-
-      // Search results
-      for (const std of searchResults) {
-        scoredMap.set(std.code, { standard: std, score: (scoredMap.get(std.code)?.score || 0) + 100 });
-      }
-
-      // Terminology dictionary matching
-      const lowerText = cleanText.toLowerCase();
-      for (const [term, meta] of Object.entries(K12_TERMINOLOGY_DICTIONARY)) {
-        if (lowerText.includes(term.toLowerCase())) {
-          // Find standards addressing this domain or subject
-          const matched = this.adapter.searchK12Standards(term, {
-            subject: cleanSubject || meta.subject,
-            limit: 3
-          });
-          for (const std of matched) {
-            scoredMap.set(std.code, { standard: std, score: (scoredMap.get(std.code)?.score || 0) + 50 });
-          }
-        }
-      }
-
-      const scoredStandards = Array.from(scoredMap.values()).sort((a, b) => b.score - a.score);
-      const matchedStandards = scoredStandards.map(s => s.standard);
-      const primaryStandard = matchedStandards[0] || null;
-
-      // 4. Backtrack foundational prerequisites DAG if primary standard is identified
-      let remediation = null;
-      if (primaryStandard) {
-        try {
-          remediation = this.graphEngine.diagnoseK12RemediationPath(primaryStandard.code, []);
-        } catch {
-          remediation = null;
-        }
-      }
-
-      return sendJson(res, 200, {
-        text: cleanText,
-        subject: cleanSubject || primaryStandard?.subject || null,
-        matchedStandardsCount: matchedStandards.length,
-        matchedStandards,
-        primaryStandard,
-        foundationalPrerequisites: remediation?.unmasteredPrerequisites || [],
-        earliestFoundationalGap: remediation?.earliestFoundationalGap || null,
-        remediationPath: remediation?.remediationPath || [],
-        piagetStageProgression: remediation?.piagetStageProgression || null,
-        schoolLevelsTraversed: remediation?.schoolLevelsTraversed || []
-      });
     }
 
     // 9. Unknown route -> 404
