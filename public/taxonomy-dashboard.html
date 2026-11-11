@@ -286,6 +286,9 @@
     .official-std-status { font-size: 12px; color: var(--text-secondary); word-break: keep-all; margin-bottom: 12px; }
     .official-std-table-wrap { width: 100%; overflow-x: auto; }
     .official-std-table-wrap .item-code { white-space: nowrap; }
+    .sidebar-unofficial-note { display: flex; }
+    /* 공식 원문 화면 옆에 손작성 목록이 섞여 보이지 않도록 사이드바를 숨긴다 */
+    body[data-active-tab="tab-standards"] aside.sidebar { display: none; }
     @media (max-width: 640px) {
       .official-std-table-wrap .rubric-table { min-width: 560px; }
       #tab-standards .search-box { width: 100% !important; }
@@ -1088,8 +1091,11 @@
   <main class="app-main">
     
     <!-- Left Navigation Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" aria-label="비공식 손작성 성취기준 목록">
       <div class="sidebar-header">
+        <div class="sidebar-unofficial-note">
+          <span class="unofficial-badge" title="이 목록의 코드·문장은 교육부 고시 원문이 아니라 이 저장소에서 손으로 쓴 성취기준입니다. 공식 성취기준은 '2022 개정 연동' 탭에서 보세요."><i class="fi fi-rr-info"></i>비공식 손작성 성취기준 (고시 원문 아님)</span>
+        </div>
         <div class="search-box">
           <i class="fi fi-rr-search"></i>
           <input type="text" class="search-input" id="taxonomySearchInput" placeholder="성취코드([12미적], [9수], [4수]) 또는 개념 검색..." oninput="handleSearchInput(this.value)">
