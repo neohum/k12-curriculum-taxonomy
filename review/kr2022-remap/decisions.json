@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "교사가 검토 화면(/review/)에서 내린 손작성 성취기준 재매핑 결정. 키는 원래 코드#정규화 문장 sha256 앞 12자리. decision: accept-candidate(자동 후보가 맞음) | choose-other(다른 공식 성취기준 지정) | discard(해당 없음, 손작성 폐기) | defer(보류). officialId는 standards.json의 id(accept-candidate·choose-other만).",
+  "decisions": {}
+}

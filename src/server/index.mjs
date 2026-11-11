@@ -30,6 +30,7 @@ function parseArgs() {
 async function main() {
   const { port, host } = parseArgs();
   const server = new K12TaxonomyServer({ port, host });
+  (await import("./review-routes.mjs")).attachReviewRoutes(server); // 교사용 검토 화면 /review/
 
   console.log("\n==================================================================");
   console.log(" 🌐 K-12 Curriculum Cognitive Taxonomy & Scaffold Server");

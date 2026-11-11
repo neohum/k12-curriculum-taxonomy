@@ -7,7 +7,7 @@
 | `standards.json` | 성취기준 목록. 형식은 아래 "필드" 절에 있습니다. |
 | `sources.json` | 원문 파일(HWP·PDF)의 NCIC 다운로드 URL, 받은 시각, sha256. 원본 파일은 저장소에 넣지 않습니다. |
 | `extraction-report.json` | 별책별 추출 개수, 원문에서 같은 코드가 겹치는 경우(`codeConflicts`), 해설에만 나오는 코드 오기(`unextractedCodes`) |
-| `prerequisites.manual.json` | 사람이 직접 넣는 선수관계. `from`과 `to`에는 `id`를 씁니다. |
+| `prerequisites.manual.json` | 사람이 직접 넣는 선수관계. `from`과 `to`에는 `id`를 씁니다. 검토 화면(`/review/#prereq`)에서 넣을 수 있고, 학년 역전(코드 숫자 2·4·6·9·10·12 순서로 판단, 같은 학년군은 허용)·순환·자기 간선·없는 id·중복은 거부됩니다(`src/core/kr2022/manual-rules.mjs`). |
 
 ## 무엇이 원문 그대로이고 무엇이 붙인 값인가
 

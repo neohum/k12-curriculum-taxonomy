@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>성취기준 검토</title>
+  <meta name="description" content="손작성 성취기준을 2022 개정 고시 원문 성취기준에 연결하고, 공식 성취기준 사이의 선수관계를 교사가 직접 입력하는 화면">
+  <link rel="preload" as="style" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-light: #eef2ff;
+      --accent-border: #c7d2fe;
+      --success: #047857;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --warning: #b45309;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      --danger: #be123c;
+      --danger-light: #fff1f2;
+      --danger-border: #fecdd3;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-full: 9999px;
+      --touch-min: 44px;
+      --gutter: clamp(16px, 4vw, 32px);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-page: #090a0f;
+        --bg-surface: #11131a;
+        --bg-surface-elevated: #1a1d27;
+        --border-color: #2a3042;
+        --text-primary: #f8fafc;
+        --text-secondary: #b6c0d0;
+        --text-muted: #8a94a8;
+        --accent: #818cf8;
+        --accent-hover: #a5b4fc;
+        --accent-light: rgba(129, 140, 248, 0.14);
+        --accent-border: rgba(129, 140, 248, 0.4);
+        --success: #34d399;
+        --success-light: rgba(16, 185, 129, 0.14);
+        --success-border: rgba(16, 185, 129, 0.4);
+        --warning: #fbbf24;
+        --warning-light: rgba(245, 158, 11, 0.14);
+        --warning-border: rgba(245, 158, 11, 0.4);
+        --danger: #fb7185;
+        --danger-light: rgba(244, 63, 94, 0.14);
+        --danger-border: rgba(244, 63, 94, 0.4);
+        color-scheme: dark;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.35; }
+    p { margin: 0; text-wrap: pretty; }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    [hidden] { display: none !important; }
+
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
+
+    /* 머리글 */
+    .top {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-top: 12px; padding-bottom: 12px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; margin-right: auto; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: var(--radius-md); flex-shrink: 0;
+      background: var(--accent); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 20px; line-height: 0;
+    }
+    .brand h1 { font-size: 1.125rem; }
+    .brand p { font-size: 0.8125rem; color: var(--text-muted); }
+    .tabs { display: flex; gap: 4px; background: var(--bg-surface-elevated); padding: 4px; border-radius: var(--radius-md); max-width: 100%; }
+
+    /* 버튼 */
+    .btn {
+      min-height: var(--touch-min); padding: 0 16px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1;
+      border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+      background: var(--bg-surface); color: var(--text-primary);
+      font: inherit; font-size: 0.9375rem; font-weight: 600; white-space: nowrap; cursor: pointer;
+    }
+    .btn i { display: inline-flex; align-items: center; justify-content: center; line-height: 0; font-size: 16px; }
+    .btn:hover:not(:disabled) { background: var(--bg-surface-elevated); }
+    .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .pick:focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 2px;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn.danger { color: var(--danger); border-color: var(--danger-border); }
+    .btn.danger:hover:not(:disabled) { background: var(--danger-light); }
+    .btn.ghost { border-color: transparent; background: transparent; }
+    .tab { border: 0; background: transparent; color: var(--text-secondary); }
+    .tab[aria-selected="true"] { background: var(--bg-surface); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+    kbd {
+      display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+      min-width: 22px; height: 22px; padding: 0 6px; border-radius: 4px;
+      border: 1px solid currentColor; opacity: 0.75;
+      font: 600 0.75rem ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* 진행률 */
+    .progress-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 16px 0 8px; }
+    .progress { flex: 1 1 240px; min-width: 0; }
+    .progress-label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 0.9375rem; color: var(--text-secondary); }
+    .progress-label strong { color: var(--text-primary); }
+    .bar { height: 10px; border-radius: var(--radius-full); background: var(--bg-surface-elevated); overflow: hidden; margin-top: 6px; display: flex; }
+    .bar span { display: block; height: 100%; }
+    .bar .done { background: var(--success); }
+    .bar .defer { background: var(--warning); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0; }
+    .chip {
+      min-height: var(--touch-min); padding: 0 14px; border-radius: var(--radius-full);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; line-height: 1;
+      border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-secondary);
+      font: inherit; font-size: 0.875rem; font-weight: 600; white-space: nowrap; cursor: pointer;
+    }
+    .chip[aria-pressed="true"] { background: var(--accent-light); border-color: var(--accent-border); color: var(--accent); }
+
+    .nav-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 4px 0 16px; }
+    .nav-row .pos { font-weight: 700; padding: 0 8px; white-space: nowrap; }
+    .nav-row .spacer { flex: 1; }
+
+    /* 카드 */
+    .card {
+      background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+      padding: 16px; min-width: 0;
+    }
+    .card-title { font-size: 0.875rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .card-title i { display: inline-flex; line-height: 0; }
+    .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; align-items: start; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+      padding: 5px 10px; border-radius: var(--radius-full); white-space: nowrap;
+      font-size: 0.8125rem; font-weight: 600;
+      background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border-color);
+    }
+    .badge.code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-primary); }
+    .badge.ok { background: var(--success-light); color: var(--success); border-color: var(--success-border); }
+    .badge.warn { background: var(--warning-light); color: var(--warning); border-color: var(--warning-border); }
+    .badge.bad { background: var(--danger-light); color: var(--danger); border-color: var(--danger-border); }
+    .big-text { font-size: 1.375rem; line-height: 1.65; font-weight: 500; }
+    .cand-text { font-size: 1.25rem; line-height: 1.65; }
+    .small { font-size: 0.875rem; color: var(--text-muted); }
+
+    .cand { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; display: grid; gap: 10px; }
+    .cand + .cand { margin-top: 12px; }
+    .cand.chosen { border-color: var(--success); background: var(--success-light); }
+    .cand .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+    .score { font-size: 0.8125rem; color: var(--text-muted); white-space: nowrap; }
+    .empty { text-align: center; padding: 24px 12px; color: var(--text-secondary); }
+    .empty i { font-size: 28px; display: inline-flex; line-height: 0; margin-bottom: 8px; color: var(--text-muted); }
+
+    .saved {
+      margin-top: 16px; padding: 12px 14px; border-radius: var(--radius-sm);
+      background: var(--bg-surface-elevated); border: 1px solid var(--border-color); font-size: 0.9375rem;
+    }
+    .saved strong { display: block; margin-bottom: 4px; }
+
+    .decide { margin-top: 16px; display: grid; gap: 12px; }
+    .decide-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    label.field { display: grid; gap: 6px; font-size: 0.9375rem; font-weight: 600; min-width: 0; }
+    textarea, input[type="search"], input[type="text"], select {
+      width: 100%; min-height: var(--touch-min); padding: 10px 12px;
+      border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+      background: var(--bg-surface); color: var(--text-primary); font: inherit; font-size: 1rem; font-weight: 400;
+    }
+    textarea { min-height: 72px; resize: vertical; line-height: 1.5; }
+
+    .search { margin-top: 16px; }
+    .search-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr); gap: 8px; }
+    .pair .search-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .pair .search-form .kw { grid-column: 1 / -1; }
+    .results { margin-top: 12px; display: grid; gap: 8px; max-height: 520px; overflow-y: auto; padding: 2px; }
+    .pick {
+      width: 100%; text-align: left; display: grid; gap: 6px; padding: 12px 14px; min-height: var(--touch-min);
+      border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary);
+      font: inherit; cursor: pointer;
+    }
+    .pick:hover { border-color: var(--accent-border); background: var(--accent-light); }
+    .pick[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-light); }
+    .pick .pick-text { font-size: 1.0625rem; line-height: 1.6; }
+    .pick .pick-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.8125rem; color: var(--text-muted); }
+
+    .notice {
+      margin-top: 16px; padding: 12px 14px; border-radius: var(--radius-sm); display: flex; gap: 10px; align-items: flex-start;
+      background: var(--warning-light); border: 1px solid var(--warning-border); color: var(--text-primary); font-size: 0.9375rem;
+    }
+    .notice i { color: var(--warning); display: inline-flex; line-height: 0; margin-top: 4px; }
+    .problems { margin: 0; padding: 12px 14px 12px 32px; border-radius: var(--radius-sm); background: var(--danger-light); border: 1px solid var(--danger-border); color: var(--danger); font-weight: 600; }
+    .problems li + li { margin-top: 4px; }
+    .passes { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--success-light); border: 1px solid var(--success-border); color: var(--success); font-weight: 600; display: flex; gap: 8px; align-items: center; }
+    .passes i { display: inline-flex; line-height: 0; }
+
+    .shortcuts { margin: 24px 0; font-size: 0.875rem; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 8px 16px; }
+    .shortcuts span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+    /* 선수관계 */
+    .pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 16px; }
+    .pair-arrow { align-self: center; font-size: 28px; color: var(--accent); display: inline-flex; line-height: 0; }
+    .chosen-std { margin-top: 12px; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--accent); background: var(--accent-light); display: grid; gap: 8px; }
+    .seg { display: inline-flex; gap: 4px; background: var(--bg-surface-elevated); padding: 4px; border-radius: var(--radius-md); flex-wrap: wrap; }
+    .seg .btn { border: 0; background: transparent; }
+    .seg .btn[aria-pressed="true"] { background: var(--bg-surface); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+    .edge-form { margin-top: 16px; display: grid; gap: 12px; }
+    .edges { margin-top: 16px; display: grid; gap: 12px; }
+    .edge { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+    .edge .side { display: grid; gap: 4px; min-width: 0; }
+    .edge .arrow { font-size: 20px; color: var(--text-muted); display: inline-flex; line-height: 0; padding-top: 6px; }
+    .edge-note { grid-column: 1 / -1; font-size: 0.9375rem; color: var(--text-secondary); }
+    h2.section { font-size: 1.25rem; margin-top: 24px; }
+
+    .toast {
+      position: fixed; top: 16px; right: 16px; z-index: 50; max-width: calc(100vw - 32px);
+      padding: 12px 16px; border-radius: var(--radius-sm); background: var(--text-primary); color: var(--bg-page);
+      font-weight: 600; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+    }
+    .error-box { margin-top: 12px; color: var(--danger); font-weight: 600; }
+
+    @media (max-width: 860px) {
+      .grid2, .pair { grid-template-columns: minmax(0, 1fr); }
+      .pair-arrow { justify-self: center; transform: rotate(90deg); }
+      .search-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+      .search-form .kw { grid-column: 1 / -1; }
+      .edge { grid-template-columns: minmax(0, 1fr); }
+      .edge .arrow { transform: rotate(90deg); padding: 0; justify-self: start; }
+      .big-text { font-size: 1.25rem; }
+      .cand-text { font-size: 1.125rem; }
+    }
+    @media (max-width: 480px) {
+      .brand p { display: none; }
+      .tabs { width: 100%; }
+      .tabs .tab { flex: 1; padding: 0 8px; }
+      .decide-buttons .btn { flex: 1 1 calc(50% - 4px); }
+      .nav-row .btn .label { display: none; }
+      .shortcuts { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i class="fi fi-rr-list-check"></i></span>
+        <div>
+          <h1>성취기준 검토</h1>
+          <p>2022 개정 교육과정 고시 원문(교육부 고시 제2022-33호) 기준</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="검토 화면">
+        <button class="btn tab" role="tab" id="tab-remap" aria-controls="view-remap" aria-selected="true"><i class="fi fi-rr-list-check"></i>재매핑 검토</button>
+        <button class="btn tab" role="tab" id="tab-prereq" aria-controls="view-prereq" aria-selected="false"><i class="fi fi-rr-link"></i>선수관계 입력</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="readonly" class="notice" hidden>
+      <i class="fi fi-rr-lock"></i>
+      <p>읽기 전용입니다. 저장하려면 서버를 띄운 컴퓨터에서 <code>http://localhost:포트/review/</code>로 여세요.</p>
+    </div>
+    <div id="load-error" class="error-box" role="alert" hidden></div>
+
+    <!-- 재매핑 검토 -->
+    <section id="view-remap" role="tabpanel" aria-labelledby="tab-remap">
+      <div class="progress-row">
+        <div class="progress">
+          <div class="progress-label">
+            <span>결정 <strong id="prog-done">0</strong> / <span id="prog-total">0</span>건</span>
+            <span>보류 <span id="prog-defer">0</span> · 남음 <span id="prog-left">0</span></span>
+          </div>
+          <div class="bar" aria-hidden="true"><span class="done" id="bar-done"></span><span class="defer" id="bar-defer"></span></div>
+        </div>
+      </div>
+      <div class="chips" id="group-chips" role="group" aria-label="검토 묶음"></div>
+      <div class="nav-row">
+        <button class="btn" id="prev" title="이전 항목 (←)"><i class="fi fi-rr-angle-left"></i><span class="label">이전</span><kbd>←</kbd></button>
+        <span class="pos" id="pos" aria-live="polite">-</span>
+        <button class="btn" id="next" title="다음 항목 (→)"><span class="label">다음</span><kbd>→</kbd><i class="fi fi-rr-angle-right"></i></button>
+        <span class="spacer"></span>
+        <button class="btn primary" id="next-open" title="다음 미결정 항목 (N)"><i class="fi fi-rr-forward"></i>다음 미결정<kbd>N</kbd></button>
+      </div>
+
+      <div class="grid2">
+        <article class="card" aria-labelledby="hw-title">
+          <h2 class="card-title" id="hw-title"><i class="fi fi-rr-edit"></i>손작성 성취기준 (저장소에 있던 문장)</h2>
+          <div class="meta" id="hw-meta"></div>
+          <p class="big-text" id="hw-text"></p>
+          <div class="saved" id="hw-saved" hidden></div>
+        </article>
+
+        <article class="card" aria-labelledby="cand-title">
+          <h2 class="card-title" id="cand-title"><i class="fi fi-rr-document"></i>후보 공식 성취기준 (고시 원문)</h2>
+          <div id="cands"></div>
+        </article>
+      </div>
+
+      <div class="card decide">
+        <label class="field" for="note">메모 <span class="small">(선택, 결정과 함께 저장 · <kbd>M</kbd>으로 이동)</span>
+          <textarea id="note" maxlength="2000" placeholder="예: 손작성 문장은 두 성취기준을 합친 것. 앞부분만 해당."></textarea>
+        </label>
+        <div class="decide-buttons">
+          <button class="btn" id="btn-search"><i class="fi fi-rr-search"></i>다른 성취기준 검색해 지정<kbd>S</kbd></button>
+          <button class="btn danger" id="btn-discard"><i class="fi fi-rr-cross-circle"></i>해당 없음 (손작성 폐기)<kbd>D</kbd></button>
+          <button class="btn" id="btn-defer"><i class="fi fi-rr-pause-circle"></i>보류<kbd>H</kbd></button>
+        </div>
+        <div id="decide-error" class="error-box" role="alert" hidden></div>
+      </div>
+
+      <section class="card search" id="search-panel" hidden aria-labelledby="search-title">
+        <h2 class="card-title" id="search-title"><i class="fi fi-rr-search"></i>공식 성취기준 검색 — 고른 것을 이 손작성 항목에 지정</h2>
+        <div class="search-form" id="remap-search-form"></div>
+        <p class="small" id="remap-search-count" aria-live="polite"></p>
+        <div class="results" id="remap-search-results"></div>
+      </section>
+
+      <div class="shortcuts" aria-label="단축키">
+        <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 후보가 맞음</span>
+        <span><kbd>S</kbd> 다른 성취기준 검색</span>
+        <span><kbd>D</kbd> 해당 없음</span>
+        <span><kbd>H</kbd> 보류</span>
+        <span><kbd>M</kbd> 메모</span>
+        <span><kbd>←</kbd><kbd>→</kbd> 이전·다음</span>
+        <span><kbd>N</kbd> 다음 미결정</span>
+        <span><kbd>Esc</kbd> 입력칸 나가기</span>
+      </div>
+    </section>
+
+    <!-- 선수관계 입력 -->
+    <section id="view-prereq" role="tabpanel" aria-labelledby="tab-prereq" hidden>
+      <p class="small" style="margin-top:16px">"A를 먼저 배워야 B를 배울 수 있다"는 관계를 하나씩 넣습니다. 학년군이 뒤로 가는 관계, 자기 자신, 순환(A→B→…→A)은 저장되지 않습니다.</p>
+      <div class="pair">
+        <div class="card">
+          <h2 class="card-title"><i class="fi fi-rr-document"></i>A · 먼저 배울 성취기준</h2>
+          <div class="search-form" id="a-form"></div>
+          <p class="small" id="a-count" aria-live="polite"></p>
+          <div class="results" id="a-results"></div>
+          <div id="a-chosen"></div>
+        </div>
+        <span class="pair-arrow" aria-hidden="true"><i class="fi fi-rr-arrow-right"></i></span>
+        <div class="card">
+          <h2 class="card-title"><i class="fi fi-rr-document"></i>B · 나중에 배울 성취기준</h2>
+          <div class="search-form" id="b-form"></div>
+          <p class="small" id="b-count" aria-live="polite"></p>
+          <div class="results" id="b-results"></div>
+          <div id="b-chosen"></div>
+        </div>
+      </div>
+
+      <div class="card edge-form">
+        <div class="field" role="group" aria-labelledby="strength-label">
+          <span id="strength-label" style="font-weight:600">관계의 세기</span>
+          <div class="seg">
+            <button class="btn" data-strength="hard" aria-pressed="true">필수 (hard)</button>
+            <button class="btn" data-strength="soft" aria-pressed="false">권장 (soft)</button>
+          </div>
+        </div>
+        <label class="field" for="edge-note">근거 메모 <span class="small">(필수 — 왜 A가 B의 선수학습인지)</span>
+          <textarea id="edge-note" maxlength="2000" placeholder="예: 두 자리 수의 자릿값을 알아야 받아올림이 있는 덧셈을 설명할 수 있다."></textarea>
+        </label>
+        <div id="edge-check" aria-live="polite"></div>
+        <div><button class="btn primary" id="edge-add"><i class="fi fi-rr-plus"></i>관계 추가</button></div>
+      </div>
+
+      <h2 class="section">입력한 선수관계 <span class="small" id="edge-count"></span></h2>
+      <div class="edges" id="edge-list"></div>
+      <div style="height:32px"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script type="module">
+    import { checkEdge, checkManualEdges, gradeLabel } from "/review/manual-rules.mjs";
+
+    const API = "/api/review/kr2022";
+    const GROUPS = [
+      { id: "review-queue", label: "검토 큐" },
+      { id: "no-candidates", label: "후보 없음" },
+      { id: "matched-no-reason", label: "사유 없는 matched" },
+      { id: "other", label: "기타" }
+    ];
+    const DECISION_LABEL = {
+      "accept-candidate": "자동 후보가 맞음",
+      "choose-other": "다른 공식 성취기준 지정",
+      discard: "해당 없음 (손작성 폐기)",
+      defer: "보류"
+    };
+    const STATUS_LABEL = { matched: "자동: 일치 후보", ambiguous: "자동: 애매", unmapped: "자동: 연결 못 함" };
+    const REASON_LABEL = {
+      "near-miss": "점수 낮은 후보만 있음",
+      "top-two-within-margin": "1·2등 점수 차 작음",
+      "low-score": "점수 0.75 미만",
+      "narrow-margin": "2등과 차이 작음",
+      "shared-target": "다른 손작성 항목과 같은 후보"
+    };
+    const BAND_OF_GRADE = [
+      [/1|2/, "초등학교 1~2학년"], [/3|4/, "초등학교 3~4학년"], [/5|6/, "초등학교 5~6학년"]
+    ];
+
+    const state = {
+      items: [], decisions: {}, standards: [], byId: new Map(), canSave: false,
+      group: "review-queue", index: 0, edges: [], strength: "hard", pickA: null, pickB: null
+    };
+
+    // ---------- 작은 도구 ----------
+    function h(tag, attrs = {}, ...children) {
+      const el = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (v == null || v === false) continue;
+        if (k === "class") el.className = v;
+        else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v === true ? "" : v);
+      }
+      for (const c of children.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : String(c));
+      return el;
+    }
+    const icon = name => h("i", { class: `fi fi-rr-${name}`, "aria-hidden": "true" });
+    const $ = id => document.getElementById(id);
+    let toastTimer;
+    function toast(msg) {
+      const t = $("toast");
+      t.textContent = msg;
+      t.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.hidden = true; }, 4000);
+    }
+    function fmtTime(iso) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso || "");
+      return m ? `${m[1]}.${m[2]}.${m[3]} ${m[4]}:${m[5]}` : "";
+    }
+    async function getJson(url) {
+      const r = await fetch(url);
+      const body = await r.json();
+      if (!r.ok) throw new Error(body.error || `HTTP ${r.status}`);
+      return body;
+    }
+    async function postJson(url, data) {
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const err = new Error(body.error || `HTTP ${r.status}`);
+        err.problems = body.problems;
+        throw err;
+      }
+      return body;
+    }
+    const stdMeta = s => [s.code, s.subject + (s.course && s.course !== s.subject ? ` · ${s.course}` : ""), s.gradeBand, s.domain].filter(Boolean);
+
+    // ---------- 공식 성취기준 검색 ----------
+    function searchStandards({ subject, band, keyword }, limit = 60) {
+      const words = keyword.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const out = [];
+      let total = 0;
+      for (const s of state.standards) {
+        if (subject && s.subject !== subject) continue;
+        if (band && s.gradeBand !== band) continue;
+        if (words.length) {
+          const hay = `${s.code} ${s.text} ${s.domain ?? ""} ${s.course ?? ""}`.toLowerCase();
+          if (!words.every(w => hay.includes(w))) continue;
+        }
+        total++;
+        if (out.length < limit) out.push(s);
+      }
+      return { total, list: out };
+    }
+
+    function buildSearchForm(container, prefix, onChange) {
+      const subjects = [...new Set(state.standards.map(s => s.subject))];
+      const bands = [...new Set(state.standards.map(s => s.gradeBand))];
+      const subjectSel = h("select", { id: `${prefix}-subject` }, h("option", { value: "" }, "전체 교과"), subjects.map(s => h("option", { value: s }, s)));
+      const bandSel = h("select", { id: `${prefix}-band` }, h("option", { value: "" }, "전체 학년군"), bands.map(b => h("option", { value: b }, b)));
+      const kw = h("input", { type: "search", id: `${prefix}-kw`, placeholder: "예: 자릿값 덧셈", autocomplete: "off" });
+      container.replaceChildren(
+        h("label", { class: "field", for: `${prefix}-subject` }, "교과", subjectSel),
+        h("label", { class: "field", for: `${prefix}-band` }, "학년군", bandSel),
+        h("label", { class: "field kw", for: `${prefix}-kw` }, "낱말 (띄어 쓰면 모두 포함)", kw)
+      );
+      const fire = () => onChange({ subject: subjectSel.value, band: bandSel.value, keyword: kw.value });
+      subjectSel.addEventListener("change", fire);
+      bandSel.addEventListener("change", fire);
+      let t;
+      kw.addEventListener("input", () => { clearTimeout(t); t = setTimeout(fire, 150); });
+      kw.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          container.parentElement.querySelector(".results .pick")?.focus();
+        }
+      });
+      return { subjectSel, bandSel, kw, fire };
+    }
+
+    function renderPicks(resultsEl, countEl, found, onPick, selectedId, actionLabel) {
+      countEl.textContent = found.total === 0
+        ? "0건 — 조건에 맞는 공식 성취기준이 없습니다. 교과나 학년군을 '전체'로 바꿔 보세요."
+        : found.total > found.list.length
+        ? `${found.total}건 중 앞의 ${found.list.length}건 — 낱말을 더 넣어 좁히세요`
+        : `${found.total}건`;
+      resultsEl.replaceChildren(...found.list.map(s => h("button", {
+        class: "pick", type: "button", "aria-pressed": String(s.id === selectedId),
+        onclick: () => onPick(s)
+      },
+        h("span", { class: "pick-meta" }, stdMeta(s).map((m, i) => h("span", { class: i === 0 ? "mono" : null }, m)), actionLabel ? h("span", {}, `· ${actionLabel}`) : null),
+        h("span", { class: "pick-text" }, s.text)
+      )));
+    }
+
+    // ---------- 재매핑 검토 ----------
+    const itemsIn = group => state.items.filter(it => it.group === group);
+    const current = () => itemsIn(state.group)[state.index];
+
+    function renderProgress() {
+      const total = state.items.length;
+      let done = 0, defer = 0;
+      for (const it of state.items) {
+        const d = state.decisions[it.key];
+        if (!d) continue;
+        if (d.decision === "defer") defer++;
+        else done++;
+      }
+      $("prog-done").textContent = done;
+      $("prog-total").textContent = total;
+      $("prog-defer").textContent = defer;
+      $("prog-left").textContent = total - done - defer;
+      $("bar-done").style.width = `${total ? (done / total) * 100 : 0}%`;
+      $("bar-defer").style.width = `${total ? (defer / total) * 100 : 0}%`;
+      const chips = GROUPS.filter(g => g.id !== "other" || itemsIn("other").length).map(g => {
+        const list = itemsIn(g.id);
+        const decided = list.filter(it => state.decisions[it.key] && state.decisions[it.key].decision !== "defer").length;
+        return h("button", {
+          class: "chip", type: "button", "aria-pressed": String(state.group === g.id),
+          onclick: () => { state.group = g.id; state.index = firstOpenIndex(g.id); renderRemap(); }
+        }, `${g.label} ${decided}/${list.length}`);
+      });
+      $("group-chips").replaceChildren(...chips);
+    }
+
+    function firstOpenIndex(group) {
+      const list = itemsIn(group);
+      const i = list.findIndex(it => !state.decisions[it.key]);
+      return i < 0 ? 0 : i;
+    }
+
+    function renderRemap() {
+      renderProgress();
+      const list = itemsIn(state.group);
+      const it = list[state.index];
+      $("pos").textContent = list.length ? `${state.index + 1} / ${list.length}` : "0 / 0";
+      $("prev").disabled = state.index <= 0;
+      $("next").disabled = state.index >= list.length - 1;
+      $("decide-error").hidden = true;
+      if (!it) {
+        $("hw-meta").replaceChildren();
+        $("hw-text").textContent = "이 묶음에 항목이 없습니다.";
+        $("cands").replaceChildren();
+        return;
+      }
+      const d = state.decisions[it.key];
+      $("hw-meta").replaceChildren(
+        h("span", { class: "badge code" }, it.oldCode),
+        h("span", { class: "badge" }, [it.subject, it.grade || it.gradeCluster].filter(Boolean).join(" · ")),
+        it.oldDomain ? h("span", { class: "badge" }, it.oldDomain) : null,
+        h("span", { class: `badge ${it.status === "matched" ? "ok" : it.status === "ambiguous" ? "warn" : "bad"}` }, STATUS_LABEL[it.status] || it.status),
+        ...it.reasons.map(r => h("span", { class: "badge warn" }, REASON_LABEL[r] || r))
+      );
+      $("hw-text").textContent = it.oldText;
+      const saved = $("hw-saved");
+      if (d) {
+        const target = d.officialId ? state.byId.get(d.officialId) : null;
+        saved.replaceChildren(
+          h("strong", {}, `저장된 결정: ${DECISION_LABEL[d.decision]}`),
+          target ? h("p", {}, h("span", { class: "mono" }, `${target.code} `), target.text) : null,
+          d.note ? h("p", { class: "small" }, `메모: ${d.note}`) : null,
+          h("p", { class: "small" }, `${fmtTime(d.decidedAt)} 저장 · 다시 고르면 덮어씁니다`)
+        );
+        saved.hidden = false;
+      } else saved.hidden = true;
+      $("note").value = d?.note ?? "";
+
+      if (!it.candidates.length) {
+        $("cands").replaceChildren(h("div", { class: "empty" },
+          icon("info"), h("p", {}, "자동으로 찾은 후보가 없습니다."),
+          h("p", { class: "small" }, "다른 성취기준을 검색해 지정하거나, 해당하는 공식 성취기준이 없으면 '해당 없음'을 고르세요.")));
+      } else {
+        $("cands").replaceChildren(...it.candidates.map((c, i) => {
+          const chosen = d && d.officialId === c.id && d.decision === "accept-candidate";
+          return h("div", { class: `cand${chosen ? " chosen" : ""}` },
+            h("div", { class: "meta", style: "margin:0" }, stdMeta(c).map((m, j) => h("span", { class: j === 0 ? "badge code" : "badge" }, m))),
+            h("p", { class: "cand-text" }, c.text),
+            h("div", { class: "actions" },
+              h("span", { class: "score" }, `자동 유사도 ${c.score}${c.id === it.matchedId ? " · 자동 판정 1순위" : ""}`),
+              h("button", { class: "btn primary", type: "button", disabled: !state.canSave, onclick: () => decide("accept-candidate", c.id) },
+                icon("check"), "이 후보가 맞음", h("kbd", {}, String(i + 1))))
+          );
+        }));
+      }
+      for (const id of ["btn-search", "btn-discard", "btn-defer"]) $(id).disabled = !state.canSave;
+      if (!$("search-panel").hidden) resetRemapSearch();
+    }
+
+    let remapSearch;
+    function guessBand(it) {
+      const c = it.candidates[0];
+      if (c?.gradeBand) return c.gradeBand;
+      const g = `${it.grade ?? ""} ${it.gradeCluster ?? ""}`;
+      if (/중/.test(g)) return "중학교 1~3학년";
+      if (/초/.test(g)) for (const [re, b] of BAND_OF_GRADE) if (re.test(g)) return b;
+      return "";
+    }
+    function resetRemapSearch() {
+      const it = current();
+      if (!it) return;
+      const subjects = new Set(state.standards.map(s => s.subject));
+      remapSearch.subjectSel.value = subjects.has(it.subject) ? it.subject : (it.candidates[0]?.subject ?? "");
+      remapSearch.bandSel.value = guessBand(it);
+      remapSearch.kw.value = "";
+      remapSearch.fire();
+    }
+    function openSearch() {
+      if (!state.canSave) return;
+      const panel = $("search-panel");
+      panel.hidden = false;
+      resetRemapSearch();
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      remapSearch.kw.focus({ preventScroll: true });
+    }
+
+    async function decide(decision, officialId = null) {
+      const it = current();
+      if (!it || !state.canSave) return;
+      const err = $("decide-error");
+      err.hidden = true;
+      try {
+        const saved = await postJson(`${API}/decisions`, { key: it.key, decision, officialId, note: $("note").value });
+        const { key, ...entry } = saved;
+        delete entry.ok;
+        state.decisions[key] = entry;
+        toast(`저장했습니다: ${it.oldCode} → ${DECISION_LABEL[decision]}`);
+        $("search-panel").hidden = true;
+        const list = itemsIn(state.group);
+        if (state.index < list.length - 1) state.index++;
+        renderRemap();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (e) {
+        err.textContent = `저장하지 못했습니다: ${e.message}`;
+        err.hidden = false;
+      }
+    }
+
+    function go(delta) {
+      const list = itemsIn(state.group);
+      const i = Math.min(Math.max(state.index + delta, 0), list.length - 1);
+      if (i !== state.index) { state.index = i; renderRemap(); }
+    }
+    function goNextOpen() {
+      const order = GROUPS.map(g => g.id);
+      const startGroup = order.indexOf(state.group);
+      for (let k = 0; k < order.length; k++) {
+        const g = order[(startGroup + k) % order.length];
+        const list = itemsIn(g);
+        const from = k === 0 ? state.index + 1 : 0;
+        const i = list.findIndex((it, j) => j >= from && !state.decisions[it.key]);
+        if (i >= 0) { state.group = g; state.index = i; renderRemap(); return; }
+      }
+      toast("미결정 항목이 더 없습니다.");
+    }
+
+    // ---------- 선수관계 ----------
+    function edgeDraft() {
+      if (!state.pickA || !state.pickB) return null;
+      return {
+        from: state.pickA.id, to: state.pickB.id, strength: state.strength,
+        evidence: [{ type: "manual", ref: "교사 입력(검토 화면)", note: $("edge-note").value.trim() }]
+      };
+    }
+    function edgeProblems(edge) {
+      const msgs = checkEdge(edge, state.byId, "이 관계").filter(p => p.rule !== "evidence").map(p => p.message);
+      msgs.push(...checkManualEdges([...state.edges, edge], state.byId).filter(p => p.rule === "duplicate" || p.rule === "cycle")
+        .map(p => p.rule === "duplicate" ? "이미 입력한 관계입니다." : p.message));
+      if (!edge.evidence[0].note) msgs.push("근거 메모를 적어 주세요.");
+      return msgs;
+    }
+    function renderEdgeCheck() {
+      const box = $("edge-check");
+      const edge = edgeDraft();
+      if (!edge) {
+        box.replaceChildren(h("p", { class: "small" }, "A와 B를 하나씩 고르면 저장 전에 규칙을 검사합니다."));
+        $("edge-add").disabled = true;
+        return;
+      }
+      const msgs = edgeProblems(edge);
+      box.replaceChildren(msgs.length
+        ? h("ul", { class: "problems" }, msgs.map(m => h("li", {}, m)))
+        : h("p", { class: "passes" }, icon("check"), `규칙을 모두 통과했습니다 (${gradeLabel(edge.from)} → ${gradeLabel(edge.to)})`));
+      $("edge-add").disabled = msgs.length > 0 || !state.canSave;
+    }
+    function chosenCard(s, which) {
+      if (!s) return null;
+      return h("div", { class: "chosen-std" },
+        h("div", { class: "meta", style: "margin:0" }, stdMeta(s).map((m, j) => h("span", { class: j === 0 ? "badge code" : "badge" }, m))),
+        h("p", { class: "cand-text" }, s.text),
+        h("div", {}, h("button", { class: "btn ghost", type: "button", onclick: () => { state[which] = null; renderPickers(); } }, icon("cross-circle"), "선택 취소")));
+    }
+    const pickers = {};
+    function renderPickers() {
+      for (const [p, which] of [["a", "pickA"], ["b", "pickB"]]) {
+        $(`${p}-chosen`).replaceChildren(chosenCard(state[which], which) ?? "");
+        pickers[p].fire();
+      }
+      renderEdgeCheck();
+    }
+    function setupPicker(p, which) {
+      pickers[p] = buildSearchForm($(`${p}-form`), p, q => {
+        renderPicks($(`${p}-results`), $(`${p}-count`), searchStandards(q, 40), s => {
+          state[which] = s;
+          $(`${p}-chosen`).replaceChildren(chosenCard(s, which));
+          pickers[p].fire();
+          renderEdgeCheck();
+        }, state[which]?.id);
+      });
+    }
+    function renderEdges() {
+      $("edge-count").textContent = `${state.edges.length}개`;
+      if (!state.edges.length) {
+        $("edge-list").replaceChildren(h("div", { class: "card empty" }, icon("info"), h("p", {}, "아직 입력한 선수관계가 없습니다.")));
+        return;
+      }
+      $("edge-list").replaceChildren(...state.edges.map(e => {
+        const side = id => {
+          const s = state.byId.get(id);
+          return h("div", { class: "side" }, h("span", { class: "mono small" }, s ? `${s.code} · ${s.subject} · ${s.gradeBand}` : id), h("p", {}, s?.text ?? "(standards.json에 없음)"));
+        };
+        const ev = e.evidence?.[0] ?? {};
+        return h("div", { class: "card edge" },
+          side(e.from), h("span", { class: "arrow", "aria-label": "먼저 배운 뒤" }, icon("arrow-right")), side(e.to),
+          h("button", { class: "btn danger", type: "button", disabled: !state.canSave, onclick: () => removeEdge(e) }, icon("trash"), "삭제"),
+          h("p", { class: "edge-note" }, h("span", { class: `badge ${e.strength === "hard" ? "ok" : ""}` }, e.strength === "hard" ? "필수" : "권장"), " ", ev.note || ev.ref || ""));
+      }));
+    }
+    async function addEdge() {
+      const edge = edgeDraft();
+      if (!edge || edgeProblems(edge).length) return renderEdgeCheck();
+      try {
+        const r = await postJson(`${API}/prerequisites`, { op: "add", from: edge.from, to: edge.to, strength: edge.strength, note: edge.evidence[0].note });
+        state.edges = r.edges;
+        state.pickB = null;
+        $("edge-note").value = "";
+        toast("선수관계를 저장했습니다.");
+        renderEdges();
+        renderPickers();
+      } catch (e) {
+        $("edge-check").replaceChildren(h("ul", { class: "problems" }, (e.problems?.length ? e.problems : [e.message]).map(m => h("li", {}, m))));
+      }
+    }
+    async function removeEdge(e) {
+      const a = state.byId.get(e.from)?.code ?? e.from;
+      const b = state.byId.get(e.to)?.code ?? e.to;
+      if (!confirm(`${a} → ${b} 관계를 삭제할까요?`)) return;
+      try {
+        const r = await postJson(`${API}/prerequisites`, { op: "delete", from: e.from, to: e.to });
+        state.edges = r.edges;
+        toast("삭제했습니다.");
+        renderEdges();
+        renderEdgeCheck();
+      } catch (err) {
+        toast(`삭제하지 못했습니다: ${err.message}`);
+      }
+    }
+
+    // ---------- 탭·키보드 ----------
+    function showTab(name) {
+      const remap = name === "remap";
+      $("tab-remap").setAttribute("aria-selected", String(remap));
+      $("tab-prereq").setAttribute("aria-selected", String(!remap));
+      $("view-remap").hidden = !remap;
+      $("view-prereq").hidden = remap;
+      history.replaceState(null, "", remap ? "#remap" : "#prereq");
+    }
+    $("tab-remap").addEventListener("click", () => showTab("remap"));
+    $("tab-prereq").addEventListener("click", () => showTab("prereq"));
+    $("prev").addEventListener("click", () => go(-1));
+    $("next").addEventListener("click", () => go(1));
+    $("next-open").addEventListener("click", goNextOpen);
+    $("btn-search").addEventListener("click", openSearch);
+    $("btn-discard").addEventListener("click", () => decide("discard"));
+    $("btn-defer").addEventListener("click", () => decide("defer"));
+    $("edge-note").addEventListener("input", renderEdgeCheck);
+    $("edge-add").addEventListener("click", addEdge);
+    document.querySelectorAll("[data-strength]").forEach(b => b.addEventListener("click", () => {
+      state.strength = b.dataset.strength;
+      document.querySelectorAll("[data-strength]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      renderEdgeCheck();
+    }));
+
+    document.addEventListener("keydown", e => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+      if (e.key === "Escape") {
+        if (typing) e.target.blur();
+        else if (!$("search-panel").hidden) $("search-panel").hidden = true;
+        return;
+      }
+      if (typing || $("view-remap").hidden) return;
+      const k = e.key.toLowerCase();
+      const it = current();
+      if (/^[1-9]$/.test(k) && it?.candidates[Number(k) - 1]) { e.preventDefault(); decide("accept-candidate", it.candidates[Number(k) - 1].id); }
+      else if (k === "s" || k === "/") { e.preventDefault(); openSearch(); }
+      else if (k === "d") { e.preventDefault(); decide("discard"); }
+      else if (k === "h") { e.preventDefault(); decide("defer"); }
+      else if (k === "m") { e.preventDefault(); $("note").focus(); }
+      else if (k === "n") { e.preventDefault(); goNextOpen(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
+    });
+
+    // ---------- 시작 ----------
+    try {
+      const [remap, stds, manual] = await Promise.all([getJson(`${API}/remap`), getJson(`${API}/standards`), getJson(`${API}/prerequisites`)]);
+      state.items = remap.items;
+      state.decisions = remap.decisions;
+      state.canSave = remap.canSave && manual.canSave;
+      state.standards = stds.standards;
+      state.byId = new Map(stds.standards.map(s => [s.id, s]));
+      state.edges = manual.edges;
+      $("readonly").hidden = state.canSave;
+
+      remapSearch = buildSearchForm($("remap-search-form"), "rs", q => {
+        renderPicks($("remap-search-results"), $("remap-search-count"), searchStandards(q), s => decide("choose-other", s.id), null, "누르면 지정");
+      });
+      setupPicker("a", "pickA");
+      setupPicker("b", "pickB");
+
+      const firstGroup = GROUPS.find(g => itemsIn(g.id).some(it => !state.decisions[it.key])) ?? GROUPS[0];
+      state.group = firstGroup.id;
+      state.index = firstOpenIndex(state.group);
+      renderRemap();
+      renderPickers();
+      renderEdges();
+      showTab(location.hash === "#prereq" ? "prereq" : "remap");
+    } catch (e) {
+      const box = $("load-error");
+      box.textContent = `데이터를 불러오지 못했습니다: ${e.message}`;
+      box.hidden = false;
+    }
+  </script>
+</body>
+</html>
