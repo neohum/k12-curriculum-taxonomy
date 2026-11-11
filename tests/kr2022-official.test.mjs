@@ -7,9 +7,10 @@ import { fileURLToPath } from "node:url";
 import {
   loadOfficial, getByCode, getById, searchOfficial, tagOfficial, normalizeOfficialCode
 } from "../src/core/kr2022/official.mjs";
-import { loadConfirmedLinks, handwrittenCodesFor } from "../src/core/kr2022/handwritten-links.mjs";
+import { loadDecisions, handwrittenFor, handwrittenStatus, handwrittenBasis } from "../src/core/kr2022/handwritten-links.mjs";
+import { itemKey } from "../src/server/review-routes.mjs";
 import { searchStandards, tagContent } from "../src/core/kr2022/standards-service.mjs";
-import { MarketCurriculumTagger } from "../src/core/taxonomy/MarketCurriculumTagger.mjs";
+import { MarketCurriculumTagger, CORE_CURRICULUM_STANDARDS } from "../src/core/taxonomy/MarketCurriculumTagger.mjs";
 import { Korea2022K12CurriculumAdapter } from "../src/core/taxonomy/Korea2022K12CurriculumAdapter.mjs";
 import { TaxonomyGraphEngine } from "../src/core/taxonomy/TaxonomyGraphEngine.mjs";
 import { K12TaxonomyServer } from "../src/server/K12TaxonomyServer.mjs";
@@ -21,6 +22,26 @@ function tmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "kr2022-official-"));
 }
 const NO_DECISIONS = path.join(tmpDir(), "decisions.json");
+
+// 손작성 항목의 실제 코드·문장(검토 화면과 같은 키를 만들기 위해)
+const HW_ADAPTER = new Korea2022K12CurriculumAdapter();
+function hw(code) {
+  const s = HW_ADAPTER.getK12Standard(code);
+  return { code: s.code, text: s.statement };
+}
+
+/** 검토 화면(#9) 형식의 decisions.json을 임시 디렉터리에 쓴다. 저장소 파일은 건드리지 않는다. */
+function writeDecisions(entries, extra = {}) {
+  const file = path.join(tmpDir(), "decisions.json");
+  const decisions = {};
+  for (const e of entries) {
+    decisions[e.key ?? itemKey(e.oldCode, e.oldText)] = {
+      oldCode: e.oldCode, decision: e.decision, officialId: e.officialId ?? null, note: "", decidedAt: "2026-11-12T10:00:00+09:00"
+    };
+  }
+  fs.writeFileSync(file, JSON.stringify({ schemaVersion: 1, description: "test", decisions, ...extra }));
+  return file;
+}
 
 // 고시 원문 문장(별책에서 그대로 옮긴 값). standards.json과 응답이 이 문장과 같아야 한다.
 const VERBATIM = [
@@ -117,33 +138,68 @@ test("service: source=handwritten은 손작성 데이터에 official:false와 �
   assert.throws(() => searchStandards({ source: "nope" }, { adapter }), /source/);
 });
 
-test("links: decisions.json이 없으면 연결 없이, 자동 matched·미확정은 버리고 사람 확정만 쓴다", () => {
-  const none = loadConfirmedLinks(NO_DECISIONS);
+test("links: decisions.json이 없거나 형식이 다르면 연결 없이 동작한다", () => {
+  const none = loadDecisions(NO_DECISIONS);
   assert.equal(none.present, false);
   assert.equal(none.links.size, 0);
+  assert.equal(handwrittenBasis(none, [hw("[6수01-06]")]).decisionsFile, "absent");
 
   const dir = tmpDir();
-  const file = path.join(dir, "decisions.json");
-  fs.writeFileSync(file, JSON.stringify({
-    decisions: [
-      { oldCode: "[6수01-06]", decision: "confirmed", officialIds: ["b8:[6수01-08]"], decidedBy: "test" },
-      { oldCode: "[4수01-01]", decision: "matched", officialIds: ["b8:[4수01-15]"] },
-      { oldCode: "[2수01-01]", decision: "confirmed", officialIds: ["b8:[2수01-01]"], humanVerified: false },
-      { oldCode: "[2수01-05]", decision: "confirmed", officialIds: ["b99:[없는코드]"] },
-      { oldCode: "[6수01-01]", decision: "rejected", officialIds: ["b8:[6수01-01]"] }
-    ]
-  }));
-  const state = loadConfirmedLinks(file);
-  assert.equal(state.present, true);
-  assert.deepEqual([...state.links.keys()], ["[6수01-06]"]);
-  assert.equal(state.ignored, 4);
-  assert.deepEqual(handwrittenCodesFor("b8:[6수01-08]", state), ["[6수01-06]"]);
-
   const broken = path.join(dir, "broken.json");
   fs.writeFileSync(broken, "{ not json");
-  const bad = loadConfirmedLinks(broken);
-  assert.equal(bad.links.size, 0);
-  assert.ok(bad.error);
+  assert.equal(loadDecisions(broken).links.size, 0);
+  assert.ok(loadDecisions(broken).error);
+
+  const a = hw("[6수01-06]");
+  const entry = { [itemKey(a.code, a.text)]: { oldCode: a.code, decision: "accept-candidate", officialId: "b8:[6수01-08]" } };
+  for (const doc of [
+    { schemaVersion: 2, decisions: entry },
+    { schemaVersion: 1, decisions: Object.values(entry) },
+    { schemaVersion: 1, decisions: null }
+  ]) {
+    const f = path.join(dir, `bad-${Math.random()}.json`);
+    fs.writeFileSync(f, JSON.stringify(doc));
+    const st = loadDecisions(f);
+    assert.equal(st.valid, false);
+    assert.equal(st.links.size, 0);
+    assert.equal(handwrittenBasis(st, [a]).decisionsFile, "invalid");
+  }
+
+  // 저장소에 커밋된 decisions.json(현재 비어 있음)도 형식은 맞다
+  const repo = loadDecisions();
+  assert.equal(repo.valid, true);
+});
+
+test("links: accept-candidate·choose-other만 연결, discard는 폐기 표시, defer·없는 id는 연결 없음", () => {
+  const accepted = hw("[6수01-06]");
+  const chosen = hw("[1수01-02]");
+  const discarded = hw("[4수01-01]");
+  const deferred = hw("[2수01-01]");
+  const missing = hw("[2수01-05]");
+  const file = writeDecisions([
+    { oldCode: accepted.code, oldText: accepted.text, decision: "accept-candidate", officialId: "b8:[6수01-08]" },
+    { oldCode: chosen.code, oldText: chosen.text, decision: "choose-other", officialId: "b8:[2수01-02]" },
+    { oldCode: discarded.code, oldText: discarded.text, decision: "discard" },
+    { oldCode: deferred.code, oldText: deferred.text, decision: "defer" },
+    { oldCode: missing.code, oldText: missing.text, decision: "accept-candidate", officialId: "b99:[없는코드]" }
+  ]);
+  const st = loadDecisions(file);
+  assert.equal(st.valid, true);
+  assert.equal(st.links.size, 2);
+
+  assert.equal(handwrittenStatus(accepted.code, accepted.text, st).status, "linked");
+  assert.equal(handwrittenStatus(chosen.code, chosen.text, st).officialLink.id, "b8:[2수01-02]");
+  assert.equal(handwrittenStatus(discarded.code, discarded.text, st).status, "discarded");
+  assert.equal(handwrittenStatus(deferred.code, deferred.text, st).status, "deferred");
+  assert.equal(handwrittenStatus(missing.code, missing.text, st).status, "undecided");
+  // 같은 코드라도 문장이 다른 손작성 항목에는 연결되지 않는다(키는 코드+문장)
+  assert.equal(handwrittenStatus(accepted.code, "다른 손작성 문장", st).status, "undecided");
+
+  assert.deepEqual(handwrittenFor("b8:[6수01-08]", st).map(h => h.oldCode), ["[6수01-06]"]);
+
+  const basis = handwrittenBasis(st, [discarded]);
+  assert.equal(basis.discarded, true);
+  assert.ok(basis.discardedWarning.includes("폐기"));
 });
 
 test("service: 공식 태깅의 선수학습 역추적은 사람 확정 연결이 있을 때만 쓴다", () => {
@@ -159,14 +215,19 @@ test("service: 공식 태깅의 선수학습 역추적은 사람 확정 연결�
   assert.deepEqual(without.remediationPath, []);
   assert.equal(without.remediationBasis.handwrittenCode, null);
 
-  const file = path.join(tmpDir(), "decisions.json");
-  fs.writeFileSync(file, JSON.stringify({
-    decisions: [{ oldCode: "[6수01-06]", decision: "confirmed", officialIds: ["b8:[6수01-08]"], decidedBy: "test" }]
-  }));
+  const a = hw("[6수01-06]");
+  const deferOnly = writeDecisions([{ oldCode: a.code, oldText: a.text, decision: "defer" }]);
+  assert.deepEqual(tagContent({ text }, { adapter, graphEngine, decisionsPath: deferOnly }).remediationPath, []);
+
+  const otherText = writeDecisions([{ oldCode: a.code, oldText: "다른 손작성 문장", decision: "accept-candidate", officialId: "b8:[6수01-08]" }]);
+  assert.equal(tagContent({ text }, { adapter, graphEngine, decisionsPath: otherText }).remediationBasis.handwrittenCode, null);
+
+  const file = writeDecisions([{ oldCode: a.code, oldText: a.text, decision: "accept-candidate", officialId: "b8:[6수01-08]" }]);
   const withLink = tagContent({ text }, { adapter, graphEngine, decisionsPath: file });
   assert.equal(withLink.remediationBasis.handwrittenCode, "[6수01-06]");
   assert.equal(withLink.remediationBasis.official, false);
   assert.equal(withLink.remediationBasis.officialLinks[0].id, "b8:[6수01-08]");
+  assert.ok(withLink.remediationPath.length > 0);
 });
 
 test("MarketCurriculumTagger: 기본은 공식 성취기준, handwritten 모드는 경고", () => {
@@ -183,12 +244,43 @@ test("MarketCurriculumTagger: 기본은 공식 성취기준, handwritten 모드�
   assert.equal(official.handwrittenBasis.used, false);
   assert.equal(official.warning, undefined);
 
+  assert.equal(official.qualityLabel.humanVerified, false);
+  assert.ok(!/공인|완벽/.test(official.qualityLabel.titleKo + official.qualityLabel.descriptionKo));
+  assert.ok(official.qualityLabel.titleKo.startsWith("자동"));
+
+  const core = CORE_CURRICULUM_STANDARDS.find(s => s.code === "[6수01-06]");
+  const linkFile = writeDecisions([{ oldCode: core.code, oldText: core.statement, decision: "choose-other", officialId: "b8:[6수01-08]" }]);
+  const linked = new MarketCurriculumTagger({ decisionsPath: linkFile }).tag(input);
+  assert.equal(linked.handwrittenBasis.used, true);
+  assert.equal(linked.handwrittenBasis.handwrittenCode, "[6수01-06]");
+  assert.ok(linked.prerequisites.count > 0, "확정 연결이 있으면 손작성 선수학습 규칙을 빌려 온다");
+
+  const discardFile = writeDecisions([{ oldCode: core.code, oldText: core.statement, decision: "discard" }]);
+  const legacyDiscarded = new MarketCurriculumTagger({ source: "handwritten", decisionsPath: discardFile }).tag(input);
+  assert.equal(legacyDiscarded.handwrittenBasis.discarded, true);
+
   const legacy = new MarketCurriculumTagger({ source: "handwritten" }).tag(input);
   assert.equal(legacy.source, "handwritten");
   assert.equal(legacy.official, false);
   assert.ok(legacy.warning);
   assert.equal(legacy.curriculum.primaryCode, "[6수01-06]");
   assert.ok(legacy.prerequisites.count > 0);
+  assert.equal(legacy.qualityLabel.basis, "handwritten-automatic-estimate");
+  assert.ok(legacy.qualityLabel.descriptionKo.includes("비공식 손작성"));
+});
+
+test("server: diagnose는 discard된 손작성 항목에 폐기 표시를 붙인다", async (t) => {
+  const a = hw("[6수01-06]");
+  const file = writeDecisions([{ oldCode: a.code, oldText: a.text, decision: "discard" }]);
+  const server = new K12TaxonomyServer({ port: 8995, host: "127.0.0.1", decisionsPath: file });
+  const { url } = await server.start();
+  t.after(() => server.stop());
+  const diag = await (await fetch(`${url}/api/taxonomy/diagnose`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ standardCode: "[6수01-06]" })
+  })).json();
+  assert.equal(diag.dataBasis.discarded, true);
+  assert.equal(diag.dataBasis.handwrittenItems[0].status, "discarded");
+  assert.ok(diag.dataBasis.discardedWarning);
 });
 
 test("server: /api/taxonomy/standards 기본 공식, ?source=handwritten 경고, 기능 응답에 비공식 표시", async (t) => {
@@ -208,6 +300,12 @@ test("server: /api/taxonomy/standards 기본 공식, ?source=handwritten 경고,
 
   const bad = await fetch(`${url}/api/taxonomy/standards?source=xyz`);
   assert.equal(bad.status, 400);
+
+  const diag = await (await fetch(`${url}/api/taxonomy/diagnose`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ standardCode: "[6수01-06]" })
+  })).json();
+  assert.equal(diag.dataBasis.official, false);
+  assert.equal(diag.dataBasis.handwrittenItems[0].status, "undecided");
 
   const chains = await (await fetch(`${url}/api/taxonomy/chains`)).json();
   assert.equal(chains.dataBasis.label, "비공식 손작성 성취기준 기반");

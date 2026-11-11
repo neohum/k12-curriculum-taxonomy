@@ -21,8 +21,9 @@ import {
   DEFAULT_DECISIONS_PATH,
   HANDWRITTEN_WARNING,
   handwrittenBasis,
-  handwrittenCodesFor,
-  loadConfirmedLinks
+  handwrittenFor,
+  itemKey,
+  loadDecisions
 } from "../kr2022/handwritten-links.mjs";
 
 export const PIAGET_STAGES = Object.freeze({
@@ -502,7 +503,7 @@ export class MarketCurriculumTagger {
     }
 
     const official = this.source === "official";
-    const linkState = loadConfirmedLinks(this.decisionsPath);
+    const linkState = loadDecisions(this.decisionsPath);
 
     // 1. 성취기준 후보: 공식 모드는 고시 원문에서, 손작성 모드는 손작성 16개에서 찾는다.
     const scoredMatches = official
@@ -514,9 +515,10 @@ export class MarketCurriculumTagger {
 
     // 선수학습·나선형 궤적·피아제 단계 정보는 손작성 데이터에만 있다. 공식 모드에서는
     // 사람이 확정한 연결로 찾은 손작성 성취기준이 있을 때만 그 정보를 빌려 온다.
-    const linkedCodes = official && primaryStandard ? handwrittenCodesFor(primaryStandard.id, linkState) : [];
+    // 연결은 검토 화면과 같은 키(코드+손작성 문장)로 이 파일의 손작성 항목과 맞춘다.
+    const linkedKeys = official && primaryStandard ? new Set(handwrittenFor(primaryStandard.id, linkState).map(h => h.key)) : new Set();
     const handwrittenRef = official
-      ? (linkedCodes.length ? CORE_CURRICULUM_STANDARDS.find(s => linkedCodes.includes(s.code)) || { code: linkedCodes[0] } : null)
+      ? this.standards.find(s => linkedKeys.has(itemKey(s.code, s.statement))) || null
       : primaryStandard;
 
     // 2. 학제(Target Stage), 교과(Subject Domain), 대분류(Major Category) 도출
@@ -535,7 +537,7 @@ export class MarketCurriculumTagger {
     const cognitiveAudit = this._auditCognitiveDevelopment(taxonomy.targetStage, fullText, primaryStandard);
 
     // 7. 교사용 품질 검증 뱃지 및 액션 가이드 발급
-    const qualityLabel = this._generateQualityLabel(cognitiveAudit, primaryStandard, prerequisites);
+    const qualityLabel = this._generateQualityLabel(cognitiveAudit, primaryStandard, prerequisites, official);
 
     const report = {
       success: true,
@@ -582,7 +584,7 @@ export class MarketCurriculumTagger {
       qualityLabel,
       // 선수학습·나선형 궤적·피아제 단계가 손작성 데이터에서 왔는지 표시한다.
       handwrittenBasis: {
-        ...handwrittenBasis(linkState, handwrittenRef?.code ? [handwrittenRef.code] : []),
+        ...handwrittenBasis(linkState, handwrittenRef ? [{ code: handwrittenRef.code, text: handwrittenRef.statement }] : []),
         handwrittenCode: handwrittenRef?.code ?? null,
         used: Boolean(handwrittenRef),
         appliesTo: ["prerequisites", "spiralTrajectory", "taxonomy.piagetStage"]
@@ -845,29 +847,36 @@ export class MarketCurriculumTagger {
   /**
    * 품질 검증 라벨 및 뱃지 발급
    */
-  _generateQualityLabel(audit, primaryStandard, prerequisites) {
+  _generateQualityLabel(audit, primaryStandard, prerequisites, official = this.source === "official") {
+    // 성취기준 후보는 문자열 유사도·키워드로 고른 자동 추정이고, 인지 발달 검사는 정규식 규칙이다.
+    // 사람이 적합성을 확인한 결과가 아니므로 "공인"·"완벽히 부합" 같은 표현을 쓰지 않는다.
+    // badge 값(GOLD/SILVER/FLAGGED/BRONZE)은 기존 호출부 호환을 위해 그대로 둔다.
+    const basisKo = official ? "고시 원문 성취기준 후보" : "비공식 손작성 성취기준 후보";
     let badge = "GOLD";
-    let titleKo = "2022 개정 교육과정 공인 적합";
-    let descriptionKo = "성취기준 위계와 피아제 인지 발달 단계가 완벽히 부합하며, 명확한 선수학습 안내를 포함합니다.";
+    let titleKo = "자동 추정: 성취기준 후보 있음, 위험 신호 없음";
+    let descriptionKo = `텍스트와 가장 비슷한 ${basisKo}를 자동으로 골랐고, 규칙 기반 인지 발달 검사에서 위험 신호가 나오지 않았습니다.`;
 
     if (audit.status === "FAIL") {
       badge = "FLAGGED";
-      titleKo = "인지 발달 부적합 경고 (검토 필요)";
-      descriptionKo = "학습 대상자의 인지 발달 단계를 초과하는 과도한 추상 기호 또는 교육과정 불일치가 감지되었습니다.";
+      titleKo = "자동 검사: 인지 발달 부적합 신호 (검토 필요)";
+      descriptionKo = "규칙 기반 검사에서 학습 대상의 인지 발달 단계를 넘는 추상 기호나 학교급 불일치 신호가 나왔습니다.";
     } else if (audit.status === "WARNING") {
       badge = "SILVER";
-      titleKo = "교육과정 정합 (비계 보강 권장)";
-      descriptionKo = "교육과정에는 부합하나 일부 고난도 어휘나 기호가 포함되어 있어 교사의 세심한 비계 설정이 권장됩니다.";
+      titleKo = "자동 추정: 성취기준 후보 있음, 비계 보강 권장";
+      descriptionKo = `${basisKo}를 자동으로 골랐고, 규칙 기반 검사에서 일부 고난도 어휘나 기호가 감지되어 비계 보강을 권합니다.`;
     } else if (!primaryStandard) {
       badge = "BRONZE";
-      titleKo = "비표준 자유 주제 활동지";
-      descriptionKo = "명확한 2022 개정 성취기준 코드가 감지되지 않은 교양/비교과 자료입니다.";
+      titleKo = "성취기준 후보 없음";
+      descriptionKo = "자동 추정으로 2022 개정 성취기준 후보를 찾지 못했습니다. 교육과정과 무관하다는 뜻은 아닙니다.";
     }
+    descriptionKo += " 교육과정 적합성을 사람이 확인한 결과가 아닙니다.";
 
     return {
       badge,
       titleKo,
       descriptionKo,
+      basis: official ? "official-automatic-estimate" : "handwritten-automatic-estimate",
+      humanVerified: false,
       hasPrerequisitesVerified: prerequisites.length > 0,
       piagetCompliant: audit.isAppropriate
     };
@@ -878,7 +887,7 @@ export class MarketCurriculumTagger {
    */
   _buildPrerequisiteSummary(prerequisites, primaryStandard) {
     if (!prerequisites || prerequisites.length === 0) {
-      return "별도의 필수 선수학습 없이 도입 가능한 기초 단원입니다.";
+      return "이 성취기준에 등록된 선수학습 규칙이 없습니다(선수학습이 필요 없다는 뜻은 아닙니다).";
     }
     const hardReqs = prerequisites.filter(p => p.strength === "hard");
     const reqTitles = hardReqs.map(p => `[${p.code}] ${p.title}`).join(", ");

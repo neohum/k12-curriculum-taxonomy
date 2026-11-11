@@ -86,10 +86,12 @@ npm run dev
 - 원문은 같은 코드를 두 번 쓰는 경우가 있어(12개 코드) 항목 구분은 `id`로 합니다. `?query=[12스문01-01]`은 두 항목을 모두 돌려줍니다.
 - 예전 손작성 데이터는 `?source=handwritten`일 때만 나오고, 그때 응답과 항목에 `official: false`와 경고 문구가 붙습니다.
 - 진단·수업 비계·나선형 사슬 응답에는 `dataBasis`(`label: "비공식 손작성 성취기준 기반"`)가 붙습니다.
-- 공식 성취기준과 손작성 데이터(오개념·교구·피아제 단계·선수관계)를 잇는 근거는 `review/kr2022-remap/decisions.json`의
-  **사람이 확정한 결정**뿐입니다(`decision`이 `confirmed`·`accepted`·`approved`이고, `officialIds`/`officialId`가
-  standards.json에 있는 항목). 자동 재매핑 결과(`matched` 포함)는 쓰지 않습니다. 파일이 없으면 연결 없이 동작하므로,
-  공식 태깅 결과의 선수학습 역추적(`foundationalPrerequisites` 등)은 비어 있습니다.
+- 공식 성취기준과 손작성 데이터(오개념·교구·피아제 단계·선수관계)를 잇는 근거는 검토 화면(`/review/`)이 저장하는
+  `review/kr2022-remap/decisions.json`의 **교사 결정**뿐입니다. 키는 검토 화면과 같은 `원래 코드#손작성 문장 sha256 앞 12자리`로
+  맞춥니다. `accept-candidate`·`choose-other`이고 `officialId`가 standards.json에 있을 때만 연결하고, `discard`는
+  그 손작성 항목에 기댄 응답의 `dataBasis`에 폐기 표시(`discarded: true`)를 붙이며, `defer`는 연결하지 않습니다.
+  자동 재매핑 결과(`matched` 포함)는 쓰지 않습니다. 파일이 없거나 형식(`schemaVersion` 1, `decisions` 객체)이 다르면
+  연결 없이 동작하므로, 그때 공식 태깅 결과의 선수학습 역추적(`foundationalPrerequisites` 등)은 비어 있습니다.
 
 ---
 

@@ -11,9 +11,10 @@ import {
   DEFAULT_DECISIONS_PATH,
   HANDWRITTEN_WARNING,
   handwrittenBasis,
-  handwrittenCodesFor,
-  loadConfirmedLinks,
-  officialLinksFor
+  handwrittenFor,
+  handwrittenStatus,
+  itemKey,
+  loadDecisions
 } from "./handwritten-links.mjs";
 
 export const SOURCES = Object.freeze(["official", "handwritten"]);
@@ -29,12 +30,14 @@ export function resolveSource(source) {
 }
 
 function markHandwritten(std, linkState) {
+  const review = handwrittenStatus(std.code, std.statement, linkState);
   return {
     ...std,
     source: "handwritten",
     official: false,
     warning: HANDWRITTEN_WARNING,
-    officialLinks: officialLinksFor(std.code, linkState)
+    review: { status: review.status, key: review.key, decidedAt: review.decidedAt },
+    officialLinks: review.officialLink ? [review.officialLink] : []
   };
 }
 
@@ -47,7 +50,7 @@ export function searchStandards(params = {}, { adapter, decisionsPath = DEFAULT_
   const limit = Number.isFinite(params.limit) && params.limit > 0 ? params.limit : 20;
 
   if (source === "handwritten") {
-    const linkState = loadConfirmedLinks(decisionsPath);
+    const linkState = loadDecisions(decisionsPath);
     const standards = adapter
       .searchK12Standards(params.query || "", { subject: params.subject || null, schoolLevel: params.schoolLevel || null, limit })
       .map(s => markHandwritten(s, linkState));
@@ -88,7 +91,7 @@ function tagHandwritten(cleanText, cleanSubject, { adapter, graphEngine }) {
   }
   const matchedStandards = Array.from(scoredMap.values()).sort((a, b) => b.score - a.score).map(s => s.standard);
   const primaryStandard = matchedStandards[0] || null;
-  return { matchedStandards, primaryStandard, remediationCodes: primaryStandard ? [primaryStandard.code] : [] };
+  return { matchedStandards, primaryStandard, remediationItems: primaryStandard ? [{ code: primaryStandard.code, text: primaryStandard.statement }] : [] };
 }
 
 function diagnose(graphEngine, code) {
@@ -107,23 +110,31 @@ export function tagContent(params = {}, { adapter, graphEngine, decisionsPath = 
   const source = resolveSource(params.source);
   const cleanText = String(params.text || "").trim();
   const cleanSubject = params.subject ? String(params.subject).trim() : null;
-  const linkState = loadConfirmedLinks(decisionsPath);
+  const linkState = loadDecisions(decisionsPath);
 
   let matchedStandards;
   let primaryStandard;
-  let remediationCodes;
+  let remediationItems;
   if (source === "handwritten") {
-    ({ matchedStandards, primaryStandard, remediationCodes } = tagHandwritten(cleanText, cleanSubject, { adapter, graphEngine }));
+    ({ matchedStandards, primaryStandard, remediationItems } = tagHandwritten(cleanText, cleanSubject, { adapter, graphEngine }));
     matchedStandards = matchedStandards.map(s => markHandwritten(s, linkState));
     primaryStandard = matchedStandards[0] || null;
   } else {
     matchedStandards = tagOfficial(cleanText, { subject: cleanSubject, limit: 10 });
     primaryStandard = matchedStandards[0] || null;
     // 선수학습 역추적은 손작성 그래프에만 있다. 사람이 확정한 연결이 있을 때만 쓴다.
-    remediationCodes = primaryStandard ? handwrittenCodesFor(primaryStandard.id, linkState) : [];
+    // 손작성 그래프는 K12_STANDARDS 기준이다. 같은 코드라도 문장이 다른 손작성 항목(다른 파일)에
+    // 대한 결정이면 그래프의 항목과 같은 것이 아니므로 쓰지 않는다(키로 확인).
+    remediationItems = primaryStandard
+      ? handwrittenFor(primaryStandard.id, linkState)
+        .map(({ key, oldCode }) => ({ key, code: oldCode, text: adapter.getK12Standard(oldCode)?.statement ?? null }))
+        .filter(it => it.text !== null && itemKey(it.code, it.text) === it.key)
+        .map(({ code, text }) => ({ code, text }))
+      : [];
   }
 
-  const remediationCode = remediationCodes[0] || null;
+  const remediationItem = remediationItems[0] || null;
+  const remediationCode = remediationItem?.code ?? null;
   const remediation = remediationCode && graphEngine ? diagnose(graphEngine, remediationCode) : null;
 
   const response = {
@@ -140,7 +151,7 @@ export function tagContent(params = {}, { adapter, graphEngine, decisionsPath = 
     piagetStageProgression: remediation?.piagetStageProgression || null,
     schoolLevelsTraversed: remediation?.schoolLevelsTraversed || [],
     remediationBasis: {
-      ...handwrittenBasis(linkState, remediationCode ? [remediationCode] : []),
+      ...handwrittenBasis(linkState, remediationItem ? [remediationItem] : []),
       handwrittenCode: remediationCode,
       note: remediation
         ? "선수학습 역추적은 손작성 성취기준 그래프로 계산했습니다."

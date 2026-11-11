@@ -22,7 +22,7 @@ import { LessonPlannerRAG } from "../core/taxonomy/LessonPlannerRAG.mjs";
 import { recommendConcreteManipulative } from "../core/taxonomy/DiagnosticAssessmentEngine.mjs";
 import { EmpiricalWeightCalibrator } from "../core/taxonomy/EmpiricalWeightCalibrator.mjs";
 import { loadOfficial } from "../core/kr2022/official.mjs";
-import { DEFAULT_DECISIONS_PATH, handwrittenBasis, loadConfirmedLinks } from "../core/kr2022/handwritten-links.mjs";
+import { DEFAULT_DECISIONS_PATH, handwrittenBasis, loadDecisions } from "../core/kr2022/handwritten-links.mjs";
 import { searchStandards, tagContent, UnknownSourceError } from "../core/kr2022/standards-service.mjs";
 
 const NEW_SPIRAL_CHAIN_KEYS = Object.freeze([
@@ -102,6 +102,17 @@ export class K12TaxonomyServer {
     const defaultPublicDir = fileURLToPath(new URL("../../public", import.meta.url));
     const cwdPublicDir = path.resolve(process.cwd(), "public");
     this.publicDir = options.publicDir || (fs.existsSync(cwdPublicDir) ? cwdPublicDir : defaultPublicDir);
+  }
+
+  /**
+   * 손작성 코드 → 검토 결정과 맞출 { code, text } (text는 손작성 문장, 없으면 null)
+   * @private
+   */
+  _handwrittenItems(codes) {
+    return codes.filter(Boolean).map(c => {
+      const std = this.adapter.getK12Standard(c);
+      return std ? { code: std.code, text: std.statement } : { code: c, text: null };
+    });
   }
 
   /**
@@ -309,7 +320,7 @@ export class K12TaxonomyServer {
         newChains,
         totalCount: allChains.length,
         newChainsCount: newChains.length,
-        dataBasis: handwrittenBasis(loadConfirmedLinks(this.decisionsPath))
+        dataBasis: handwrittenBasis(loadDecisions(this.decisionsPath))
       });
     }
 
@@ -336,8 +347,8 @@ export class K12TaxonomyServer {
         stagesCount: chain.stagesCount,
         transitions: chain.transitions,
         dataBasis: handwrittenBasis(
-          loadConfirmedLinks(this.decisionsPath),
-          (chain.stages || []).map(st => st.standardCode)
+          loadDecisions(this.decisionsPath),
+          this._handwrittenItems((chain.stages || []).map(st => st.standardCode))
         )
       });
     }
@@ -371,7 +382,7 @@ export class K12TaxonomyServer {
           mistakePattern: mistakePattern || null,
           remediationAdvice,
           ...diagnosis,
-          dataBasis: handwrittenBasis(loadConfirmedLinks(this.decisionsPath), [standardCode])
+          dataBasis: handwrittenBasis(loadDecisions(this.decisionsPath), this._handwrittenItems([standardCode]))
         });
       } catch (err) {
         return sendJson(res, 400, {
@@ -432,7 +443,7 @@ export class K12TaxonomyServer {
           dialogScript: lessonPlan.dialogScript,
           rubric: lessonPlan.rubric,
           lessonPlan,
-          dataBasis: handwrittenBasis(loadConfirmedLinks(this.decisionsPath), [topicId])
+          dataBasis: handwrittenBasis(loadDecisions(this.decisionsPath), this._handwrittenItems([topicId]))
         });
       } catch (err) {
         return sendJson(res, 500, {

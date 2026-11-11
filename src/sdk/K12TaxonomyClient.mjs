@@ -17,7 +17,7 @@ import {
 } from "../core/taxonomy/Korea2022K12CurriculumAdapter.mjs";
 import { loadOfficial } from "../core/kr2022/official.mjs";
 import { searchStandards, tagContent } from "../core/kr2022/standards-service.mjs";
-import { handwrittenBasis, loadConfirmedLinks } from "../core/kr2022/handwritten-links.mjs";
+import { handwrittenBasis, loadDecisions } from "../core/kr2022/handwritten-links.mjs";
 import { LessonPlannerRAG } from "../core/taxonomy/LessonPlannerRAG.mjs";
 import { recommendConcreteManipulative } from "../core/taxonomy/DiagnosticAssessmentEngine.mjs";
 
@@ -48,6 +48,17 @@ export class K12TaxonomyClient {
       this.adapter = options.adapter || null;
       this.lessonPlanner = options.lessonPlanner || null;
     }
+  }
+
+  /**
+   * 손작성 코드 → 검토 결정과 맞출 { code, text } (text는 손작성 문장, 없으면 null)
+   * @private
+   */
+  _handwrittenItems(codes) {
+    return codes.filter(Boolean).map(c => {
+      const std = this.adapter.getK12Standard(c);
+      return std ? { code: std.code, text: std.statement } : { code: c, text: null };
+    });
   }
 
   /**
@@ -192,7 +203,7 @@ export class K12TaxonomyClient {
       newChains: allChains.filter(c => c.isNew),
       totalCount: allChains.length,
       newChainsCount: newKeys.length,
-      dataBasis: handwrittenBasis(loadConfirmedLinks())
+      dataBasis: handwrittenBasis(loadDecisions())
     };
   }
 
@@ -213,7 +224,7 @@ export class K12TaxonomyClient {
     }
     return {
       ...chain,
-      dataBasis: handwrittenBasis(loadConfirmedLinks(), (chain.stages || []).map(st => st.standardCode))
+      dataBasis: handwrittenBasis(loadDecisions(), this._handwrittenItems((chain.stages || []).map(st => st.standardCode)))
     };
   }
 
@@ -256,7 +267,7 @@ export class K12TaxonomyClient {
       mistakePattern: mistakePattern || null,
       remediationAdvice,
       ...diagnosis,
-      dataBasis: handwrittenBasis(loadConfirmedLinks(), [standardCode])
+      dataBasis: handwrittenBasis(loadDecisions(), this._handwrittenItems([standardCode]))
     };
   }
 
@@ -320,7 +331,7 @@ export class K12TaxonomyClient {
       dialogScript: lessonPlan.dialogScript,
       rubric: lessonPlan.rubric,
       lessonPlan,
-      dataBasis: handwrittenBasis(loadConfirmedLinks(), [topicId])
+      dataBasis: handwrittenBasis(loadDecisions(), this._handwrittenItems([topicId]))
     };
   }
 
